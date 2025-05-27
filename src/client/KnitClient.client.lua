@@ -19,5 +19,3 @@ Knit.Start()
 	end)
 	:catch(warn)
 
-local clientGA = require(ReplicatedStorage.Shared.GA)
-clientGA.initClient()
