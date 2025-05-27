@@ -15,12 +15,18 @@ local RECOIL_FORCE = 300
 local Knit = require(ReplicatedStorage.Packages.Knit)
 local Trove = require(Knit.Packages.Trove)
 local Types = require(ReplicatedStorage.Shared.Data.Types)
+local GetSafeCharacter = require(Knit.Modules.GetSafeCharacter)
 
 local ClientTank = {}
 ClientTank.__index = ClientTank
 
 function ClientTank.new(tankModel: Model)
     local self = setmetatable({}, ClientTank)
+
+    local character = GetSafeCharacter() 
+    if not character then 
+        return 
+    end
 
     --Knit controllers/services
     self.ProjectileController = Knit.GetController("ProjectileController")
@@ -36,6 +42,9 @@ function ClientTank.new(tankModel: Model)
     self.BarrelHinge = self.Rotator:WaitForChild("BarrelHinge") :: HingeConstraint
     self.RotatorServo = self.Turret:WaitForChild("Base"):WaitForChild("RotatorServo") :: HingeConstraint
 
+    self.Character = character 
+    self.Humanoid = self.Character.Humanoid 
+    
     --State
     self.IsOccupied = false 
 
@@ -46,6 +55,12 @@ function ClientTank.new(tankModel: Model)
     self.Trove:Add(UserInputService.InputBegan:Connect(function(inputObject: InputObject, gameProcessed: boolean) 
         self:HandleInput(inputObject, gameProcessed)
     end))
+
+    self.Trove:Add(self.Humanoid.Died:Connect(function() 
+        
+    end))
+
+
 
     return self 
 end
@@ -120,6 +135,10 @@ function ClientTank:Fire()
 
     --Add recoil
     barrel:ApplyImpulse(directionOfFire*RECOIL_FORCE*-1)
+end
+
+function ClientTank:CharacterDied() 
+    self.Trove:Destroy() -- removes all the binds n shit
 end
 
 return ClientTank
