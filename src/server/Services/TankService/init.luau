@@ -1,7 +1,6 @@
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local Players = game:GetService("Players")
 
-print'doing tank service'
 local Knit = require(ReplicatedStorage.Packages.Knit)
 local TankService = Knit.CreateService({ Name = "TankService", Client = {}})
 
@@ -20,9 +19,11 @@ function TankService.Client:RequestTank(player: Player)
     local spawnCFrame = hrp.CFrame + hrp.CFrame.LookVector * 5
     tank:SetPrimaryPartCFrame(spawnCFrame)
 
-    tank.PrimaryPart:SetNetworkOwner(player)
+    repeat 
+        wait() 
+    until tank.DriveSeat.Anchored == false 
 
-    task.wait(0.5)
+    tank.PrimaryPart:SetNetworkOwner(player)
     return tank
 end
 
