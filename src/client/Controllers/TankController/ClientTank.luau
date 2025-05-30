@@ -35,7 +35,7 @@ function ClientTank.new(tankModel: Model)
     
     --Parts
     self.Model = tankModel :: Model
-    self.Seat = tankModel:WaitForChild("DriveSeat") :: VehicleSeat
+    self.Seat = tankModel.Chassis:WaitForChild("VehicleSeat") :: VehicleSeat
     self.Turret = tankModel:WaitForChild("Turret") :: Model
     self.TurretBase = self.Turret:WaitForChild("Base") :: BasePart
     self.Rotator = self.Turret:WaitForChild("Rotator") :: BasePart

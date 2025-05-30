@@ -21,7 +21,7 @@ function TankService.Client:RequestTank(player: Player)
 
     repeat 
         wait() 
-    until tank.DriveSeat.Anchored == false 
+    until tank.Chassis.VehicleSeat.Anchored == false 
 
     tank.PrimaryPart:SetNetworkOwner(player)
     return tank
