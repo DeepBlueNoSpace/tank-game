@@ -58,6 +58,8 @@ function ClientTank.new(tankModel: Model)
     self.Rotator = self.Turret:WaitForChild("Rotator") :: BasePart
     self.BarrelHinge = self.Rotator:WaitForChild("BarrelHinge") :: HingeConstraint
     self.RotatorServo = self.Turret:WaitForChild("Base"):WaitForChild("RotatorServo") :: HingeConstraint
+    self.TargetBarrelAngle = 0 :: number 
+    self.TargetRotatorAngle = 0 :: number 
 
     self.Character = character 
     self.Humanoid = self.Character.Humanoid 
@@ -78,25 +80,15 @@ function ClientTank.new(tankModel: Model)
     end))
 
     self.Trove:Add(RunService.RenderStepped:Connect(function() 
-        while script.Parent ~= nil do
-            --Update throttle, steer, handbrake
-            local throttle, steering, handbreak = self:GetInputValues()
+        local throttle, steering, handbreak = self:GetInputValues()
 
-            local currentVel = self.Chassis:GetAverageVelocity()
-            self.Chassis:UpdateSteering(steering, currentVel)
+        local currentVel = self.Chassis:GetAverageVelocity()
+        self.Chassis:UpdateSteering(steering, currentVel)
+        self.Chassis:UpdateThrottle(currentVel, throttle)
 
-            -- Taking care of throttling
-            --script.AngularMotorVelocity.Value = currentVel
-            --script.ForwardVelocity.Value = self.Seat.CFrame.LookVector:Dot(self.Seat.Velocity)
-            self.Chassis:UpdateThrottle(currentVel, throttle)
-
-            -- Taking care of handbrake
-            if handbreak > 0 then
-                self.Chassis:EnableHandbrake()
-            end
-            wait()
+        if handbreak > 0 then
+            self.Chassis:EnableHandbrake()
         end
-
     end))
 
 
@@ -195,6 +187,10 @@ function ClientTank:HandleInput(inputObject: InputObject, gameProcessed: boolean
     end
 end
 
+local function lerp(v0,v1,t)
+    return v0+(v1-v0) * t 
+end
+
 function ClientTank:UpdateTurret()
     local mouseRay = Camera:ScreenPointToRay(Mouse.X, Mouse.Y)
     local rayOrigin = mouseRay.Origin
@@ -211,13 +207,19 @@ function ClientTank:UpdateTurret()
     local worldDir = (mouseHit - turretPos).Unit
     local localDir =  self.TurretBase.CFrame:VectorToObjectSpace(worldDir)
     local yaw = math.deg(math.atan2(-localDir.X, -localDir.Z))
-    self.RotatorServo.TargetAngle = yaw
+    local currentYaw = self.RotatorServo.TargetAngle
 
-    -- PITCH from rotator
+    self.TargetRotatorAngle = yaw 
+    self.RotatorServo.TargetAngle = lerp(currentYaw, self.TargetRotatorAngle, 0.5)
+
     local toTarget = (mouseHit - self.Rotator.Position).Unit
     local pitchDir = self.Rotator.CFrame:VectorToObjectSpace(toTarget)
-    local pitch = math.deg(math.atan2(pitchDir.Y, -pitchDir.Z))
-    self.BarrelHinge.TargetAngle = pitch
+    local targetPitch = math.deg(math.atan2(pitchDir.Y, -pitchDir.Z))
+
+    local currentPitch = self.BarrelHinge.CurrentAngle
+
+    self.TargetBarrelAngle = targetPitch
+    self.BarrelHinge.TargetAngle = lerp(currentPitch, self.TargetBarrelAngle, 0.5)
 end
 
 function ClientTank:Fire()

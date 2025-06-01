@@ -1,34 +1,16 @@
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
-local Players = game:GetService("Players")
 
 local Knit = require(ReplicatedStorage.Packages.Knit)
 local TankService = Knit.CreateService({ Name = "TankService", Client = {}})
+local ServerTank = require(script.ServerTank)
 
 function TankService:KnitInit() 
 
 end
 
 function TankService.Client:RequestTank(player: Player)
-    print'tank requested'
-    local character = player.Character or player.CharacterAdded:Wait()
-    local hrp = character:WaitForChild("HumanoidRootPart")
-
-    local tank = ReplicatedStorage.Tank:Clone()
-    tank.Parent = workspace
-
-    -- Spawn 5 studs in front of the player
-    local spawnCFrame = hrp.CFrame + hrp.CFrame.LookVector * 5
-    tank:SetPrimaryPartCFrame(spawnCFrame)
-
-    repeat 
-        wait() 
-    until tank.Chassis.VehicleSeat.Anchored == false 
-
-    tank.PrimaryPart:SetNetworkOwner(player)
-
-    local tankSeat = tank.Chassis.VehicleSeat
-    tankSeat:Sit(character.Humanoid)
-    return tank
+    local tank = ServerTank.new(player)
+    return tank.Model
 end
 
 function TankService.Client:Fire(player: Player, tank: Model)
@@ -42,7 +24,7 @@ function TankService.Client:Fire(player: Player, tank: Model)
     -- Raycast parameters (ignore the tank itself)
     local rayParams = RaycastParams.new()
     rayParams.FilterDescendantsInstances = {tank}
-    rayParams.FilterType = Enum.RaycastFilterType.Blacklist
+    rayParams.FilterType = Enum.RaycastFilterType.Exclude
     rayParams.IgnoreWater = true
 
     -- Fire the ray
@@ -55,8 +37,7 @@ function TankService.Client:Fire(player: Player, tank: Model)
         local explosion = Instance.new("Explosion")
         explosion.Position = hitPos
         explosion.BlastRadius = 10
-        explosion.BlastPressure = 500000
-        explosion.DestroyJointRadiusPercent = 30
+        explosion.BlastPressure = 5000
         explosion.Parent = workspace
     end
 end
