@@ -3,6 +3,10 @@ local UserInputService = game:GetService("UserInputService")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
 local HttpService = game:GetService("HttpService")
+local ContextActionService = game:GetService("ContextActionService")
+
+local RAW_INPUT_ACTION_NAME = "VehicleChassisRawInput"
+local EXIT_ACTION_NAME = "VehicleChassisExitVehicle"
 
 local Player = Players.LocalPlayer
 
@@ -16,9 +20,20 @@ local Knit = require(ReplicatedStorage.Packages.Knit)
 local Trove = require(Knit.Packages.Trove)
 local Types = require(ReplicatedStorage.Shared.Data.Types)
 local GetSafeCharacter = require(Knit.Modules.GetSafeCharacter)
+local Chassis = require(script.Parent.Chassis)
+local Keymap = require(script.Parent.Keymap)
 
 local ClientTank = {}
 ClientTank.__index = ClientTank
+
+local _rawInput = Keymap.newInputTable()
+
+local function _clearInput()
+	for k, v in pairs(_rawInput) do
+		_rawInput[k] = 0
+	end
+end
+
 
 function ClientTank.new(tankModel: Model)
     local self = setmetatable({}, ClientTank)
@@ -31,11 +46,13 @@ function ClientTank.new(tankModel: Model)
     --Knit controllers/services
     self.ProjectileController = Knit.GetController("ProjectileController")
     self.ServerTimeController = Knit.GetController("ServerTimeController")
+    self.Chassis = Chassis.new(tankModel)
+
     self.Trove = Trove.new() 
     
     --Parts
     self.Model = tankModel :: Model
-    self.Seat = tankModel.Chassis:WaitForChild("VehicleSeat") :: VehicleSeat
+    self.Seat = tankModel:WaitForChild("Chassis"):WaitForChild("VehicleSeat") :: VehicleSeat
     self.Turret = tankModel:WaitForChild("Turret") :: Model
     self.TurretBase = self.Turret:WaitForChild("Base") :: BasePart
     self.Rotator = self.Turret:WaitForChild("Rotator") :: BasePart
@@ -60,9 +77,93 @@ function ClientTank.new(tankModel: Model)
         
     end))
 
+    self.Trove:Add(RunService.RenderStepped:Connect(function() 
+        while script.Parent ~= nil do
+            --Update throttle, steer, handbrake
+            local throttle, steering, handbreak = self:GetInputValues()
+
+            local currentVel = self.Chassis:GetAverageVelocity()
+            self.Chassis:UpdateSteering(steering, currentVel)
+
+            -- Taking care of throttling
+            --script.AngularMotorVelocity.Value = currentVel
+            --script.ForwardVelocity.Value = self.Seat.CFrame.LookVector:Dot(self.Seat.Velocity)
+            self.Chassis:UpdateThrottle(currentVel, throttle)
+
+            -- Taking care of handbrake
+            if handbreak > 0 then
+                self.Chassis:EnableHandbrake()
+            end
+            wait()
+        end
+
+    end))
 
 
     return self 
+end
+
+
+local function _updateRawInput(_, inputState, inputObj)
+	local key = inputObj.KeyCode
+	local data = Keymap.getData(key)
+	
+	if not data then 
+		return
+	end
+	
+	local axis = data.Axis
+	local val = 0
+	
+	if axis then
+		val = inputObj.Position:Dot(axis)
+	else
+		val = (inputState == Enum.UserInputState.Begin or inputState == Enum.UserInputState.Change) and 1 or 0
+	end
+	
+	val = val * (data.Sign or 1)
+	
+	_rawInput[key] = val
+	
+end
+
+local function onInputBegan(input, gameProcessed)
+	if not gameProcessed and table.find(Keymap.allKeys(), input.KeyCode) then
+		_updateRawInput(RAW_INPUT_ACTION_NAME, Enum.UserInputState.Begin, input)
+	end
+end
+
+
+local function onInputEnded(input, gameProcessed)
+	if not gameProcessed and table.find(Keymap.allKeys(), input.KeyCode) then
+		_updateRawInput(RAW_INPUT_ACTION_NAME, Enum.UserInputState.End, input)
+	end
+end
+
+UserInputService.InputBegan:Connect(onInputBegan)
+UserInputService.InputEnded:Connect(onInputEnded)
+
+local function _calculateInput(action)
+	-- Loop through all mappings for this action and calculate a resultant value from the raw input
+	local mappings = Keymap[action]
+	local val = 0
+	local absVal = val
+	
+	for _, data in ipairs(mappings) do
+		local thisVal = _rawInput[data.KeyCode]
+		if math.abs(thisVal) > absVal then
+			val = thisVal
+			absVal = math.abs(val)
+		end
+	end
+	
+	return val
+end
+
+
+function ClientTank:GetInputValues()
+    local throttle, steering, handbreak = _calculateInput("Throttle") - _calculateInput("Brake"), _calculateInput("SteerLeft") + _calculateInput("SteerRight"), _calculateInput("Handbrake")
+    return throttle, steering, handbreak
 end
 
 function ClientTank:Update()

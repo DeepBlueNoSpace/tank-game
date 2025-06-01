@@ -9,6 +9,7 @@ function TankService:KnitInit()
 end
 
 function TankService.Client:RequestTank(player: Player)
+    print'tank requested'
     local character = player.Character or player.CharacterAdded:Wait()
     local hrp = character:WaitForChild("HumanoidRootPart")
 
@@ -24,6 +25,9 @@ function TankService.Client:RequestTank(player: Player)
     until tank.Chassis.VehicleSeat.Anchored == false 
 
     tank.PrimaryPart:SetNetworkOwner(player)
+
+    local tankSeat = tank.Chassis.VehicleSeat
+    tankSeat:Sit(character.Humanoid)
     return tank
 end
 
