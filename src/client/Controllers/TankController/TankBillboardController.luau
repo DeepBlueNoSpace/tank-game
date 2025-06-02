@@ -27,6 +27,10 @@ function TankBillboardController:KnitStart()
 end
 
 function TankBillboardController:IndexTank(tank: Model)
+    if tank:GetAttribute("OwnerName") == Player.Name then 
+        return 
+    end
+    
     local billboardTrove = Trove.new() 
 
     local attachment = billboardTrove:Add(Assets.Attachments.TankBillboard:Clone())

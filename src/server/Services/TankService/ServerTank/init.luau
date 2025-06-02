@@ -37,7 +37,7 @@ end
 function ServerTank:SetUpAttributes()
     self.Model:SetAttribute("Health", 200)
     self.Model:SetAttribute("MaxHealth", 200)
-    self.Model:SetAttribute("OwnerName", 200)
+    self.Model:SetAttribute("OwnerName", self.Driver.Name)
 
     self.Model:AddTag("Tank")
 end
@@ -46,7 +46,6 @@ function ServerTank:Disable()
     --Flow goes disabled (so its not alive now), waits a bit, then cleans itself up
     self.Alive = false
     self.Character:Destroy()
-    print'hello'
     self.TankService.Client.DestroyClientTank:Fire(self.Driver)
     task.wait(3)
     self:Destroy()
