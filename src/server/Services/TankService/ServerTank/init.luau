@@ -35,8 +35,8 @@ end
 
 --Tank tag is only added once its ready for clients to listen to it
 function ServerTank:SetUpAttributes()
-    self.Model:SetAttribute("Health", 200)
-    self.Model:SetAttribute("MaxHealth", 200)
+    self.Model:SetAttribute("Health", 1000)
+    self.Model:SetAttribute("MaxHealth", 1000)
     self.Model:SetAttribute("OwnerName", self.Driver.Name)
 
     self.Model:AddTag("Tank")

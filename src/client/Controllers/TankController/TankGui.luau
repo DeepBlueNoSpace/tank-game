@@ -41,13 +41,10 @@ function TankGui:UpdateAimingReticle()
     local result = workspace:Raycast(origin, direction, raycastParams)
     local hitPosition = result and result.Position or (origin + direction)
     local camera = workspace.CurrentCamera
-    local screenPoint, onScreen = camera:WorldToViewportPoint(hitPosition)
+    local screenPoint = camera:WorldToViewportPoint(hitPosition)
 
-    if onScreen then
-        self.Aimer.Position = UDim2.fromOffset(screenPoint.X, screenPoint.Y)
-    else
-        self.Aimer.Position = UDim2.fromOffset(-1000, -1000) 
-    end
+    local aimerTargetPosition = UDim2.fromOffset(screenPoint.X, screenPoint.Y)
+    self.Aimer.Position = self.Aimer.Position:lerp(aimerTargetPosition,0.5)
 end
 
 function TankGui:UpdateHealthBar()

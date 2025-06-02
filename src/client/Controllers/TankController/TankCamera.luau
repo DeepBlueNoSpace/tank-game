@@ -7,7 +7,7 @@ local TankCamera = {}
 TankCamera.__index = TankCamera
 
 local DEFAULT_Y_OFFSET = 6.5
-local DEFAULT_Z_OFFSET = 22
+local DEFAULT_Z_OFFSET = 30
 local GAMEPAD_DEAD_ZONE = .1
 local X_SENS_ADJUST = 0.05
 local Y_SENS_ADJUST = -0.05 

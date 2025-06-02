@@ -21,6 +21,23 @@ local VehicleParameters = { -- These are default values in the case the package 
 	BaseEngineRPM = 1745
 }
 
+--[[
+local VehicleParameters = { -- These are default values in the case the package structure is broken
+	MaxSpeed = 40/mphConversion,
+	ReverseSpeed = 20/mphConversion,
+	AccelerationMax = 10,
+	DrivingTorque = 35000,
+	BrakingTorque = 40000,
+	StrutSpringStiffnessFront = 34000,
+	StrutSpringDampingFront = 1430,
+	StrutSpringStiffnessRear = 32000,
+	StrutSpringDampingRear = 1400,
+	TorsionSpringStiffness = 20000,
+	TorsionSpringDamping = 150,
+	MaxSteer = 0.5,
+	WheelFriction = 2,
+	BaseEngineRPM = 1745
+}]]
 local Chassis = nil
 local LimitSteerAtHighVel = true
 -- Limits the amount you can steer based on velocity. Helpful for keyboard/non-analog steer inputs
