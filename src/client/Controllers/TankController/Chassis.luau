@@ -325,4 +325,8 @@ function Chassis:Reset() --Reset user inputs and redress (For when a player exit
 	redressingState = false
 end
 
+function Chassis:Destroy() 
+	--idk actually know if there is anything to destroy here
+end
+
 return Chassis

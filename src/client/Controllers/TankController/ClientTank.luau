@@ -3,10 +3,6 @@ local UserInputService = game:GetService("UserInputService")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
 local HttpService = game:GetService("HttpService")
-local ContextActionService = game:GetService("ContextActionService")
-
-local RAW_INPUT_ACTION_NAME = "VehicleChassisRawInput"
-local EXIT_ACTION_NAME = "VehicleChassisExitVehicle"
 
 local Player = Players.LocalPlayer
 
@@ -22,6 +18,8 @@ local Types = require(ReplicatedStorage.Shared.Data.Types)
 local GetSafeCharacter = require(Knit.Modules.GetSafeCharacter)
 local Chassis = require(script.Parent.Chassis)
 local Keymap = require(script.Parent.Keymap)
+local TankCamera = require(script.Parent.TankCamera)
+local TankGui = require(script.Parent.TankGui)
 
 local ClientTank = {}
 ClientTank.__index = ClientTank
@@ -29,7 +27,7 @@ ClientTank.__index = ClientTank
 local _rawInput = Keymap.newInputTable()
 
 local function _clearInput()
-	for k, v in pairs(_rawInput) do
+	for k, _ in pairs(_rawInput) do
 		_rawInput[k] = 0
 	end
 end
@@ -46,10 +44,10 @@ function ClientTank.new(tankModel: Model)
     --Knit controllers/services
     self.ProjectileController = Knit.GetController("ProjectileController")
     self.ServerTimeController = Knit.GetController("ServerTimeController")
-    self.Chassis = Chassis.new(tankModel)
 
     self.Trove = Trove.new() 
     
+    self.Chassis = self.Trove:Add(Chassis.new(tankModel))
     --Parts
     self.Model = tankModel :: Model
     self.Seat = tankModel:WaitForChild("Chassis"):WaitForChild("VehicleSeat") :: VehicleSeat
@@ -92,11 +90,14 @@ function ClientTank.new(tankModel: Model)
     end))
 
 
+    self.Camera = self.Trove:Add(TankCamera.new(self))
+    self.TankGui = self.Trove:Add(TankGui.new(self))
+
     return self 
 end
 
 
-local function _updateRawInput(_, inputState, inputObj)
+local function _updateRawInput(inputState, inputObj)
 	local key = inputObj.KeyCode
 	local data = Keymap.getData(key)
 	
@@ -121,14 +122,14 @@ end
 
 local function onInputBegan(input, gameProcessed)
 	if not gameProcessed and table.find(Keymap.allKeys(), input.KeyCode) then
-		_updateRawInput(RAW_INPUT_ACTION_NAME, Enum.UserInputState.Begin, input)
+		_updateRawInput(Enum.UserInputState.Begin, input)
 	end
 end
 
 
 local function onInputEnded(input, gameProcessed)
 	if not gameProcessed and table.find(Keymap.allKeys(), input.KeyCode) then
-		_updateRawInput(RAW_INPUT_ACTION_NAME, Enum.UserInputState.End, input)
+		_updateRawInput(Enum.UserInputState.End, input)
 	end
 end
 
