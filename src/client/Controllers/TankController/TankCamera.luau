@@ -12,11 +12,14 @@ local GAMEPAD_DEAD_ZONE = .1
 local X_SENS_ADJUST = 0.05
 local Y_SENS_ADJUST = -0.05 
 
+local BARREL_RAD_VELOCITY = 0.5 
+
 function TankCamera.new(tank: {})
     local self = setmetatable({}, TankCamera)
     self.Tank = tank 
     self.CameraYaw = 0 
     self.CameraPitch = 0
+
 
     self.LastInputDelta = Vector2.new() 
 
@@ -35,9 +38,7 @@ function TankCamera.new(tank: {})
         end
 
         if inputObject.UserInputType == Enum.UserInputType.Touch then
-          --  if inputObject.Position.X > CharacterStatus:GetScreenCenter().X then
                 self.LastInputDelta  = inputObject.Delta * 1.15
-           -- end
             return
         end
 
@@ -53,7 +54,45 @@ function TankCamera.new(tank: {})
 
     return self
 end
+local BARREL_ANG_VELOCITY = 60
 
+local function moveToward(current, target, maxDelta)
+    local delta = (target - current + 180) % 360 - 180 -- shortest angle difference
+    if math.abs(delta) <= maxDelta then
+        return target
+    end
+    return (current + math.sign(delta) * maxDelta + 180) % 360 - 180
+end
+
+function TankCamera:UpdateBarrel(dT: number)
+    local maxAngleChange = BARREL_ANG_VELOCITY * dT
+
+    -- Raycast from the center of the screen
+    local camera = workspace.CurrentCamera
+    local ray = camera:ViewportPointToRay(camera.ViewportSize.X / 2, camera.ViewportSize.Y / 2)
+    local rayOrigin = ray.Origin
+    local rayDirection = ray.Direction * 1000
+
+    local rayParams = RaycastParams.new()
+    rayParams.FilterDescendantsInstances = {self.Tank}
+    rayParams.FilterType = Enum.RaycastFilterType.Exclude
+
+    local result = workspace:Raycast(rayOrigin, rayDirection, rayParams)
+    local hitPos = result and result.Position or (rayOrigin + rayDirection)
+
+    -- Get turret base position
+    local turretBasePos = self.Tank.Turret.Rotator.BarrelConnection.WorldPosition
+    local toTarget = (hitPos - turretBasePos).Unit
+
+    -- Compute yaw and corrected pitch
+    local yaw = math.deg(math.atan2(-toTarget.X, -toTarget.Z))
+    local flatDist = math.sqrt(toTarget.X^2 + toTarget.Z^2)
+    local pitch = math.deg(math.atan2(toTarget.Y, flatDist))
+
+    -- Smoothly move towards target yaw and pitch
+    self.Tank.BarrelYaw = moveToward(self.Tank.BarrelYaw, yaw, maxAngleChange)
+    self.Tank.BarrelPitch = moveToward(self.Tank.BarrelPitch, pitch, maxAngleChange)
+end
 function TankCamera:Update(dT: number)
     local basePosition = self.Tank.Seat.CameraPostion.WorldPosition
     local xAdjustment = X_SENS_ADJUST * self.LastInputDelta.X 
@@ -68,6 +107,7 @@ function TankCamera:Update(dT: number)
         * CFrame.new(0,DEFAULT_Y_OFFSET,DEFAULT_Z_OFFSET)
 
     self.LastInputDelta = Vector2.new()
+    self:UpdateBarrel(dT)
 end
 
 function TankCamera:Destroy()

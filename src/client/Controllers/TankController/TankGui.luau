@@ -30,7 +30,27 @@ function TankGui.new(tank: {})
 end
 
 function TankGui:UpdateAimingReticle()
-    local barrelEndCFrame = self.Tank.Turret.Barrel.BarrelEnd.WorldCFrame
+    local barrelEndPosition = self.Tank.Turret.Barrel.BarrelEnd.WorldPosition
+    local rayYaw = math.rad(self.Tank.BarrelYaw)
+    local rayPitch = math.rad(self.Tank.BarrelPitch)
+
+    -- Construct direction vector using CFrame
+    local direction = CFrame.fromEulerAnglesYXZ(rayPitch, rayYaw, 0).LookVector * 2000
+
+    local raycastParams = RaycastParams.new()
+    raycastParams.FilterDescendantsInstances = {self.Tank}
+    raycastParams.FilterType = Enum.RaycastFilterType.Exclude
+
+    local result = workspace:Raycast(barrelEndPosition, direction, raycastParams)
+    local hitPosition = result and result.Position or (barrelEndPosition + direction)
+
+    local camera = workspace.CurrentCamera
+    local screenPoint = camera:WorldToViewportPoint(hitPosition)
+
+    local aimerTargetPosition = UDim2.fromOffset(screenPoint.X, screenPoint.Y)
+    self.Aimer.Position = self.Aimer.Position:lerp(aimerTargetPosition, 0.5)
+end
+--[[]
     local origin = barrelEndCFrame.Position
     local direction = barrelEndCFrame.LookVector * 2000 
 
@@ -44,9 +64,7 @@ function TankGui:UpdateAimingReticle()
     local screenPoint = camera:WorldToViewportPoint(hitPosition)
 
     local aimerTargetPosition = UDim2.fromOffset(screenPoint.X, screenPoint.Y)
-    self.Aimer.Position = self.Aimer.Position:lerp(aimerTargetPosition,0.5)
-end
-
+    self.Aimer.Position = self.Aimer.Position:lerp(aimerTargetPosition,0.5)]]
 function TankGui:UpdateHealthBar()
     local health = self.Tank.Model:GetAttribute("Health")
     local maxHealth = self.Tank.Model:GetAttribute("MaxHealth")

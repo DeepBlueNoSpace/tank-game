@@ -58,6 +58,9 @@ function ClientTank.new(tankModel: Model)
     self.TargetBarrelAngle = 0 :: number 
     self.TargetRotatorAngle = 0 :: number 
 
+    self.BarrelYaw = 0 :: number
+    self.BarrelPitch = 0 :: number
+
     self.Character = character 
     self.Humanoid = self.Character.Humanoid 
     
@@ -192,6 +195,59 @@ local function lerp(v0,v1,t)
 end
 
 function ClientTank:UpdateTurret()
+    -- YAW
+    local baseCFrame = self.TurretBase.CFrame
+    local currentYaw = self.RotatorServo.TargetAngle
+    local desiredYawWorld = self.BarrelYaw
+
+    -- Convert world yaw to local yaw relative to TurretBase
+    local baseYaw = math.deg(math.atan2(-baseCFrame.LookVector.X, -baseCFrame.LookVector.Z))
+    local relativeYaw = desiredYawWorld - baseYaw
+
+    -- Normalize angle to [-180, 180]
+    relativeYaw = (relativeYaw + 180) % 360 - 180
+
+    self.TargetRotatorAngle = relativeYaw
+    self.RotatorServo.TargetAngle = lerp(currentYaw, self.TargetRotatorAngle, 0.5)
+
+    -- PITCH
+    local rotatorCFrame = self.Rotator.CFrame
+    local currentPitch = self.BarrelHinge.CurrentAngle
+    local desiredPitchWorld = self.BarrelPitch
+
+    -- Convert world pitch to local pitch relative to Rotator
+    local rotatorLook = rotatorCFrame.LookVector
+    local worldPitch = math.deg(math.asin(rotatorLook.Y))
+    local relativePitch = desiredPitchWorld - worldPitch
+
+    self.TargetBarrelAngle = relativePitch
+    self.BarrelHinge.TargetAngle = lerp(currentPitch, self.TargetBarrelAngle, 0.5)
+end
+
+function ClientTank:Fire()
+    --next thing is to make the local tank its own object
+    local barrel = self.Turret.Barrel :: BasePart
+    local directionOfFire = barrel.BarrelEnd.WorldCFrame.LookVector
+    local projectileData = {
+        Id = HttpService:GenerateGUID(),
+        MuzzleVelocity = MUZZLE_VELOCITY * directionOfFire,
+        Origin = barrel.BarrelEnd.WorldPosition,
+        StartTime = self.ServerTimeController:GetTime()
+    } :: Types.ProjectileData
+
+
+    self.ProjectileController:AddProjectile(true, projectileData)
+
+    --Add recoil
+    barrel:ApplyImpulse(directionOfFire*RECOIL_FORCE*-1)
+end
+
+function ClientTank:Destroy() 
+    self.Trove:Destroy() -- removes all the binds n shit
+end
+
+--[[
+function ClientTank:UpdateTurret()
     local mouseRay = Camera:ScreenPointToRay(Mouse.X, Mouse.Y)
     local rayOrigin = mouseRay.Origin
     local rayDirection = mouseRay.Direction * 1000
@@ -221,27 +277,6 @@ function ClientTank:UpdateTurret()
     self.TargetBarrelAngle = targetPitch
     self.BarrelHinge.TargetAngle = lerp(currentPitch, self.TargetBarrelAngle, 0.5)
 end
-
-function ClientTank:Fire()
-    --next thing is to make the local tank its own object
-    local barrel = self.Turret.Barrel :: BasePart
-    local directionOfFire = barrel.BarrelEnd.WorldCFrame.LookVector
-    local projectileData = {
-        Id = HttpService:GenerateGUID(),
-        MuzzleVelocity = MUZZLE_VELOCITY * directionOfFire,
-        Origin = barrel.BarrelEnd.WorldPosition,
-        StartTime = self.ServerTimeController:GetTime()
-    } :: Types.ProjectileData
-
-
-    self.ProjectileController:AddProjectile(true, projectileData)
-
-    --Add recoil
-    barrel:ApplyImpulse(directionOfFire*RECOIL_FORCE*-1)
-end
-
-function ClientTank:Destroy() 
-    self.Trove:Destroy() -- removes all the binds n shit
-end
+]]
 
 return ClientTank
