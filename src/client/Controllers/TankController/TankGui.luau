@@ -13,10 +13,10 @@ TankGui.__index = TankGui
 
 function TankGui.new(tank: {})
     local self = setmetatable({}, TankGui)
-    self.Gui = TankGuiPrefab:Clone() :: ScreenGui
-    self.Aimer = self.Gui.Aimer :: ImageLabel 
     self.Tank = tank :: {}
     
+    self.Gui = self.Tank.Trove:Add(TankGuiPrefab:Clone()) :: ScreenGui
+    self.Aimer = self.Gui.Aimer :: ImageLabel 
     self.HealthFill = self.Gui.Health.Fill :: Frame 
     self.HealthValue = self.Gui.Health.Value :: TextLabel 
 

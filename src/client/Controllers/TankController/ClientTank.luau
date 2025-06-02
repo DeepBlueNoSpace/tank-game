@@ -35,7 +35,6 @@ end
 
 function ClientTank.new(tankModel: Model)
     local self = setmetatable({}, ClientTank)
-
     local character = GetSafeCharacter() 
     if not character then 
         return 
@@ -241,7 +240,7 @@ function ClientTank:Fire()
     barrel:ApplyImpulse(directionOfFire*RECOIL_FORCE*-1)
 end
 
-function ClientTank:CharacterDied() 
+function ClientTank:Destroy() 
     self.Trove:Destroy() -- removes all the binds n shit
 end
 

@@ -73,6 +73,7 @@ end
 function TankCamera:Destroy()
     Camera.CameraType = Enum.CameraType.Custom
     UserInputService.MouseIconEnabled = true
+    UserInputService.MouseBehavior = Enum.MouseBehavior.Default
 end
 
 return TankCamera

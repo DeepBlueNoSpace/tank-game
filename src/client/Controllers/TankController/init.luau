@@ -6,7 +6,8 @@ local Player = Players.LocalPlayer
 local Knit = require(ReplicatedStorage.Packages.Knit)
 local ClientTank = require(script.ClientTank)
 
-local TankController = Knit.CreateController({ Name = "TankController" })
+local TankController = Knit.CreateController({ Name = "TankController", 
+    Tank = nil :: {}?})
 
 function TankController:KnitInit()
     self.TankService = Knit.GetService("TankService")
@@ -14,13 +15,12 @@ function TankController:KnitInit()
 end
 
 function TankController:KnitStart()
-    --spawn(function() 
-    --    wait(1)
-    --    self:InitTank()
-    --    Player.CharacterAdded:Connect(function() 
-    --        self:InitTank()
-    --    end)
-    --end)
+    self.TankService.DestroyClientTank:Connect(function() 
+        if self.Tank then 
+            self.Tank:Destroy()
+            self.Tank = nil 
+        end
+    end)
 end
 
 

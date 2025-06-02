@@ -9,7 +9,7 @@ local TeamService = Knit.CreateService {
     Client = {},
 }
 
-function TeamService:SetupTeams(amount: boolean)
+function TeamService:SetupTeams(amount: number)
     for i=1, amount do
         local teamData = TeamUtil.TeamData[i]
         local team = Instance.new("Team")
@@ -25,7 +25,7 @@ function TeamService:ResetTeams()
         team:Detroy()
     end
 
-    for i,v in pairs(game.Players:GetPlayers()) do
+    for _,v in pairs(game.Players:GetPlayers()) do
         if v.Team then
             v.Team = nil
         end

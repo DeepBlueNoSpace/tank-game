@@ -14,8 +14,8 @@ local ProjectileService = Knit.CreateService({ Name = "ProjectileService",
 })
 
 
-local DEFAULT_RADIUS = 10
-local DEFAULT_PRESSURE = 5000
+local DEFAULT_RADIUS = 50
+local DEFAULT_DAMAGE = 100
 
 function ProjectileService:KnitStart() 
     self.ExplosionService = Knit.GetService("ExplosionService")
@@ -39,7 +39,7 @@ function ProjectileService:KnitInit()
         assert(projectile, "Projectile not found")
         assert(projectile.Owner == player, "Player not owner of projectile") 
 
-        self.ExplosionService:SpawnExplosion(hitPosition, DEFAULT_RADIUS, DEFAULT_PRESSURE)
+        self.ExplosionService:SpawnExplosion(hitPosition, DEFAULT_RADIUS, DEFAULT_DAMAGE)
     end)
 end
 
