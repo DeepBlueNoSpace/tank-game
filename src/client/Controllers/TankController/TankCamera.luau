@@ -93,6 +93,7 @@ function TankCamera:UpdateBarrel(dT: number)
     self.Tank.BarrelYaw = moveToward(self.Tank.BarrelYaw, yaw, maxAngleChange)
     self.Tank.BarrelPitch = moveToward(self.Tank.BarrelPitch, pitch, maxAngleChange)
 end
+
 function TankCamera:Update(dT: number)
     local basePosition = self.Tank.Seat.CameraPostion.WorldPosition
     local xAdjustment = X_SENS_ADJUST * self.LastInputDelta.X 

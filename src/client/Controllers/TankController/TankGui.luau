@@ -50,21 +50,7 @@ function TankGui:UpdateAimingReticle()
     local aimerTargetPosition = UDim2.fromOffset(screenPoint.X, screenPoint.Y)
     self.Aimer.Position = self.Aimer.Position:lerp(aimerTargetPosition, 0.5)
 end
---[[]
-    local origin = barrelEndCFrame.Position
-    local direction = barrelEndCFrame.LookVector * 2000 
 
-    local raycastParams = RaycastParams.new()
-    raycastParams.FilterDescendantsInstances = {self.Tank}
-    raycastParams.FilterType = Enum.RaycastFilterType.Exclude
-
-    local result = workspace:Raycast(origin, direction, raycastParams)
-    local hitPosition = result and result.Position or (origin + direction)
-    local camera = workspace.CurrentCamera
-    local screenPoint = camera:WorldToViewportPoint(hitPosition)
-
-    local aimerTargetPosition = UDim2.fromOffset(screenPoint.X, screenPoint.Y)
-    self.Aimer.Position = self.Aimer.Position:lerp(aimerTargetPosition,0.5)]]
 function TankGui:UpdateHealthBar()
     local health = self.Tank.Model:GetAttribute("Health")
     local maxHealth = self.Tank.Model:GetAttribute("MaxHealth")
