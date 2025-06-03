@@ -9,6 +9,8 @@ Knit.Assets = ReplicatedStorage:WaitForChild("Assets")
 Knit.Data = ReplicatedStorage.Shared:WaitForChild("Data")
 Knit.Shared = ReplicatedStorage.Shared
 
+require(script.Parent.AntiJump)
+
 -- init all services
 Knit.AddControllersDeep(script.Parent.Controllers)
 
