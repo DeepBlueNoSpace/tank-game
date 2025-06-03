@@ -11,7 +11,7 @@ function ExplosionService:KnitInit()
 	self.TankService = Knit.GetService("TankService")
 end
 
-function ExplosionService:SpawnExplosion(position: Vector3, radius: number, damage: number)
+function ExplosionService:SpawnExplosion(sender: Player, position: Vector3, radius: number, damage: number)
 	for _, tank in ipairs(CollectionService:GetTagged("Tank")) do
 		local primary = tank.PrimaryPart or tank:FindFirstChild("PrimaryPart") or tank:FindFirstChildWhichIsA("BasePart")
 		if not primary then continue end
@@ -27,7 +27,7 @@ function ExplosionService:SpawnExplosion(position: Vector3, radius: number, dama
 
 		local scaledDamage = damage * (1 - (distance / radius))
 		local tankObject = self.TankService:GetTankFromModel(tank)
-		tankObject:TakeDamage(300)--scaledDamage)
+		tankObject:TakeDamage(300, sender)--scaledDamage)
 	end
 end
 

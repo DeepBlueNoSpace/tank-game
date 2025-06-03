@@ -18,8 +18,9 @@ function ServerTank.new(driver: Player)
     self.Alive = true 
 
     local hrp = self.Character:WaitForChild("HumanoidRootPart")
-    self.Model.Parent = workspace
-
+    self.Model.Name = driver.Name
+    self.Model.Parent = workspace:WaitForChild("Tanks")
+    
     -- Spawn 5 studs in front of the player
     local spawnCFrame = hrp.CFrame + hrp.CFrame.LookVector * 5
     self.Model:SetPrimaryPartCFrame(spawnCFrame)
@@ -42,12 +43,13 @@ function ServerTank:SetUpAttributes()
     self.Model:AddTag("Tank")
 end
 
-function ServerTank:Disable()
+function ServerTank:Disable(waitTime)
+    waitTime = waitTime or 5
     --Flow goes disabled (so its not alive now), waits a bit, then cleans itself up
     self.Alive = false
     self.Character:Destroy()
     self.TankService.Client.DestroyClientTank:Fire(self.Driver)
-    task.wait(3)
+    task.wait(waitTime)
     self:Destroy()
     self.Driver:LoadCharacter()
 end
@@ -57,12 +59,17 @@ function ServerTank:Destroy()
 end
 
 
-function ServerTank:TakeDamage(damage: number)
+function ServerTank:TakeDamage(damage: number, sender: Player?)
     local newHealth = self.Model:GetAttribute("Health")-damage
-    if newHealth < 0 then 
+
+    if newHealth <= 0 then 
+        if self.Alive then
+            Knit.GetService("GameLoopService"):ReportKill(sender, self.Driver)
+        end
+
         self.Model:SetAttribute("Health", 0)
         self:Disable()
-        return 
+        return
     end
 
     self.Model:SetAttribute("Health", newHealth)

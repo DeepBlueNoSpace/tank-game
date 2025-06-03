@@ -65,6 +65,7 @@ function UIController:KnitInit()
 
 	self.playerGui = PlayerGui
 	self.lobbyGui = self.playerGui:WaitForChild("LobbyGui")
+	self.gameGui = self.playerGui:WaitForChild("GameGui")
 end
 
 function UIController:KnitStart()

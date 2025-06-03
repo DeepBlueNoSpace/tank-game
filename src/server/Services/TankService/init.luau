@@ -41,6 +41,11 @@ function TankService.Client:RequestTank(player: Player)
     return tank.Model
 end
 
+function TankService:DestroyAllTanks()
+    for _, tank in pairs(self.LiveTanks) do
+        tank:Disable(0)
+    end
+end
 
 function TankService:GetTankFromModel(model: Model)
     for _, tank in self.LiveTanks do 

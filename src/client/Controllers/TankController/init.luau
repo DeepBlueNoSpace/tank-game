@@ -28,9 +28,15 @@ function TankController:FireLocalTank()
     
 end
 
+function TankController:GetTankFromPlayer(player)
+    if not player then return nil end
+    return workspace:WaitForChild("Tanks"):FindFirstChild(player.Name)
+end
+
 function TankController:InitTank()
     self.TankService:RequestTank():andThen(function(tank)
         self.Tank = ClientTank.new(tank) 
+        Knit.GetController("GameUI"):Open()
     end)
 end
 

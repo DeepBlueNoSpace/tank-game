@@ -10,6 +10,8 @@ local LobbyMainUI= Knit.CreateController({ Name = "LobbyMainUI", open = false })
 
 function LobbyMainUI:Open()
 	warn("LobbyMainUI OPEN!!!!")
+	Knit.GetController("GameUI"):Close()
+
 	self.open = true
 	self.frame.Visible = true
 
