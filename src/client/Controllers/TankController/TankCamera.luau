@@ -1,5 +1,9 @@
 local RunService = game:GetService("RunService")
 local UserInputService = game:GetService("UserInputService")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+
+local Knit = require(ReplicatedStorage.Packages.Knit)
+local Spring = require(Knit.Modules.Spring)
 
 local Camera = workspace.CurrentCamera
 
@@ -12,15 +16,15 @@ local GAMEPAD_DEAD_ZONE = .1
 local X_SENS_ADJUST = 0.05
 local Y_SENS_ADJUST = -0.05 
 
-local BARREL_RAD_VELOCITY = 0.5 
-
 function TankCamera.new(tank: {})
     local self = setmetatable({}, TankCamera)
     self.Tank = tank 
     self.CameraYaw = 0 
     self.CameraPitch = 0
 
-
+    self.zSpring = Spring.new(0, 0, 30,0.5)
+    self.ySpring = Spring.new(0, 0, 30,0.5)
+ 
     self.LastInputDelta = Vector2.new() 
 
     Camera.CameraType = Enum.CameraType.Scriptable
@@ -64,6 +68,12 @@ local function moveToward(current, target, maxDelta)
     return (current + math.sign(delta) * maxDelta + 180) % 360 - 180
 end
 
+function TankCamera:ApplyShotImpulse(force: number)
+    self.zSpring:Accelerate(force*0.8)
+    self.ySpring:Accelerate(force*0.2)
+end
+
+
 function TankCamera:UpdateBarrel(dT: number)
     local maxAngleChange = BARREL_ANG_VELOCITY * dT
 
@@ -102,10 +112,13 @@ function TankCamera:Update(dT: number)
     self.CameraYaw = self.CameraYaw-xAdjustment
     self.CameraPitch = self.CameraPitch+yAdjustment
 
+    local ySpringOffset = self.ySpring:Solve(dT)
+    local xSpringOffset = self.zSpring:Solve(dT)
+
     Camera.CFrame = CFrame.new(basePosition) 
         * CFrame.Angles(0,math.rad(self.CameraYaw),0)
         * CFrame.Angles(math.rad(self.CameraPitch),0,0)
-        * CFrame.new(0,DEFAULT_Y_OFFSET,DEFAULT_Z_OFFSET)
+        * CFrame.new(0,DEFAULT_Y_OFFSET+ySpringOffset,DEFAULT_Z_OFFSET+xSpringOffset)
 
     self.LastInputDelta = Vector2.new()
     self:UpdateBarrel(dT)

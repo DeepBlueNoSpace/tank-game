@@ -6,9 +6,6 @@ local HttpService = game:GetService("HttpService")
 
 local Player = Players.LocalPlayer
 
-local Camera = workspace.CurrentCamera
-local Mouse = Player:GetMouse()
-
 local MUZZLE_VELOCITY = 600 
 local RECOIL_FORCE = 300
 
@@ -242,6 +239,7 @@ function ClientTank:Fire()
 
     --Add recoil
     barrel:ApplyImpulse(directionOfFire*RECOIL_FORCE*-1)
+    self.Camera:ApplyShotImpulse(200)
 end
 
 function ClientTank:Destroy() 
