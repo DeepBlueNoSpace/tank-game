@@ -43,6 +43,7 @@ function ClientTank.new(tankModel: Model)
     --Knit controllers/services
     self.ProjectileController = Knit.GetController("ProjectileController")
     self.ServerTimeController = Knit.GetController("ServerTimeController")
+    self.VFXController = Knit.GetController("VFXController")
 
     self.Trove = Trove.new() 
     
@@ -184,8 +185,8 @@ function ClientTank:HandleInput(inputObject: InputObject, gameProcessed: boolean
         return 
     end
 
-    lastShot = tick()
-    if inputObject.UserInputType == Enum.UserInputType.MouseButton1 then 
+    if inputObject.UserInputType == Enum.UserInputType.MouseButton1 then
+        lastShot = tick()
         self:Fire() 
     end
 end
@@ -228,13 +229,14 @@ function ClientTank:Fire()
     --next thing is to make the local tank its own object
     local barrel = self.Turret.Barrel :: BasePart
     local directionOfFire = barrel.BarrelEnd.WorldCFrame.LookVector
+
     local projectileData = {
         Id = HttpService:GenerateGUID(),
         MuzzleVelocity = MUZZLE_VELOCITY * directionOfFire,
         Origin = barrel.BarrelEnd.WorldPosition,
-        StartTime = self.ServerTimeController:GetTime()
+        StartTime = self.ServerTimeController:GetTime(),
+        BarrelEnd = barrel.BarrelEnd
     } :: Types.ProjectileData
-
 
     self.ProjectileController:AddProjectile(true, projectileData)
 
@@ -246,37 +248,5 @@ function ClientTank:Destroy()
     self.Trove:Destroy() -- removes all the binds n shit
 end
 
---[[
-function ClientTank:UpdateTurret()
-    local mouseRay = Camera:ScreenPointToRay(Mouse.X, Mouse.Y)
-    local rayOrigin = mouseRay.Origin
-    local rayDirection = mouseRay.Direction * 1000
-
-    local rayParams = RaycastParams.new()
-    rayParams.FilterDescendantsInstances = {self.Tank}
-    rayParams.FilterType = Enum.RaycastFilterType.Exclude
-
-    local result = workspace:Raycast(rayOrigin, rayDirection, rayParams)
-    local mouseHit = result and result.Position or (rayOrigin + rayDirection)
-
-    local turretPos = self.TurretBase.Position
-    local worldDir = (mouseHit - turretPos).Unit
-    local localDir =  self.TurretBase.CFrame:VectorToObjectSpace(worldDir)
-    local yaw = math.deg(math.atan2(-localDir.X, -localDir.Z))
-    local currentYaw = self.RotatorServo.TargetAngle
-
-    self.TargetRotatorAngle = yaw 
-    self.RotatorServo.TargetAngle = lerp(currentYaw, self.TargetRotatorAngle, 0.5)
-
-    local toTarget = (mouseHit - self.Rotator.Position).Unit
-    local pitchDir = self.Rotator.CFrame:VectorToObjectSpace(toTarget)
-    local targetPitch = math.deg(math.atan2(pitchDir.Y, -pitchDir.Z))
-
-    local currentPitch = self.BarrelHinge.CurrentAngle
-
-    self.TargetBarrelAngle = targetPitch
-    self.BarrelHinge.TargetAngle = lerp(currentPitch, self.TargetBarrelAngle, 0.5)
-end
-]]
 
 return ClientTank

@@ -17,7 +17,6 @@ function ExplosionService:SpawnExplosion(sender: Player, position: Vector3, radi
 		if not primary then continue end
 
 		local distance = (primary.Position - position).Magnitude
-		print(distance)
 		if distance > radius then continue end
 
 		local health = tank:GetAttribute("Health")

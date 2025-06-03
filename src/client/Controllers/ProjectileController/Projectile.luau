@@ -14,26 +14,43 @@ Projectile.__index = Projectile
 function Projectile.new(isLocal: boolean, projectileData: Types.ProjectileData)
     local self = setmetatable({}, Projectile)
     self.ProjectileService = Knit.GetService("ProjectileService")
+    self.VFXController = Knit.GetController("VFXController")
 
-    self.Id = projectileData.Id 
-    self.Origin = projectileData.Origin 
-    self.MuzzleVelocity = projectileData.MuzzleVelocity
-    self.StartTime = projectileData.StartTime
-    self.LastUpdate = projectileData.StartTime
-    
-    self.IsLocal = isLocal
+    self.Id = projectileData.Id :: string
+    self.Origin = projectileData.Origin :: Vector3
+    self.MuzzleVelocity = projectileData.MuzzleVelocity :: Vector3
+    self.StartTime = projectileData.StartTime :: number
+    self.LastUpdate = projectileData.StartTime :: number 
+    self.BarrelEnd = projectileData.BarrelEnd :: Attachment?
 
-    self.Position = self.Origin
-    self.Velocity = self.MuzzleVelocity
+    self.IsLocal = isLocal :: boolean
+
+    self.Position = self.Origin :: Vector3
+    self.Velocity = self.MuzzleVelocity :: Vector3
 
     self:SetUpModel()
-    
+    self:SpawnEffect() 
+
     if isLocal then 
         self:ReplicateToServer(projectileData)
     end
 
     return self 
 end
+
+function Projectile:SpawnEffect()
+    local barrelEnd = self.BarrelEnd
+    if not barrelEnd then 
+        return 
+    end
+
+    local vfxInfo = {
+        Parent = barrelEnd
+    } :: Types.VFXInfo
+
+    self.VFXController:SpawnVFX("CannonFire", vfxInfo)
+end
+
 
 function Projectile:ReplicateToServer(projectileData: Types.ProjectileData)
     self.ProjectileService.SpawnProjectile:Fire(projectileData)
@@ -52,23 +69,24 @@ function Projectile:UpdateModelPosition()
 end
 
 function Projectile:OnHit(result: RaycastResult)
-    --Do visuals (this will get replaced with a custom, scalable effect)
-    local explosion = Instance.new("Explosion")
-    explosion.Position = result.Position
-    explosion.BlastRadius = 0
-    explosion.BlastPressure = 0
-    explosion.DestroyJointRadiusPercent = 0
-    explosion.Parent = workspace
+    local explosionInfo = {
+        ScaleSize = 2, 
+        CFrame = CFrame.new(result.Position)
+    } :: Types.VFXInfo
+
+    self.VFXController:SpawnVFX("Explosion", explosionInfo)
 
     --Replicate to server
-    self.ProjectileService.ProjectileHit:Fire(self.Id, result.Position)
+    if self.IsLocal then 
+        self.ProjectileService.ProjectileHit:Fire(self.Id, result.Position)
+    end
 
     --Clean up
     self:Destroy()
 end 
 
 function Projectile:Destroy()
-    self.Model:Destroy()
+     self.Model:Destroy()
 end
 
 function Projectile:Update(serverTime: number): boolean

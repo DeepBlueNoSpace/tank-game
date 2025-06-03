@@ -23,11 +23,6 @@ function TankController:KnitStart()
     end)
 end
 
-
-function TankController:FireLocalTank() 
-    
-end
-
 function TankController:GetTankFromPlayer(player)
     if not player then return nil end
     return workspace:WaitForChild("Tanks"):FindFirstChild(player.Name)
