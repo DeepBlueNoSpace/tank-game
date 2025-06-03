@@ -14,7 +14,7 @@ local ProjectileService = Knit.CreateService({ Name = "ProjectileService",
 })
 
 
-local DEFAULT_RADIUS = 50
+local DEFAULT_RADIUS = 7
 local DEFAULT_DAMAGE = 100
 
 function ProjectileService:KnitStart() 
