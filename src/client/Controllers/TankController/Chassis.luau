@@ -8,7 +8,7 @@ local VehicleParameters = { -- These are default values in the case the package 
 	MaxSpeed = 40/mphConversion,
 	ReverseSpeed = 20/mphConversion,
 	AccelerationMax = 10,
-	DrivingTorque = 35000,
+	DrivingTorque = 200000,
 	BrakingTorque = 40000,
 	StrutSpringStiffnessFront = 34000,
 	StrutSpringDampingFront = 1430,
@@ -16,7 +16,7 @@ local VehicleParameters = { -- These are default values in the case the package 
 	StrutSpringDampingRear = 1400,
 	TorsionSpringStiffness = 20000,
 	TorsionSpringDamping = 150,
-	MaxSteer = 0.5,
+	MaxSteer = 0.8,
 	WheelFriction = 2,
 	BaseEngineRPM = 1745
 }
