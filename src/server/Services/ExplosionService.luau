@@ -8,7 +8,7 @@ local Knit = require(ReplicatedStorage.Packages.Knit)
 local ExplosionService = Knit.CreateService({ Name = "ExplosionService"})
 
 local DEFAULT_PRESSURE = 350
-local PHYSICS_RADIUS_MOD = 0.3
+local PHYSICS_RADIUS_MOD = 0.5
 local TERRAIN_RADIUS_MOD = 0.1 
 
 function ExplosionService:KnitInit()
@@ -41,7 +41,7 @@ function ExplosionService:DamageTanks(sender: Player, position: Vector3, radius:
 end
 
 function ExplosionService:DamageTerrain(position: Vector3, radius: number)
-	Terrain:FillBall(position, radius*PHYSICS_RADIUS_MOD, Enum.Material.Air)
+	Terrain:FillBall(position, radius*TERRAIN_RADIUS_MOD, Enum.Material.Air)
 end
 
 
