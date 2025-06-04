@@ -22,6 +22,8 @@ function TankGui.new(tank: {})
     self.HealthFill = self.Gui.Health.Fill :: Frame 
     self.HealthValue = self.Gui.Health.Value :: TextLabel 
 
+    self.MobileFire = self.Gui:WaitForChild("MobileFire") :: ImageButton
+
     self.Gui.Parent = PlayerGui
 
     self.Tank.Trove:Add(RunService.Heartbeat:Connect(function()
@@ -59,6 +61,11 @@ function TankGui:SetUpMobile(touchGui: ScreenGui)
 	
     self.ThumbstickStart = DThumbstickFrame:WaitForChild("ThumbstickStart") :: ImageLabel
 	self.ThumbstickEnd = DThumbstickFrame:WaitForChild("ThumbstickEnd") :: ImageLabel
+
+    self.MobileFire.Visible = true -- This will be replaced with a generic hide and show mobile UI function function presumably
+    self.MobileFire.Activated:Connect(function() 
+        self.Tank:AttemptFire()
+    end)
 end
 
 function TankGui:UpdateAimingReticle()
@@ -111,7 +118,6 @@ function TankGui:ComputeMobileThrottle()
 
     if self.ThumbstickEnd.ImageTransparency == 1 then
         -- there is no current input, throttle to 0 
-        print'stopping'
         self.Tank.JoystickThrottle = {Z=0,X=0, Braking = true} :: Types.JoystickThrottle
         return
     end

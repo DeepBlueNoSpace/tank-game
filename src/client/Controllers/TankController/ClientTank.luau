@@ -72,6 +72,7 @@ function ClientTank.new(tankModel: Model)
     --State
     self.IsOccupied = false :: boolean
     self.IsJoystickControlled = false :: boolean
+    self.LastShot = 0 :: number 
 
     self.Trove:Add(RunService.Heartbeat:Connect(function()
         self:Update()
@@ -158,14 +159,12 @@ end
 
 function ClientTank:GetInputValues()
     local throttle, steering, handbreak 
+    --Kind of a rachet way to do it. We should average the values if they both are reporting?
     if self.IsJoystickControlled then 
-        print'hi'
         throttle, steering, handbreak = self.JoystickThrottle.Z, self.JoystickThrottle.X, self.JoystickThrottle.Braking and 1 or 0
-        print(throttle, steering, handbreak)
     else    
         throttle, steering, handbreak = _calculateInput("Throttle") - _calculateInput("Brake"), _calculateInput("SteerLeft") + _calculateInput("SteerRight"), _calculateInput("Handbrake")
     end
-   
 
     return throttle, steering, handbreak
 end
@@ -177,25 +176,13 @@ function ClientTank:Update()
         self:UpdateTurret()
     end
 end
-
-local lastShot = 0
-
 function ClientTank:HandleInput(inputObject: InputObject, gameProcessed: boolean)
     if gameProcessed then 
         return 
     end
 
-    if not self.IsOccupied then 
-        return 
-    end
-
-    if tick() - lastShot < 1 then 
-        return 
-    end
-
     if inputObject.UserInputType == Enum.UserInputType.MouseButton1 then
-        lastShot = tick()
-        self:Fire() 
+        self:AttemptFire() 
     end
 end
 
@@ -231,7 +218,19 @@ function ClientTank:UpdateTurret()
     self.BarrelHinge.TargetAngle = lerp(currentPitch, self.TargetBarrelAngle, 0.5)
 end
 
+local SHOT_COOLDOWN = 1 
+
+function ClientTank:AttemptFire()
+    if tick() - self.LastShot < SHOT_COOLDOWN then 
+        return 
+    end
+
+    self:Fire()
+end
+
 function ClientTank:Fire()
+    self.LastShot = tick() 
+
     local barrel = self.Turret.Barrel :: BasePart
     local barrelEnd = barrel.BarrelEnd :: Attachment
 
@@ -251,7 +250,6 @@ function ClientTank:Fire()
     self.Seat:ApplyImpulse(directionOfFire*RECOIL_FORCE*-1)
     self.Camera:ApplyShotImpulse(200)
 end
-
 function ClientTank:Destroy() 
     self.Trove:Destroy() -- removes all the binds n shit
 end
