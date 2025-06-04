@@ -1,4 +1,8 @@
 local Workspace = game:GetService("Workspace")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+
+local SoundAssets = ReplicatedStorage.Assets.Sound
+
 local mphConversion = 0.6263 -- using a 28cm = 1stud conversion rate
 
 local torqueDamping = 0.6
@@ -9,7 +13,7 @@ local VehicleParameters = { -- These are default values in the case the package 
 	ReverseSpeed = 20/mphConversion,
 	AccelerationMax = 10,
 	DrivingTorque = 500000,
-	BrakingTorque = 40000,
+	BrakingTorque = 50000000,
 	StrutSpringStiffnessFront = 34000,
 	StrutSpringDampingFront = 1430,
 	StrutSpringStiffnessRear = 32000,
@@ -42,6 +46,8 @@ function Chassis.new(vehicle)
     self.vehicle = vehicle
     self.RedressMount = self.root:WaitForChild("RedressMount")
 
+	self.LastFakeRPM = 0 
+
     self.SteeringPrismatic = self.constraints:FindFirstChild("SteeringPrismatic")
 	self.SteeringPrismatic.UpperLimit = VehicleParameters.MaxSteer
 	self.SteeringPrismatic.LowerLimit = -VehicleParameters.MaxSteer
@@ -51,8 +57,21 @@ function Chassis.new(vehicle)
     self.driverSeat.MaxSpeed = VehicleParameters.MaxSpeed * wheelRadius
 
     self.parameters = VehicleParameters
-
 	self:InitializeDrivingValues()
+
+	self.StartSound = SoundAssets.TankStart:Clone() :: Sound
+	self.DriveSound = SoundAssets.TankDrive:Clone() :: Sound
+
+	self.StartSound.Parent = self.root 
+	self.DriveSound.Parent = self.root 
+
+	self.LiveSound = self.StartSound
+	self.StartSound:Play()
+
+	self.StartSound.Ended:Connect(function() 
+		self.DriveSound:Play()
+		self.LiveSound = self.DriveSound
+	end)
 	return self
 end
 
@@ -151,7 +170,7 @@ function Chassis:InitializeDrivingValues()
 	self.SteeringPrismatic = self.constraints:FindFirstChild("SteeringPrismatic")
 	self.SteeringPrismatic.UpperLimit = VehicleParameters.MaxSteer
 	self.SteeringPrismatic.LowerLimit = -VehicleParameters.MaxSteer
-
+	
 	for _,s in pairs(strutSpringsFront) do
 		adjustSpring(s, self.parameters.StrutSpringStiffnessFront, self.parameters.StrutSpringDampingFront)
 	end
@@ -216,10 +235,7 @@ end
 
 --Set target steering position based on current velocity
 function Chassis:UpdateSteering(steer, currentVel)
-
-	local maxSteer = VehicleParameters.MaxSteer
-	
-	
+	local maxSteer = VehicleParameters.MaxSteer	
 	if LimitSteerAtHighVel then
 		local c = SteerLimit * (math.abs(currentVel)/VehicleParameters.MaxSpeed) + 1
 		--decrease steer value as speed increases to prevent tipping (handbrake cancels this)
@@ -228,11 +244,21 @@ function Chassis:UpdateSteering(steer, currentVel)
 	self.SteeringPrismatic.TargetPosition = steer * steer * steer * maxSteer
 end
 
+local function lerp(v0,v1,t)
+	return v0+(v1-v0)*t 
+end
+
+local idlePitch = 0.7
+local maxPitch = 1.6
+local baseVolume = 0.3
+--[[
 function Chassis:UpdateThrottle(currentSpeed, throttle)
 	local targetVel = 0
-	local gainModifier = 0
 	
-	if math.abs(throttle) < 0.1 then
+	local fakeRPM = 0 	
+	print(throttle)
+
+	if math.abs(throttle) < 0.1 and currentSpeed < 0.2 then
 		-- Idling
 		self:setMotorMaxAcceleration(VehicleParameters.AccelerationMax)
 		self:setMotorTorque(2000)
@@ -253,81 +279,80 @@ function Chassis:UpdateThrottle(currentSpeed, throttle)
 		local maxSpeed = (useReverse and VehicleParameters.ReverseSpeed or VehicleParameters.MaxSpeed)
 		targetVel = math.sign(throttle) * maxSpeed
 		
-		-- if we are approaching max speed, we should take that as an indication of throttling down, even if not from input
-		local maxAccelSpeed = targetVel
-		
-		-- lets say we start throttling down after reaching 75% of max speed, then linearly drop to 0
-		local function quad(x)
-			return math.sign(x)*(x^2)
-		end
-		
-		
-		local r = math.abs(velocity.Magnitude / maxSpeed*2.5) -- adding a bit to the max speed so that it sounds better (always trying to rev engines)
-		local desiredRPM = math.exp(-3*r*r)
-		
-		
-		gainModifier = desiredRPM
-		
-		if gainModifier > 0 then
-			effectsThrottleState = true
-		end
+		-- Scale from 0 to 1 based on speed and throttle
+		local normalizedSpeed = math.clamp(currentSpeed / maxSpeed, 0, 1)
+		fakeRPM = 0.3 * normalizedSpeed + 0.7 * math.abs(throttle)
 	else
 		-- Braking
+		local sign = 1 
+		if currentSpeed < 0 then 
+			sign =-1 
+		end
+		self:setMotorMaxAcceleration(VehicleParameters.AccelerationMax*3*sign)
+		self:setMotorTorque(self.parameters.BrakingTorque)
+		targetVel = math.sign(throttle) * 500
+
+		fakeRPM = 0
+	end
+	
+	self:SetMotorVelocity(targetVel)
+
+	local newRPM = lerp(self.LastFakeRPM,fakeRPM,0.5)
+	self.LiveSound.PlaybackSpeed = idlePitch + (maxPitch - idlePitch) * newRPM
+	self.LiveSound.Volume = (baseVolume*0.5) + (0.5 * newRPM * baseVolume)
+
+	self.LastFakeRPM = newRPM
+end
+]]
+
+
+function Chassis:UpdateThrottle(currentSpeed, throttle)
+	local targetVel = 0
+	
+	local fakeRPM = 0
+	if math.abs(throttle) < 0.1 then
+		-- Idling
+		print'here'
+		self:setMotorMaxAcceleration(VehicleParameters.AccelerationMax)
+		self:setMotorTorque(self.parameters.BrakingTorque)
+	elseif math.sign(throttle * currentSpeed) > 0 or math.abs(currentSpeed) < 0.5 then
+		self:setMotorMaxAcceleration(VehicleParameters.AccelerationMax)
+
+		local velocity = self.driverSeat.Velocity
+		local velocityVector = velocity.Unit
+		local directionalVector = self.driverSeat.CFrame.lookVector
+		local dotProd = velocityVector:Dot(directionalVector) -- Dot product is a measure of how similar two vectors are; if they're facing the same direction, it is 1, if they are facing opposite directions, it is -1, if perpendicular, it is 0
+		
+		self:setMotorTorqueDamped(self.parameters.DrivingTorque * throttle * throttle, dotProd, math.sign(throttle))
+		-- Arbitrary large number
+		local movingBackwards = dotProd < 0
+		local acceleratingBackwards = throttle < 0
+		local useReverse = (movingBackwards and acceleratingBackwards)
+		
+		local maxSpeed = (useReverse and VehicleParameters.ReverseSpeed or VehicleParameters.MaxSpeed)
+		targetVel = math.sign(throttle) * maxSpeed
+		
+		local normalizedSpeed = math.clamp(currentSpeed / maxSpeed, 0, 1)
+		fakeRPM = 0.3 * normalizedSpeed + 0.7 * math.abs(throttle)
+
+	else
 		self:setMotorMaxAcceleration(VehicleParameters.AccelerationMax*3)
 		self:setMotorTorque(self.parameters.BrakingTorque * throttle * throttle)
 		targetVel = math.sign(throttle) * 500
 	end
+
+	local newRPM = lerp(self.LastFakeRPM,fakeRPM,0.5)
+	self.LiveSound.PlaybackSpeed = idlePitch + (maxPitch - idlePitch) * newRPM
+	self.LiveSound.Volume = (baseVolume*0.5) + (0.5 * newRPM * baseVolume)
+
+	self.LastFakeRPM = newRPM
 	
 	self:SetMotorVelocity(targetVel)
 end
 
-local redressingState = false
-local targetAttachment
-function Chassis:Redress()
-	if redressingState then
-		return
-	end
-	redressingState = true
-	local p = self.driverSeat.CFrame.Position + Vector3.new( 0,10,0 )
-	local xc = Chaselfssis.driverSeat.CFrame.RightVector
-	xc = Vector3.new(xc.x,0,xc.z)
-	xc = xc.Unit
-	local yc = Vector3.new(0,1,0)
-
-	if not targetAttachment then
-		targetAttachment = self.RedressMount.RedressTarget
-	end
-
-	targetAttachment.Parent = Workspace.Terrain
-	targetAttachment.Position = p
-	targetAttachment.Axis = xc
-	targetAttachment.SecondaryAxis = yc
-	self.RedressMount.RedressOrientation.Enabled = true
-	self.RedressMount.RedressPosition.Enabled = true
-	wait(1.5)
-	self.RedressMount.RedressOrientation.Enabled = false
-	self.RedressMount.RedressPosition.Enabled = false
-	targetAttachment.Parent = self.RedressMount
-	wait(2)
-	redressingState = false
-end
-
-function Chassis:Reset() --Reset user inputs and redress (For when a player exits the vehicle)
-	self:UpdateThrottle(1, 1) --Values must  be changed to replicate to client.
-	self:UpdateSteering(1, 0) --i.e. setting vel to 0 when it is 0 wont update to clients
-	self:EnableHandbrake()
-	self.setMotorTorque(self.parameters.BrakingTorque)
-	self:SetMotorVelocity(0)
-	self:UpdateSteering(0, 0)
-	self.RedressMount.RedressOrientation.Enabled = true
-	self.RedressMount.RedressPosition.Enabled = true
-	self.RedressMount.RedressOrientation.Enabled = false
-	self.RedressMount.RedressPosition.Enabled = false
-	redressingState = false
-end
-
 function Chassis:Destroy() 
 	--idk actually know if there is anything to destroy here
+
 end
 
 return Chassis
