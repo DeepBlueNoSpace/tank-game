@@ -28,8 +28,8 @@ function TankCamera.new(tank: {})
     self.LastInputDelta = Vector2.new() 
 
     Camera.CameraType = Enum.CameraType.Scriptable
-	--UserInputService.MouseBehavior = Enum.MouseBehavior.LockCenter
-   -- UserInputService.MouseIconEnabled = false
+	UserInputService.MouseBehavior = Enum.MouseBehavior.LockCenter
+    UserInputService.MouseIconEnabled = false
 
     self.Tank.Trove:Add(RunService.Heartbeat:Connect(function(dT: number)
         self:Update(dT)
