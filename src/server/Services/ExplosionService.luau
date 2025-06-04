@@ -7,6 +7,10 @@ local Knit = require(ReplicatedStorage.Packages.Knit)
 
 local ExplosionService = Knit.CreateService({ Name = "ExplosionService"})
 
+local DEFAULT_PRESSURE = 350
+local PHYSICS_RADIUS_MOD = 0.3
+local TERRAIN_RADIUS_MOD = 0.1 
+
 function ExplosionService:KnitInit()
 	self.TankService = Knit.GetService("TankService")
 end
@@ -14,6 +18,11 @@ end
 function ExplosionService:DamageTanks(sender: Player, position: Vector3, radius: number, damage: number)
 	--Damage tanks
 	for _, tank in ipairs(CollectionService:GetTagged("Tank")) do
+		local isAlive = tank:GetAttribute("Alive") ::boolean
+		if not isAlive then 
+			continue 
+		end
+		
 		local primary = tank.PrimaryPart or tank:FindFirstChild("PrimaryPart") or tank:FindFirstChildWhichIsA("BasePart")
 		if not primary then continue end
 
@@ -31,47 +40,55 @@ function ExplosionService:DamageTanks(sender: Player, position: Vector3, radius:
 	end
 end
 
-local DEFAULT_PRESSURE = 350
+function ExplosionService:DamageTerrain(position: Vector3, radius: number)
+	Terrain:FillBall(position, radius*PHYSICS_RADIUS_MOD, Enum.Material.Air)
+end
 
-function ExplosionService:SpawnExplosion(sender: Player, position: Vector3, radius: number, damage: number)
-	self:DamageTanks(sender, position, radius, damage)
+
+local function isValidPart(part)
+	local current = part
+
+	while current do
+		if current:IsA("Model") then
+			if CollectionService:HasTag(current, "Tank") then
+				return false
+			end
+			if current:FindFirstChildOfClass("Humanoid") then
+				return false
+			end
+		end
+		current = current.Parent
+	end
+
+	return true
+end
+
+function ExplosionService:DoPhysicsDamage(position: Vector3, radius: number)
+	radius *= PHYSICS_RADIUS_MOD
+
 	local overlapParams = OverlapParams.new()
 	overlapParams.FilterType = Enum.RaycastFilterType.Include
 	overlapParams.FilterDescendantsInstances = { workspace }
 
-	--[[
 	local parts = workspace:GetPartBoundsInRadius(position, radius, overlapParams)
+	local filteredParts = {}
+	for _, part in ipairs(parts) do
+		if isValidPart(part) then
+			table.insert(filteredParts, part)
+		end
+	end
+	parts = filteredParts
 
 	for _, part in ipairs(parts) do
-		if part:IsA("BasePart") and not part.Anchored then
-			-- Check if this part belongs to a tagged "Tank" model
-			local inTank = false
-			local ancestor = part
-			while ancestor do
-				if ancestor:IsA("Model") and CollectionService:HasTag(ancestor, "Tank") then
-					inTank = true
-					break
-				end
-				ancestor = ancestor.Parent
-			end
-
-			-- Only destroy welds if NOT in a Tank
-			if not inTank then
-				for _, constraint in ipairs(part:GetDescendants()) do
-					if constraint:IsA("Weld") or constraint:IsA("WeldConstraint") or constraint:IsA("Motor6D") then
-						constraint:Destroy()
-					end
-				end
+		for _, constraint in ipairs(part:GetDescendants()) do
+			if constraint:IsA("Weld") or constraint:IsA("WeldConstraint") or constraint:IsA("Motor6D") then
+				constraint:Destroy()
 			end
 		end
 	end
 
-	-- Clear terrain in area
-	Terrain:FillBall(position, radius, Enum.Material.Air)
-
 	task.wait()
 
-	-- Apply physics forces
 	for _, part in ipairs(parts) do
 		if part:IsA("BasePart") and not part.Anchored then
 			local direction = (part.Position - position).Unit
@@ -81,46 +98,15 @@ function ExplosionService:SpawnExplosion(sender: Player, position: Vector3, radi
 			local force = direction * DEFAULT_PRESSURE * falloff
 			part:ApplyImpulse(force * part.AssemblyMass)
 		end
-	end]]
+	end
+end
+
+
+
+function ExplosionService:SpawnExplosion(sender: Player, position: Vector3, radius: number, damage: number)
+	self:DamageTanks(sender, position, radius, damage)
+	self:DamageTerrain(position, radius) 
+	self:DoPhysicsDamage(position, radius)	
 end
 
 return ExplosionService
-
-
---[[
-
-function ExplosionService:SpawnExplosion(position: Vector3, radius: number, blastPressure: number)
-	local overlapParams = OverlapParams.new()
-	overlapParams.FilterType = Enum.RaycastFilterType.Include
-	overlapParams.FilterDescendantsInstances = { workspace }
-
-	local parts = workspace:GetPartBoundsInRadius(position, radius, overlapParams)
-
-	--Break welds
-	for _, part in ipairs(parts) do
-		if part:IsA("BasePart") and part.Anchored == false then
-			for _, constraint in ipairs(part:GetDescendants()) do
-				if constraint:IsA("Weld") or constraint:IsA("WeldConstraint") or constraint:IsA("Motor6D") then
-					constraint:Destroy()
-				end
-			end
-		end
-	end
-
-
-	Terrain:FillBall(position, radius, Enum.Material.Air)
-	
-	task.wait()
-
-	for _, part in ipairs(parts) do
-		if part:IsA("BasePart") and part.Anchored == false then
-			local direction = (part.Position - position).Unit
-			local distance = (part.Position - position).Magnitude
-			local falloff = math.clamp(1 - (distance / radius), 0, 1)
-
-			local force = direction * blastPressure * falloff
-			part:ApplyImpulse(force * part.AssemblyMass)
-		end
-	end
-
-end]]
