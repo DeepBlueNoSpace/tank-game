@@ -34,7 +34,6 @@ function TankGui:UpdateAimingReticle()
     local rayYaw = math.rad(self.Tank.BarrelYaw)
     local rayPitch = math.rad(self.Tank.BarrelPitch)
 
-    -- Construct direction vector using CFrame
     local direction = CFrame.fromEulerAnglesYXZ(rayPitch, rayYaw, 0).LookVector * 2000
 
     local raycastParams = RaycastParams.new()

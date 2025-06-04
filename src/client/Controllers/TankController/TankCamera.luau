@@ -10,7 +10,7 @@ local Camera = workspace.CurrentCamera
 local TankCamera = {}
 TankCamera.__index = TankCamera
 
-local DEFAULT_Y_OFFSET = 6.5
+local DEFAULT_Y_OFFSET = 4.5
 local DEFAULT_Z_OFFSET = 30
 local GAMEPAD_DEAD_ZONE = .1
 local X_SENS_ADJUST = 0.05
@@ -77,9 +77,8 @@ end
 function TankCamera:UpdateBarrel(dT: number)
     local maxAngleChange = BARREL_ANG_VELOCITY * dT
 
-    -- Raycast from the center of the screen
     local camera = workspace.CurrentCamera
-    local ray = camera:ViewportPointToRay(camera.ViewportSize.X / 2, camera.ViewportSize.Y / 2)
+    local ray = camera:ViewportPointToRay(camera.ViewportSize.X / 2, camera.ViewportSize.Y *0.35)
     local rayOrigin = ray.Origin
     local rayDirection = ray.Direction * 1000
 
