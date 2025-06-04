@@ -57,7 +57,7 @@ function TankGui:UpdateHealthBar()
     local health = self.Tank.Model:GetAttribute("Health")
     local maxHealth = self.Tank.Model:GetAttribute("MaxHealth")
     self.HealthFill.Size = UDim2.fromScale(health/maxHealth, 1)
-    self.HealthValue.Text = string.format("%s/%s HP", health, maxHealth)
+    self.HealthValue.Text = string.format("%s/%s HP", tostring(math.floor(0.5+health)), maxHealth)
 end
 
 function TankGui:Update()
