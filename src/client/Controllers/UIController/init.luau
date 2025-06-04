@@ -1,9 +1,5 @@
---!nocheck
-local CollectionService = game:GetService("CollectionService")
 local GuiService = game:GetService("GuiService")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
-local TweenService = game:GetService("TweenService")
-local UserInputService = game:GetService("UserInputService")
 
 local Knit = require(ReplicatedStorage.Packages.Knit)
 
@@ -19,14 +15,6 @@ local UIController = Knit.CreateController({
 	defaultClosePosition = UDim2.fromScale(0.5, 1.5) :: UDim2,
 })
 
-local Blur = Instance.new("BlurEffect")
-Blur.Name = "UIControllerBlur"
-Blur.Enabled = true
-Blur.Size = 0
-Blur.Parent = game.Lighting
-
-local UIControllerArray= {}
-
 --[[
 Attempts to run the enable function of the requested controller.
     Returns if it was successful.
@@ -35,7 +23,7 @@ Attempts to run the enable function of the requested controller.
 function UIController:AttemptOpen(controller): boolean
 	if self.activeController then
 		if self.activeController == controller then
-			return
+			return false
 		end
 
 		UIController:AttemptClose(self.activeController)
