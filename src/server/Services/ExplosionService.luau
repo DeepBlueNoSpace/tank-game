@@ -18,6 +18,11 @@ end
 function ExplosionService:DamageTanks(sender: Player, position: Vector3, radius: number, damage: number)
 	--Damage tanks
 	for _, tank in ipairs(CollectionService:GetTagged("Tank")) do
+		local tankObject = self.TankService:GetTankFromModel(tank)
+		if not tankObject then
+			continue 
+		end
+
 		local isAlive = tank:GetAttribute("Alive") ::boolean
 		if not isAlive then 
 			continue 
@@ -35,7 +40,6 @@ function ExplosionService:DamageTanks(sender: Player, position: Vector3, radius:
 		end
 
 		local scaledDamage = damage * (1 - (distance / radius))
-		local tankObject = self.TankService:GetTankFromModel(tank)
 		tankObject:TakeDamage(scaledDamage, sender)
 	end
 end

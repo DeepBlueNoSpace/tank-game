@@ -46,7 +46,7 @@ function TankCamera.new(tank: {})
             if pos.X < Camera.ViewportSize.X / 2 then
                 return -- ignore input from the left side
             end
-            self.LastInputDelta = inputObject.Delta * 1.15
+            self.LastInputDelta = inputObject.Delta * 2
             return
         end
 

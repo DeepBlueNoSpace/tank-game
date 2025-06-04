@@ -77,7 +77,7 @@ function ServerTank:Disable(waitTime)
 end
 
 function ServerTank:Destroy()
-    self.TankService:RemovePlayersTankIndex(self.Driver)
+    self.TankService:RemovePlayersTankIndex(self.Driver, self)
     self.Trove:Destroy()
 end
 
