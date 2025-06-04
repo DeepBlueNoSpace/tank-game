@@ -39,7 +39,7 @@ function TankBillboardController:IndexTank(tank: Model)
     
     local healthFill = attachment.BillboardGui.Health.Fill 
     local _teamColor = attachment.BillboardGui.TeamColor 
-    local _ownerLabel = attachment.BillboardGui.Owner 
+    local ownerLabel = attachment.BillboardGui.Owner 
 
 
     local function updateHealth()
@@ -50,6 +50,8 @@ function TankBillboardController:IndexTank(tank: Model)
 
     updateHealth()
     billboardTrove:Add(tank:GetAttributeChangedSignal("Health"):Connect(updateHealth))-- this must be in trove cuz the model will persist.
+
+    ownerLabel.Text = tank:GetAttribute("OwnerName")
 end
 
 return TankBillboardController
