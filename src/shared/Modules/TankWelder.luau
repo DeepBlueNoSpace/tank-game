@@ -2,25 +2,22 @@ local tank = workspace.Tank
 local turret = tank.Turret 
 local armour = tank.Armour 
 
-local function weldModelTo(model, rootPart)
-    for _, part in ipairs(model:GetDescendants()) do
-        if part:IsA("BasePart") and part ~= rootPart then
-            -- Create the Motor6D
-            local motor = Instance.new("Motor6D")
-            motor.Name = part.Name .. "_Motor"
-            motor.Part0 = rootPart
-            motor.Part1 = part
+local function weldTo(x, y)
 
-            -- Create the attachments based on current positions
-            motor.C0 = rootPart.CFrame:ToObjectSpace(part.CFrame)
-            motor.C1 = CFrame.new() -- Assume Part1 is at its origin relative to itself
+	local motor = Instance.new("Motor6D")
+	motor.Name = x.Name .. "_Motor"
+	motor.Part0 = x
+	motor.Part1 = y
 
-            motor.Parent = rootPart
-        end
-    end
+	-- Create the attachments based on current positions
+	motor.C0 = x.CFrame:ToObjectSpace(y.CFrame)
+	motor.C1 = CFrame.new() -- Assume Part1 is at its origin relative to itself
+
+	motor.Parent = x
 end
 
-weldModelTo(armour.Turret, turret.Rotator)
+local selection = game:GetService("Selection"):Get()
+weldTo(selection[1], selection[2])
 
 
 for _, part in armour.Barrel:GetChildren() do 

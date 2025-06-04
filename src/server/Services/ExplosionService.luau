@@ -39,6 +39,7 @@ function ExplosionService:SpawnExplosion(sender: Player, position: Vector3, radi
 	overlapParams.FilterType = Enum.RaycastFilterType.Include
 	overlapParams.FilterDescendantsInstances = { workspace }
 
+	--[[
 	local parts = workspace:GetPartBoundsInRadius(position, radius, overlapParams)
 
 	for _, part in ipairs(parts) do
@@ -80,7 +81,7 @@ function ExplosionService:SpawnExplosion(sender: Player, position: Vector3, radi
 			local force = direction * DEFAULT_PRESSURE * falloff
 			part:ApplyImpulse(force * part.AssemblyMass)
 		end
-	end
+	end]]
 end
 
 return ExplosionService

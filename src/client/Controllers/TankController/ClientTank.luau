@@ -225,7 +225,26 @@ end
 function ClientTank:Fire()
     --next thing is to make the local tank its own object
     local barrel = self.Turret.Barrel :: BasePart
-    local directionOfFire = barrel.BarrelEnd.WorldCFrame.LookVector
+    local barrelEnd = barrel.BarrelEnd :: Attachment
+    local screenPoint = self.TankGui.Aimer.AbsolutePosition 
+
+    local camera = workspace.CurrentCamera
+
+    local ray = camera:ScreenPointToRay(screenPoint.X, screenPoint.Y)
+
+    local raycastParams = RaycastParams.new()
+    raycastParams.FilterDescendantsInstances = {} 
+    raycastParams.FilterType = Enum.RaycastFilterType.Exclude
+
+    local result = workspace:Raycast(ray.Origin, ray.Direction * 1000, raycastParams)
+
+    local targetPosition = if result then result.Position else ray.Origin + ray.Direction * 1000
+    local directionOfFire = (targetPosition - barrelEnd.WorldPosition).Unit
+
+    local part = Instance.new("Part")
+    part.Position = targetPosition
+    part.Anchored = true 
+    part.Parent = workspace
 
     local projectileData = {
         Id = HttpService:GenerateGUID(),
