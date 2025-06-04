@@ -26,9 +26,10 @@ function ProjectileService:KnitInit()
         projectileData.Owner = player
         self.LiveProjectiles[projectileData.Id] = projectileData
 
+        self.Client.SpawnProjectile:FireAll(projectileData)
+
         task.delay(10, function() 
             if self.LiveProjectiles[projectileData.Id]  then 
-                --Clients should clean this up of their own accord
                 self.LiveProjectiles[projectileData.Id]  = nil 
             end
         end)

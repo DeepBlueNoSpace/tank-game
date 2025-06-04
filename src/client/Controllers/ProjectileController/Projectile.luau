@@ -24,7 +24,7 @@ function Projectile.new(isLocal: boolean, projectileData: Types.ProjectileData)
     self.BarrelEnd = projectileData.BarrelEnd :: Attachment?
 
     self.IsLocal = isLocal :: boolean
-
+    
     self.Position = self.Origin :: Vector3
     self.Velocity = self.MuzzleVelocity :: Vector3
 

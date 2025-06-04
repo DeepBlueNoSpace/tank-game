@@ -1,5 +1,8 @@
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
+local Players = game:GetService("Players")
+
+local Player = Players.LocalPlayer 
 
 local Projectile = require(script.Projectile)
 local Types = require(ReplicatedStorage.Shared.Data.Types)
@@ -9,12 +12,19 @@ local ProjectileController = Knit.CreateController({ Name = "ProjectileControlle
 
 function ProjectileController:KnitInit()
     self.ServerTimeController = Knit.GetController("ServerTimeController")
+    self.ProjectileService = Knit.GetService("ProjectileService")
 end
 
 function ProjectileController:KnitStart()
-
     RunService.Heartbeat:Connect(function() 
         self:UpdateProjectiles()
+    end)
+
+    self.ProjectileService.SpawnProjectile:Connect(function(data: Types.ProjectileData)
+        if data.Owner == Player then 
+            return 
+        end
+        self:AddProjectile(false, data)
     end)
 end
 
