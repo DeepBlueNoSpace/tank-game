@@ -43,8 +43,8 @@ function ClientTank.new(tankModel: Model)
     self.VFXController = Knit.GetController("VFXController")
 
     self.Trove = Trove.new() 
-    
     self.Chassis = self.Trove:Add(Chassis.new(tankModel))
+
     --Parts
     self.Model = tankModel :: Model
     self.Seat = tankModel:WaitForChild("Chassis"):WaitForChild("VehicleSeat") :: VehicleSeat
@@ -116,10 +116,8 @@ local function _updateRawInput(inputState, inputObj)
 	end
 	
 	val = val * (data.Sign or 1)
-	
 	_rawInput[key] = val
-	
-end
+end 
 
 local function onInputBegan(input, gameProcessed)
 	if not gameProcessed and table.find(Keymap.allKeys(), input.KeyCode) then
@@ -222,17 +220,11 @@ function ClientTank:UpdateTurret()
 end
 
 function ClientTank:Fire()
-    --next thing is to make the local tank its own object
     local barrel = self.Turret.Barrel :: BasePart
     local barrelEnd = barrel.BarrelEnd :: Attachment
 
     local targetPosition = self.TankAimPosition
     local directionOfFire = (targetPosition - barrelEnd.WorldPosition).Unit
-
-    local part = Instance.new("Part")
-    part.Position = targetPosition
-    part.Anchored = true 
-    part.Parent = workspace
 
     local projectileData = {
         Id = HttpService:GenerateGUID(),
@@ -244,9 +236,8 @@ function ClientTank:Fire()
 
     self.ProjectileController:AddProjectile(true, projectileData)
 
-    --Add recoil
     self.Seat:ApplyImpulse(directionOfFire*RECOIL_FORCE*-1)
-   -- self.Camera:ApplyShotImpulse(200)
+    self.Camera:ApplyShotImpulse(200)
 end
 
 function ClientTank:Destroy() 
