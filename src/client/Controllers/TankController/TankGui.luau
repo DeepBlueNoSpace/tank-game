@@ -49,6 +49,8 @@ function TankGui:UpdateAimingReticle()
 
     local aimerTargetPosition = UDim2.fromOffset(screenPoint.X, screenPoint.Y)
     self.Aimer.Position = self.Aimer.Position:lerp(aimerTargetPosition, 0.5)
+
+    self.Tank.TankAimPosition = hitPosition
 end
 
 function TankGui:UpdateHealthBar()
