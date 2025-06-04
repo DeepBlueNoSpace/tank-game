@@ -6,8 +6,8 @@ local HttpService = game:GetService("HttpService")
 
 local Player = Players.LocalPlayer
 
-local MUZZLE_VELOCITY = 600 
-local RECOIL_FORCE = 300
+local MUZZLE_VELOCITY = 400 
+local RECOIL_FORCE = 15000
 
 local Knit = require(ReplicatedStorage.Packages.Knit)
 local Trove = require(Knit.Packages.Trove)
@@ -246,8 +246,8 @@ function ClientTank:Fire()
     self.ProjectileController:AddProjectile(true, projectileData)
 
     --Add recoil
-    barrel:ApplyImpulse(directionOfFire*RECOIL_FORCE*-1)
-    self.Camera:ApplyShotImpulse(200)
+    self.Seat:ApplyImpulse(directionOfFire*RECOIL_FORCE*-1)
+   -- self.Camera:ApplyShotImpulse(200)
 end
 
 function ClientTank:Destroy() 
