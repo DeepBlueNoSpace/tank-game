@@ -60,11 +60,18 @@ function ClientTank.new(tankModel: Model)
     self.BarrelPitch = 0 :: number
     self.CurrentRelativeYaw = 0 :: number 
 
-    self.Character = character 
-    self.Humanoid = self.Character.Humanoid 
+    self.JoystickThrottle = {
+        Z = 0,
+        X = 0,
+        Braking = false,
+    } :: Types.JoystickThrottle
+
+    self.Character = character :: Model
+    self.Humanoid = self.Character.Humanoid :: Humanoid
     
     --State
-    self.IsOccupied = false 
+    self.IsOccupied = false :: boolean
+    self.IsJoystickControlled = false :: boolean
 
     self.Trove:Add(RunService.Heartbeat:Connect(function()
         self:Update()
@@ -72,10 +79,6 @@ function ClientTank.new(tankModel: Model)
 
     self.Trove:Add(UserInputService.InputBegan:Connect(function(inputObject: InputObject, gameProcessed: boolean) 
         self:HandleInput(inputObject, gameProcessed)
-    end))
-
-    self.Trove:Add(self.Humanoid.Died:Connect(function() 
-        
     end))
 
     self.Trove:Add(RunService.RenderStepped:Connect(function() 
@@ -154,7 +157,16 @@ end
 
 
 function ClientTank:GetInputValues()
-    local throttle, steering, handbreak = _calculateInput("Throttle") - _calculateInput("Brake"), _calculateInput("SteerLeft") + _calculateInput("SteerRight"), _calculateInput("Handbrake")
+    local throttle, steering, handbreak 
+    if self.IsJoystickControlled then 
+        print'hi'
+        throttle, steering, handbreak = self.JoystickThrottle.Z, self.JoystickThrottle.X, self.JoystickThrottle.Braking and 1 or 0
+        print(throttle, steering, handbreak)
+    else    
+        throttle, steering, handbreak = _calculateInput("Throttle") - _calculateInput("Brake"), _calculateInput("SteerLeft") + _calculateInput("SteerRight"), _calculateInput("Handbrake")
+    end
+   
+
     return throttle, steering, handbreak
 end
 

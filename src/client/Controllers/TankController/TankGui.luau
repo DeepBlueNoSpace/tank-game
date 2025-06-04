@@ -8,6 +8,8 @@ local TankGuiPrefab = Assets.Gui.Tank
 
 local PlayerGui = Player:WaitForChild("PlayerGui")
 
+local Types = require(ReplicatedStorage.Shared.Data.Types)
+
 local TankGui = {}
 TankGui.__index = TankGui
 
@@ -26,7 +28,37 @@ function TankGui.new(tank: {})
         self:Update()
     end))
 
+    self.ThumbstickStart = nil :: ImageLabel?
+    self.ThumbstickEnd = nil :: ImageLabel?
+
+    local touchGui = Players.LocalPlayer.PlayerGui:FindFirstChild("TouchGui") :: ScreenGui
+
+    if touchGui then
+        self:SetUpMobile(touchGui)
+    else
+        self.Tank.Trove:Add(PlayerGui.ChildAdded:Connect(function(child)
+            if child.Name == "TouchGui" then
+                self:SetUpMobile(touchGui)
+            end
+        end))
+    end
     return self
+end
+
+function TankGui:SetUpMobile(touchGui: ScreenGui) 
+    -- realistically this should never fail right?
+    local controlFrame = touchGui:WaitForChild("TouchControlFrame", 1) :: Frame? 
+	if not controlFrame then
+		return
+	end
+
+	local DThumbstickFrame = controlFrame:WaitForChild("DynamicThumbstickFrame", 1) :: Frame?
+	if not DThumbstickFrame then
+		return
+	end
+	
+    self.ThumbstickStart = DThumbstickFrame:WaitForChild("ThumbstickStart") :: ImageLabel
+	self.ThumbstickEnd = DThumbstickFrame:WaitForChild("ThumbstickEnd") :: ImageLabel
 end
 
 function TankGui:UpdateAimingReticle()
@@ -62,6 +94,42 @@ end
 function TankGui:Update()
     self:UpdateAimingReticle()
     self:UpdateHealthBar()
+
+    local mobileJumpButton = PlayerGui:FindFirstChild("JumpButton", true)
+    if mobileJumpButton then 
+        mobileJumpButton.Visible = false 
+    end
+
+    if self.ThumbstickStart and self.ThumbstickEnd then 
+        self:ComputeMobileThrottle()
+    end
+end
+
+local zScaling = 100 -- TODO: Scale to screen size
+function TankGui:ComputeMobileThrottle()
+    self.Tank.IsJoystickControlled = true 
+
+    if self.ThumbstickEnd.ImageTransparency == 1 then
+        -- there is no current input, throttle to 0 
+        print'stopping'
+        self.Tank.JoystickThrottle = {Z=0,X=0, Braking = true} :: Types.JoystickThrottle
+        return
+    end
+
+    local startP = self.ThumbstickStart.AbsolutePosition
+    local endP = self.ThumbstickEnd.AbsolutePosition
+    local delta = endP - startP
+
+    local Z = math.clamp(delta.Y/zScaling, -1, 1) * -1
+    local X = math.clamp(delta.X/zScaling, -1, 1) * -1
+
+    local throttle = {
+        Z = Z;
+        X = X, 
+        Braking = false
+    } :: Types.JoystickThrottle
+
+    self.Tank.JoystickThrottle = throttle 
 end
 
 function TankGui:Destroy()

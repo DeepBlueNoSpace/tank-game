@@ -28,8 +28,8 @@ function TankCamera.new(tank: {})
     self.LastInputDelta = Vector2.new() 
 
     Camera.CameraType = Enum.CameraType.Scriptable
-	UserInputService.MouseBehavior = Enum.MouseBehavior.LockCenter
-    UserInputService.MouseIconEnabled = false
+	--UserInputService.MouseBehavior = Enum.MouseBehavior.LockCenter
+   -- UserInputService.MouseIconEnabled = false
 
     self.Tank.Trove:Add(RunService.Heartbeat:Connect(function(dT: number)
         self:Update(dT)
@@ -42,9 +42,14 @@ function TankCamera.new(tank: {})
         end
 
         if inputObject.UserInputType == Enum.UserInputType.Touch then
-                self.LastInputDelta  = inputObject.Delta * 1.15
+            local pos = inputObject.Position
+            if pos.X < Camera.ViewportSize.X / 2 then
+                return -- ignore input from the left side
+            end
+            self.LastInputDelta = inputObject.Delta * 1.15
             return
         end
+
 
         if inputObject.KeyCode == Enum.KeyCode.Thumbstick2 then
             local Temp = inputObject.Position

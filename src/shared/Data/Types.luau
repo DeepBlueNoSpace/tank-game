@@ -15,4 +15,10 @@ export type VFXInfo = {
     CFrame: CFrame?,
 }
 
+export type JoystickThrottle = {
+    Z: number, 
+    X: number, 
+    Braking: boolean
+}
+
 return Types 
