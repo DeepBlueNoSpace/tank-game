@@ -6,7 +6,7 @@ local HttpService = game:GetService("HttpService")
 
 local Player = Players.LocalPlayer
 
-local MUZZLE_VELOCITY = 400 
+local MUZZLE_VELOCITY = 600 
 local RECOIL_FORCE = 15000
 
 local Knit = require(ReplicatedStorage.Packages.Knit)
@@ -58,6 +58,7 @@ function ClientTank.new(tankModel: Model)
     self.TankAimPosition = Vector3.new() :: Vector3 
     self.BarrelYaw = 0 :: number
     self.BarrelPitch = 0 :: number
+    self.CurrentRelativeYaw = 0 :: number 
 
     self.Character = character 
     self.Humanoid = self.Character.Humanoid 
@@ -198,14 +199,13 @@ function ClientTank:UpdateTurret()
     local currentYaw = self.RotatorServo.TargetAngle
     local desiredYawWorld = self.BarrelYaw
 
-    -- Convert world yaw to local yaw relative to TurretBase
     local baseYaw = math.deg(math.atan2(-baseCFrame.LookVector.X, -baseCFrame.LookVector.Z))
-    local relativeYaw = desiredYawWorld - baseYaw
+    local desiredRelativeYaw = desiredYawWorld - baseYaw
 
-    -- Normalize angle to [-180, 180]
-    relativeYaw = (relativeYaw + 180) % 360 - 180
+    local delta = (desiredRelativeYaw - self.CurrentRelativeYaw + 180) % 360 - 180
+    self.CurrentRelativeYaw += delta
 
-    self.TargetRotatorAngle = relativeYaw
+    self.TargetRotatorAngle = self.CurrentRelativeYaw
     self.RotatorServo.TargetAngle = lerp(currentYaw, self.TargetRotatorAngle, 0.5)
 
     -- PITCH
@@ -213,7 +213,6 @@ function ClientTank:UpdateTurret()
     local currentPitch = self.BarrelHinge.CurrentAngle
     local desiredPitchWorld = self.BarrelPitch
 
-    -- Convert world pitch to local pitch relative to Rotator
     local rotatorLook = rotatorCFrame.LookVector
     local worldPitch = math.deg(math.asin(rotatorLook.Y))
     local relativePitch = desiredPitchWorld - worldPitch
