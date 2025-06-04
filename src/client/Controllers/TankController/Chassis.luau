@@ -251,60 +251,6 @@ end
 local idlePitch = 0.7
 local maxPitch = 1.6
 local baseVolume = 0.3
---[[
-function Chassis:UpdateThrottle(currentSpeed, throttle)
-	local targetVel = 0
-	
-	local fakeRPM = 0 	
-	print(throttle)
-
-	if math.abs(throttle) < 0.1 and currentSpeed < 0.2 then
-		-- Idling
-		self:setMotorMaxAcceleration(VehicleParameters.AccelerationMax)
-		self:setMotorTorque(2000)
-	elseif math.sign(throttle * currentSpeed) > 0 or math.abs(currentSpeed) < 0.5 then
-		self:setMotorMaxAcceleration(VehicleParameters.AccelerationMax)
-
-		local velocity = self.driverSeat.Velocity
-		local velocityVector = velocity.Unit
-		local directionalVector = self.driverSeat.CFrame.lookVector
-		local dotProd = velocityVector:Dot(directionalVector) -- Dot product is a measure of how similar two vectors are; if they're facing the same direction, it is 1, if they are facing opposite directions, it is -1, if perpendicular, it is 0
-		
-		self:setMotorTorqueDamped(self.parameters.DrivingTorque * throttle * throttle, dotProd, math.sign(throttle))
-		-- Arbitrary large number
-		local movingBackwards = dotProd < 0
-		local acceleratingBackwards = throttle < 0
-		local useReverse = (movingBackwards and acceleratingBackwards)
-		
-		local maxSpeed = (useReverse and VehicleParameters.ReverseSpeed or VehicleParameters.MaxSpeed)
-		targetVel = math.sign(throttle) * maxSpeed
-		
-		-- Scale from 0 to 1 based on speed and throttle
-		local normalizedSpeed = math.clamp(currentSpeed / maxSpeed, 0, 1)
-		fakeRPM = 0.3 * normalizedSpeed + 0.7 * math.abs(throttle)
-	else
-		-- Braking
-		local sign = 1 
-		if currentSpeed < 0 then 
-			sign =-1 
-		end
-		self:setMotorMaxAcceleration(VehicleParameters.AccelerationMax*3*sign)
-		self:setMotorTorque(self.parameters.BrakingTorque)
-		targetVel = math.sign(throttle) * 500
-
-		fakeRPM = 0
-	end
-	
-	self:SetMotorVelocity(targetVel)
-
-	local newRPM = lerp(self.LastFakeRPM,fakeRPM,0.5)
-	self.LiveSound.PlaybackSpeed = idlePitch + (maxPitch - idlePitch) * newRPM
-	self.LiveSound.Volume = (baseVolume*0.5) + (0.5 * newRPM * baseVolume)
-
-	self.LastFakeRPM = newRPM
-end
-]]
-
 
 function Chassis:UpdateThrottle(currentSpeed, throttle)
 	local targetVel = 0
@@ -312,7 +258,6 @@ function Chassis:UpdateThrottle(currentSpeed, throttle)
 	local fakeRPM = 0
 	if math.abs(throttle) < 0.1 then
 		-- Idling
-		print'here'
 		self:setMotorMaxAcceleration(VehicleParameters.AccelerationMax)
 		self:setMotorTorque(self.parameters.BrakingTorque)
 	elseif math.sign(throttle * currentSpeed) > 0 or math.abs(currentSpeed) < 0.5 then
@@ -324,7 +269,7 @@ function Chassis:UpdateThrottle(currentSpeed, throttle)
 		local dotProd = velocityVector:Dot(directionalVector) -- Dot product is a measure of how similar two vectors are; if they're facing the same direction, it is 1, if they are facing opposite directions, it is -1, if perpendicular, it is 0
 		
 		self:setMotorTorqueDamped(self.parameters.DrivingTorque * throttle * throttle, dotProd, math.sign(throttle))
-		-- Arbitrary large number
+
 		local movingBackwards = dotProd < 0
 		local acceleratingBackwards = throttle < 0
 		local useReverse = (movingBackwards and acceleratingBackwards)
