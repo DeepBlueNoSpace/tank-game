@@ -4,25 +4,12 @@ local Players = game:GetService("Players")
 local Knit = require(ReplicatedStorage.Packages.Knit)
 local Trove = require(Knit.Packages.Trove)
 
-local LobbyScene = workspace:WaitForChild("LobbyScene")
-local CameraPart = LobbyScene:WaitForChild("CameraPart")
-
-local DeathmatchGamemodeUI= Knit.CreateController({ Name = "DeathmatchGamemodeUI", open = false })
+local DeathmatchGamemodeUI= Knit.CreateController({ Name = "DeathmatchGamemodeUI", Open = false })
 DeathmatchGamemodeUI.Trove = Trove.new()
 DeathmatchGamemodeUI.CachedThumbnails = {}
 
--- These need to be set before init to prevent race conditions...
-local PlayerGui = game.Players.LocalPlayer:WaitForChild("PlayerGui")
-local GameGui = PlayerGui:WaitForChild("GameGui")
-local GamemodesFrame = GameGui:WaitForChild("Gamemodes")
-local Frame = GamemodesFrame:WaitForChild("Deathmatch")
-local TimerFrame = Frame:WaitForChild("Timer")
-local LeaderboardFrame = Frame:WaitForChild("Leaderboard")
-LeaderboardFrame:WaitForChild("Prefab").Visible = false
-
-function DeathmatchGamemodeUI:Open()
-	warn("DeathmatchGamemodeUI: Open()")
-	self.frame.Visible = true
+function DeathmatchGamemodeUI:OpenFrame()
+	self.Frame.Visible = true
 
 	self.DeathmatchGamemodeService.KillLeaderboard:OnReady():andThen(function()
 		self:UpdateLeaderboard()
@@ -36,8 +23,8 @@ function DeathmatchGamemodeUI:Open()
 	end))
 end
 
-function DeathmatchGamemodeUI:Close()
-	self.frame.Visible = false
+function DeathmatchGamemodeUI:CloseFrame()
+	self.Frame.Visible = false
 	self.Trove:Destroy()
 	self.CachedThumbnails = {}
 end
@@ -47,7 +34,6 @@ local MAX_TILES = 10
 
 function DeathmatchGamemodeUI:UpdateLeaderboard()
 	local leaderboardData = self.DeathmatchGamemodeService.KillLeaderboard:Get()
-	warn("DeathmatchGamemodeUI: UpdateLeaderboard()", leaderboardData)
 
 	-- process and sort players
 	local transformedData = {}
@@ -71,10 +57,10 @@ function DeathmatchGamemodeUI:UpdateLeaderboard()
 
 		-- initialize tile if it's missing
 		if transformedData[i] and not leaderboardTiles[i] then
-			local prefab = LeaderboardFrame:WaitForChild("Prefab")
+			local prefab = self.LeaderboardFrame:WaitForChild("Prefab")
 			local tile = prefab:Clone()
 			leaderboardTiles[i] = tile
-			tile.Parent = LeaderboardFrame
+			tile.Parent = self.LeaderboardFrame
 			tile.Visible = true
 		end
 
@@ -118,11 +104,11 @@ function DeathmatchGamemodeUI:UpdateTimer()
 
 	local minutes = math.floor(timeRemaining / 60)
 	local seconds = timeRemaining % 60
-	TimerFrame.TextLabel.Text = string.format("%02d:%02d", minutes, seconds)
+	self.TimerFrame.TextLabel.Text = string.format("%02d:%02d", minutes, seconds)
 end
 
 function DeathmatchGamemodeUI:LocalReplicaCreated(replica)
-	self.replica = replica
+	self.Replica = replica
 end
 
 function DeathmatchGamemodeUI:KnitInit()
@@ -132,7 +118,15 @@ function DeathmatchGamemodeUI:KnitInit()
 	self.GameLoopService = Knit.GetService("GameLoopService")
     self.DeathmatchGamemodeService = Knit.GetService("DeathmatchGamemodeService")
 
-	self.frame = Frame
+	local gameGui = self.UIController.GameGui 
+
+	local GamemodesFrame = gameGui:WaitForChild("Gamemodes")
+	self.Frame = GamemodesFrame:WaitForChild("Deathmatch")
+	self.TimerFrame = self.Frame:WaitForChild("Timer")
+	self.LeaderboardFrame = self.Frame:WaitForChild("Leaderboard")
+
+	self.LeaderboardFrame:WaitForChild("Prefab").Visible = false
+
 end
 
 function DeathmatchGamemodeUI:KnitStart()

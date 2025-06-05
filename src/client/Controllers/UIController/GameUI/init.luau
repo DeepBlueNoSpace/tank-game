@@ -1,33 +1,29 @@
 --!nocheck
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
-local Players = game:GetService("Players")
 local Knit = require(ReplicatedStorage.Packages.Knit)
 
-local LobbyScene = workspace:WaitForChild("LobbyScene")
-local CameraPart = LobbyScene:WaitForChild("CameraPart")
+local GameUI= Knit.CreateController({ Name = "GameUI", Open = false })
 
-local GameUI= Knit.CreateController({ Name = "GameUI", open = false })
-
-function GameUI:Open()
+function GameUI:OpenFrame()
     local currGamemode = self.GameLoopService.Gamemode:Get()
     if not currGamemode then
         warn("No gamemode set, cannot open UI??")
         return
     else
-        self.GamemodeUIControllers[currGamemode]:Open()
+        self.GamemodeUIControllers[currGamemode]:OpenFrame()
     end
 end
 
-function GameUI:Close()
+function GameUI:CloseFrame()
     for _, v in pairs(self.GamemodeUIControllers) do
-        v:Close()
+        v:CloseFrame()
     end
 
-    Knit.GetController("KillcamUI"):Close()
+    Knit.GetController("KillcamUI"):CloseFrame()
 end
 
 function GameUI:LocalReplicaCreated(replica)
-	self.replica = replica
+	self.Replica = replica
 end
 
 function GameUI:KnitInit()
@@ -39,7 +35,7 @@ function GameUI:KnitInit()
 end
 
 function GameUI:KnitStart()
-    self.screenGui = self.UIController.gameGui
+    self.ScreenGui = self.UIController.GameGui
 end
 
 return GameUI

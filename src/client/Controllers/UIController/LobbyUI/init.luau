@@ -1,33 +1,29 @@
---!nocheck
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
-local Players = game:GetService("Players")
 local Knit = require(ReplicatedStorage.Packages.Knit)
 
 local LobbyScene = workspace:WaitForChild("LobbyScene")
 local CameraPart = LobbyScene:WaitForChild("CameraPart")
 
-local LobbyMainUI= Knit.CreateController({ Name = "LobbyMainUI", open = false })
+local LobbyMainUI= Knit.CreateController({ Name = "LobbyMainUI", Open = false })
 
-function LobbyMainUI:Open()
-	warn("LobbyMainUI OPEN!!!!")
-	Knit.GetController("GameUI"):Close()
+function LobbyMainUI:OpenFrame()
+	Knit.GetController("GameUI"):CloseFrame()
 
-	self.open = true
-	self.frame.Visible = true
+	self.Open = true
+	self.Frame.Visible = true
 
 	workspace.CurrentCamera.CameraType = Enum.CameraType.Scriptable
 	workspace.CurrentCamera.CFrame = CameraPart.CFrame
 end
 
-function LobbyMainUI:Close()
-	self.open = false
-    self.frame.Visible = false
+function LobbyMainUI:CloseFrame()
+	self.Open = false
+    self.Frame.Visible = false
 end
 
 
-
 function LobbyMainUI:LocalReplicaCreated(replica)
-	self.replica = replica
+	self.Replica = replica
 end
 
 function LobbyMainUI:KnitInit()
@@ -36,17 +32,17 @@ function LobbyMainUI:KnitInit()
 end
 
 function LobbyMainUI:KnitStart()
-	self.frame = self.UIController.lobbyGui:WaitForChild("Main")
-	self.deployButton = self.frame:WaitForChild("DeployButton")
+	self.Frame = self.UIController.LobbyGui:WaitForChild("Main")
+	self.DeployButton = self.Frame:WaitForChild("Deploy")
 
-	self.deployButton.Activated:Connect(function()
+	self.DeployButton.Activated:Connect(function()
 		Knit.GetController("TankController"):AttemptDeploy()
 	end)
 
-	self:Open()
+	self:OpenFrame()
 
-	game.Players.LocalPlayer.CharacterAdded:Connect(function(character)
-		self:Open()
+	game.Players.LocalPlayer.CharacterAdded:Connect(function()
+		self:OpenFrame()
 	end)
 end
 

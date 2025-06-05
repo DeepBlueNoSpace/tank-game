@@ -32,7 +32,7 @@ end
 function TankController:InitTank()
     self.TankService:RequestTank():andThen(function(tank: Model, type: string)
         self.Tank = ClientTank.new(tank, type) 
-        Knit.GetController("GameUI"):Open()
+        Knit.GetController("GameUI"):OpenFrame()
     end)
 end
 
@@ -42,7 +42,7 @@ function TankController:AttemptDeploy()
 		return
 	end
 
-    Knit.GetController("LobbyMainUI"):Close()
+    Knit.GetController("LobbyMainUI"):CloseFrame()
 
     if Player.Team then
         self:InitTank()

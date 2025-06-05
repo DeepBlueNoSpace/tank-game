@@ -1,18 +1,15 @@
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
-local RunService = game:GetService("RunService")
-print'hnmmm'
 local Knit = require(ReplicatedStorage.Packages.Knit)
-print'server knit going'
+
 -- expose modules and assets
 Knit.Packages = ReplicatedStorage.Packages
 Knit.Modules = ReplicatedStorage:WaitForChild("Shared"):WaitForChild("Modules")
 Knit.Assets = ReplicatedStorage:WaitForChild("Assets")
 Knit.Data = ReplicatedStorage.Shared:WaitForChild("Data")
 Knit.Shared = ReplicatedStorage.Shared
-print'ja'
+
 -- init all services
 Knit.AddServicesDeep(script.Parent.Services)
-print'yaaa'
 
 Knit.Start()
 	:andThen(function()
@@ -45,7 +42,7 @@ Knit.Start()
 		game.Players.PlayerRemoving:Connect(function(player)
 			playerRemoving(player)
 		end)
-		print'd'
+
 		spawn(function()
 			local cmdr = require(Knit.Packages.Cmdr)
 			cmdr:RegisterDefaultCommands()
