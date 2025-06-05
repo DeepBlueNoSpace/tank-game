@@ -12,6 +12,8 @@ local RECOIL_FORCE = 15000
 local Knit = require(ReplicatedStorage.Packages.Knit)
 local Trove = require(Knit.Packages.Trove)
 local Types = require(ReplicatedStorage.Shared.Data.Types)
+local TankData = require(ReplicatedStorage.Shared.Data.TankData)
+local MunitionData = require(ReplicatedStorage.Shared.Data.MunitionData)
 local GetSafeCharacter = require(Knit.Modules.GetSafeCharacter)
 local Chassis = require(script.Parent.Chassis)
 local Keymap = require(script.Parent.Keymap)
@@ -30,12 +32,16 @@ local function _clearInput()
 end
 
 
-function ClientTank.new(tankModel: Model)
+function ClientTank.new(tankModel: Model, type: string)
     local self = setmetatable({}, ClientTank)
     local character = GetSafeCharacter() 
     if not character then 
         return 
     end
+
+    --Data 
+    self.TankType = type :: string
+    self.TankData = TankData[type] :: Types.TankData
 
     --Knit controllers/services
     self.ProjectileController = Knit.GetController("ProjectileController")
@@ -58,7 +64,15 @@ function ClientTank.new(tankModel: Model)
     self.TankAimPosition = Vector3.new() :: Vector3 
     self.BarrelYaw = 0 :: number
     self.BarrelPitch = 0 :: number
-    self.CurrentRelativeYaw = 0 :: number 
+    self.CurrentRelativeYaw = 0 :: number
+    self.Character = character :: Model
+    self.Humanoid = self.Character.Humanoid :: Humanoid
+    
+    --State
+    self.IsOccupied = false :: boolean
+    self.IsJoystickControlled = false :: boolean
+    self.LastShotTime = 0 :: number 
+    self.EquippedMunitionSlot = 1 :: number 
 
     self.JoystickThrottle = {
         Z = 0,
@@ -66,14 +80,8 @@ function ClientTank.new(tankModel: Model)
         Braking = false,
     } :: Types.JoystickThrottle
 
-    self.Character = character :: Model
-    self.Humanoid = self.Character.Humanoid :: Humanoid
-    
-    --State
-    self.IsOccupied = false :: boolean
-    self.IsJoystickControlled = false :: boolean
-    self.LastShot = 0 :: number 
 
+    --Functions
     self.Trove:Add(RunService.Heartbeat:Connect(function()
         self:Update()
     end))
@@ -176,13 +184,26 @@ function ClientTank:Update()
         self:UpdateTurret()
     end
 end
+
+function ClientTank:EquipMunitionSlot(slotNumber: number)
+    self.EquippedMunitionSlot = slotNumber
+    self.LastShotTime = tick()
+end
+
 function ClientTank:HandleInput(inputObject: InputObject, gameProcessed: boolean)
     if gameProcessed then 
         return 
     end
 
     if inputObject.UserInputType == Enum.UserInputType.MouseButton1 then
-        self:AttemptFire() 
+        self:AttemptFire()
+        return 
+    end
+
+    if inputObject.KeyCode == Enum.KeyCode.One then 
+        self:EquipMunitionSlot(1)
+    elseif inputObject.KeyCode == Enum.KeyCode.Two then 
+        self:EquipMunitionSlot(2)
     end
 end
 
@@ -218,18 +239,18 @@ function ClientTank:UpdateTurret()
     self.BarrelHinge.TargetAngle = lerp(currentPitch, self.TargetBarrelAngle, 0.5)
 end
 
-local SHOT_COOLDOWN = 1 
-
 function ClientTank:AttemptFire()
-    if tick() - self.LastShot < SHOT_COOLDOWN then 
+    local equippedMunitionType = self.TankData.Munitions[self.EquippedMunitionSlot]
+    local munitionData = MunitionData[equippedMunitionType]
+    if tick() - self.LastShotTime < munitionData.RechargeTime then 
         return 
     end
 
-    self:Fire()
+    self:Fire(equippedMunitionType)
 end
 
-function ClientTank:Fire()
-    self.LastShot = tick() 
+function ClientTank:Fire(munitionType: string)
+    self.LastShotTime = tick() 
 
     local barrel = self.Turret.Barrel :: BasePart
     local barrelEnd = barrel.BarrelEnd :: Attachment
@@ -242,7 +263,9 @@ function ClientTank:Fire()
         MuzzleVelocity = MUZZLE_VELOCITY * directionOfFire,
         Origin = barrel.BarrelEnd.WorldPosition,
         StartTime = self.ServerTimeController:GetTime(),
-        BarrelEnd = barrel.BarrelEnd
+        BarrelEnd = barrel.BarrelEnd,
+
+        MunitionType = munitionType
     } :: Types.ProjectileData
 
     self.ProjectileController:AddProjectile(true, projectileData)

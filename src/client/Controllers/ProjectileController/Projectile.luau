@@ -6,6 +6,7 @@ local ServerTime = workspace:WaitForChild("ServerTime")
 local Knit = require(ReplicatedStorage.Packages.Knit)
 
 local Types = require(ReplicatedStorage.Shared.Data.Types)
+local MunitionData = require(ReplicatedStorage.Shared.Data.MunitionData)
 
 local Projectile = {}
 Projectile.__index = Projectile
@@ -22,6 +23,7 @@ function Projectile.new(isLocal: boolean, projectileData: Types.ProjectileData)
     self.StartTime = projectileData.StartTime :: number
     self.LastUpdate = projectileData.StartTime :: number 
     self.BarrelEnd = projectileData.BarrelEnd :: Attachment?
+    self.MunitionType = projectileData.MunitionType :: string
 
     self.IsLocal = isLocal :: boolean
     
@@ -68,9 +70,13 @@ function Projectile:UpdateModelPosition()
     self.Model:PivotTo(CFrame.new(self.Position, self.Velocity))
 end
 
+local BaseRadius = 20 
+
 function Projectile:OnHit(result: RaycastResult)
+    local blastRadius = MunitionData[self.MunitionType].BlastRadius
+    local blastScalar = blastRadius/BaseRadius
     local explosionInfo = {
-        ScaleSize = 2, 
+        ScaleSize = 2*blastScalar, 
         CFrame = CFrame.new(result.Position)
     } :: Types.VFXInfo
 

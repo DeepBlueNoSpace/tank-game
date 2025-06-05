@@ -1,3 +1,4 @@
+--!strict
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 local Knit = require(ReplicatedStorage.Packages.Knit)
@@ -7,9 +8,10 @@ local TankService = Knit.CreateService({ Name = "TankService",
         LiveTanks = {} :: {[Player]:{}}
     })
 local ServerTank = require(script.ServerTank)
-local TeamUtil = require(Knit.Modules.TeamUtil)
+local TeamUtil = require(ReplicatedStorage.Shared.Modules.TeamUtil)
 
 function TankService:KnitInit() 
+    self.DataService = Knit.GetService("DataService")
 
 end
 
@@ -26,21 +28,37 @@ function TankService.Client:RequestTank(player: Player)
         return
     end
 
+    local replica = TankService.DataService:GetReplica(player)
+    if not replica then 
+        return 
+    end
+
     if player.Team then
-        local teamIndex = TeamUtil.GetTeamIndex(player.Team)
+        local playerTeam = tostring(player.Team)
+        local teamIndex = TeamUtil.GetTeamIndex(playerTeam)
+
         local map = workspace:WaitForChild("Map") -- TODO get from gamemode controller
         local spawns = map:WaitForChild("Spawns"):WaitForChild(tostring(teamIndex))
         local chosenSpawn = spawns:GetChildren()[math.random(1, #spawns:GetChildren())]
-        player.Character:PivotTo(chosenSpawn.CFrame * CFrame.new(Vector3.new(0,player.Character.Humanoid.HipHeight,0)))
+
+        local humanoid = player.Character:FindFirstChild("Humanoid") :: Humanoid
+        if not humanoid then 
+            return 
+        end
+
+        local height = humanoid and humanoid.HipHeight or 0
+        player.Character:PivotTo(chosenSpawn.CFrame * CFrame.new(Vector3.new(0,height,0)))
     else
         warn("Player does not have a team assigned when requesting a tank:", 
             player.Name, "are you sure this is supposed to happen?")
     end
     
-    local tank = ServerTank.new(player)
+
+    local tankType = replica.Data.EquippedTank
+    local tank = ServerTank.new(player, tankType)
     TankService.LiveTanks[player] = tank
 
-    return tank.Model
+    return tank.Model, tankType
 end
 
 function TankService:DestroyAllTanks()

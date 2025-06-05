@@ -1,3 +1,4 @@
+--!strict
 local Types = {}
 
 export type ProjectileData = {
@@ -7,6 +8,8 @@ export type ProjectileData = {
     Id: string;
     Owner: Player?,
     BarrelEnd: Attachment?,
+
+    MunitionType: string
 }
 
 export type VFXInfo = {
@@ -21,4 +24,17 @@ export type JoystickThrottle = {
     Braking: boolean
 }
 
+export type TankData = {
+    Name: string,
+    Health: number,
+
+    Munitions: {[number]: string}
+}
+
+export type MunitionData = {
+    Name: string,
+    BaseDamage: number,
+    BlastRadius: number;
+    RechargeTime: number,
+}
 return Types 

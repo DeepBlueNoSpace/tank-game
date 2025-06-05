@@ -2,6 +2,7 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 local Knit = require(ReplicatedStorage.Packages.Knit)
 local Types = require(ReplicatedStorage.Shared.Data.Types)
+local MunitionData = require(ReplicatedStorage.Shared.Data.MunitionData)
 
 local ProjectileService = Knit.CreateService({ Name = "ProjectileService", 
     Client = {
@@ -40,7 +41,8 @@ function ProjectileService:KnitInit()
         assert(projectile, "Projectile not found")
         assert(projectile.Owner == player, "Player not owner of projectile") 
 
-        self.ExplosionService:SpawnExplosion(player, hitPosition, DEFAULT_RADIUS, DEFAULT_DAMAGE)
+        local munitionData = MunitionData[projectile.MunitionType]
+        self.ExplosionService:SpawnExplosion(player, hitPosition, munitionData.BlastRadius, munitionData.BlastDamage)
     end)
 end
 

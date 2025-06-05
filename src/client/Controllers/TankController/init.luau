@@ -1,3 +1,4 @@
+--!strict
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local Players = game:GetService("Players")
 
@@ -29,8 +30,8 @@ function TankController:GetTankFromPlayer(player)
 end
 
 function TankController:InitTank()
-    self.TankService:RequestTank():andThen(function(tank)
-        self.Tank = ClientTank.new(tank) 
+    self.TankService:RequestTank():andThen(function(tank: Model, type: string)
+        self.Tank = ClientTank.new(tank, type) 
         Knit.GetController("GameUI"):Open()
     end)
 end
@@ -48,7 +49,7 @@ function TankController:AttemptDeploy()
     else
         -- TODO: kick over to the team selector ui
         -- Will call attempt deploy again after selecting team
-        Knit.GetService("TeamService"):RequestAssignTeam():andThen(function(team)
+        Knit.GetService("TeamService"):RequestAssignTeam():andThen(function(_team)
             self:InitTank()
         end):catch(function(err)
             warn("Failed to request team:", err)
