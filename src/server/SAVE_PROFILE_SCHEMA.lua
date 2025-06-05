@@ -1,9 +1,8 @@
-local DataStoreService = game:GetService("DataStoreService")
-
 local DATASCHEMA = {}
 
+DATASCHEMA.Kills = 0;
+DATASCHEMA.Deaths = 0; 
 
-DATASCHEMA.EquippedWeight = nil
+DATASCHEMA.EquippedTank = "Sherman"
 
--- Owned by WeightService
 return DATASCHEMA
