@@ -120,7 +120,7 @@ function DeathmatchGamemodeUI:KnitInit()
 	self.GameLoopService = Knit.GetService("GameLoopService")
     self.DeathmatchGamemodeService = Knit.GetService("DeathmatchGamemodeService")
 
-	local gameGui = Player:WaitForChild("PlayerGui"):WaitForChild"GameGui"
+	local gameGui = game.Players.LocalPlayer.PlayerGui:WaitForChild("GameGui") 
 
 	local GamemodesFrame = gameGui:WaitForChild("Gamemodes")
 	self.Frame = GamemodesFrame:WaitForChild("Deathmatch")

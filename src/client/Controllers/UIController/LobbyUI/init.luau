@@ -21,10 +21,13 @@ function LobbyMainUI:CloseFrame()
     self.Frame.Visible = false
 end
 
-
-function LobbyMainUI:LocalReplicaCreated(replica)
-	self.Replica = replica
+function LobbyMainUI:UpdateCash()
+	local moneyCounter = self.Frame:FindFirstChild("MoneyCounter")
+	moneyCounter.TextLabel.Text = tostring(self.LocalReplica.Data.Currency.Cash)
 end
+
+
+
 
 function LobbyMainUI:KnitInit()
 	self.GameLoopService = Knit.GetService("GameLoopService")
@@ -43,6 +46,15 @@ function LobbyMainUI:KnitStart()
 
 	game.Players.LocalPlayer.CharacterAdded:Connect(function()
 		self:OpenFrame()
+	end)
+
+	Knit.GetController("DataController"):GetReplicaPromise(game.Players.LocalPlayer):andThen(function(replica)
+		self.LocalReplica = replica
+
+		self:UpdateCash()
+		replica:ListenToChange({"Currency", "Cash"}, function()
+			self:UpdateCash()
+		end)
 	end)
 end
 

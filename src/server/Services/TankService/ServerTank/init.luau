@@ -1,5 +1,6 @@
 --!strict
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local TestConfigs = require(ReplicatedStorage.Shared.TEST_CONFIGS)
 local Knit = require(ReplicatedStorage.Packages.Knit)
 local Trove = require(ReplicatedStorage.Packages.Trove)
 local TankData = require(ReplicatedStorage.Shared.Data.TankData)
@@ -100,19 +101,19 @@ end
 
 
 function ServerTank:TakeDamage(damage: number, sender: Player?)
-    local newHealth = self.Model:GetAttribute("Health")-damage
-
-    if newHealth <= 0 then 
-        if self.Alive then
-            Knit.GetService("GameLoopService"):ReportKill(sender, self.Driver)
-        end
-
-        self.Model:SetAttribute("Health", 0)
-        self:Disable()
-        return
+    if TestConfigs.Is("TANK_DMG") then
+        damage = TestConfigs.TANK_DMG
     end
 
-    self.Model:SetAttribute("Health", newHealth)
+    local newHealth = self.Model:GetAttribute("Health")-damage
+    local wasKill = self.Alive and newHealth <= 0
+
+    Knit.GetService("DamageService"):ReportDamage(sender, self.Driver, wasKill)
+    self.Model:SetAttribute("Health", math.max(newHealth, 0))
+
+    if wasKill then
+        self:Disable()
+    end
 end
 
 

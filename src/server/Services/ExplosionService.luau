@@ -13,6 +13,7 @@ local TERRAIN_RADIUS_MOD = 0.1
 
 function ExplosionService:KnitInit()
 	self.TankService = Knit.GetService("TankService")
+	self.DamageService = Knit.GetService("DamageService")
 end
 
 function ExplosionService:DamageTanks(sender: Player, position: Vector3, radius: number, damage: number)
@@ -39,6 +40,7 @@ function ExplosionService:DamageTanks(sender: Player, position: Vector3, radius:
 			continue
 		end
 
+		warn('yeetimus', damage, distance, radius)
 		local scaledDamage = damage * (1 - (distance / radius))
 		tankObject:TakeDamage(scaledDamage, sender)
 	end
