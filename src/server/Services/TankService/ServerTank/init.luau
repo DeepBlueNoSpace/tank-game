@@ -5,6 +5,7 @@ local Knit = require(ReplicatedStorage.Packages.Knit)
 local Trove = require(ReplicatedStorage.Packages.Trove)
 local TankData = require(ReplicatedStorage.Shared.Data.TankData)
 local Types = require(ReplicatedStorage.Shared.Data.Types)
+local HitboxData = require(ReplicatedStorage.Shared.Data.HitboxData)
 
 local TankPrefabs = ReplicatedStorage.Assets.Tanks
 
@@ -17,6 +18,8 @@ function ServerTank.new(driver: Player, tankType: string)
 
     --Variables
     self.TankService = Knit.GetService("TankService")
+    self.DamageService = Knit.GetService("DamageService")
+    
     self.Trove = Trove.new() 
 
     self.Type = tankType :: string 
@@ -29,13 +32,29 @@ function ServerTank.new(driver: Player, tankType: string)
     self.Driver = driver :: Player
     self.Constraints = self.Model:FindFirstChild("Constraints") :: Folder 
 
+    local hitboxModel = self.Model:FindFirstChild('Hitbox'):: Model
+    self.Hitbox = hitboxModel:GetChildren() :: {}
+
     self.Alive = true :: boolean
+
+    self:SetUpAttributes()
+    self:WeldHitbox()
+   
+    self.Model.Parent = workspace:WaitForChild("Tanks")
+
 
     --Set up
     local hrp = self.Character:WaitForChild("HumanoidRootPart") :: BasePart
     self.Model.Name = driver.Name
-    self.Model.Parent = workspace:WaitForChild("Tanks")
     
+    local tankSeat = self.Seat
+    local humanoid = self.Character:FindFirstChild("Humanoid") :: Humanoid
+    tankSeat:Sit(humanoid)
+
+     self.Trove:Add(humanoid.Died:Connect(function() 
+        self:Disable()
+    end))
+
     -- Spawn 5 studs in front of the player
     local spawnCFrame = hrp.CFrame + hrp.CFrame.LookVector * 5
     self.Model:PivotTo(spawnCFrame)
@@ -43,18 +62,33 @@ function ServerTank.new(driver: Player, tankType: string)
     local primaryPart = self.Model.PrimaryPart :: BasePart
     primaryPart:SetNetworkOwner(driver)
 
-    local tankSeat = self.Seat
-    local humanoid = self.Character:FindFirstChild("Humanoid") :: Humanoid
-    tankSeat:Sit(humanoid)
-    
-    self:SetUpAttributes()
-    self.Trove:Add(humanoid.Died:Connect(function() 
-        self:Disable()
-    end))
-
-    task.wait(1)-- let it replicate. this feels risky
-    --TODO: add check here to see if we should still send the tank?
     return self
+end
+
+
+local function weldTo(x: BasePart, y: BasePart)
+	local motor = Instance.new("Motor6D")
+	motor.Name = x.Name .. "_Motor"
+	motor.Part0 = x
+	motor.Part1 = y
+
+	motor.C0 = x.CFrame:ToObjectSpace(y.CFrame)
+	motor.C1 = CFrame.new()
+
+	motor.Parent = x
+end
+
+
+function ServerTank:WeldHitbox()
+    for _, instance in self.Hitbox do 
+        local basePart = instance :: BasePart
+
+        if basePart.Name == "Top" then 
+            weldTo(self.Model.Turret.Rotator, basePart)
+        else
+            weldTo(self.Model.Turret.Base, basePart)
+        end
+    end
 end
 
 --Tank tag is only added once its ready for clients to listen to it
@@ -63,6 +97,7 @@ function ServerTank:SetUpAttributes()
     self.Model:SetAttribute("MaxHealth", self.TankData.Health)
     self.Model:SetAttribute("OwnerName", self.Driver.Name)
 
+    --Should we break this out to round the ServerTank.new() function?
     self.Model:AddTag("Tank")
 end
 
@@ -100,18 +135,24 @@ function ServerTank:Destroy()
 end
 
 
-function ServerTank:TakeDamage(damage: number, sender: Player?)
+function ServerTank:TakeDamage(damage: number, sender: Player?, hitbox: string, isDirectHit: boolean)
     if TestConfigs.Is("TANK_DMG") then
         damage = TestConfigs.TANK_DMG
     end
 
-    local newHealth = self.Model:GetAttribute("Health")-damage
-    local wasKill = self.Alive and newHealth <= 0
+    local hitboxData = HitboxData[hitbox]
+    assert(hitboxData, "No hitbox data found for " .. hitbox)
 
-    Knit.GetService("DamageService"):ReportDamage(sender, self.Driver, wasKill)
+    local adjustedDamage = hitboxData.DamageMultiplier*damage :: number
+    local currentHealth = self.Model:GetAttribute("Health") :: number
+    local newHealth =  currentHealth - adjustedDamage
+
+    local wasKilled = (self.Alive and newHealth <= 0) :: boolean
+
+    self.DamageService:ReportDamage(sender, self.Driver, adjustedDamage, wasKilled, hitbox, isDirectHit)
     self.Model:SetAttribute("Health", math.max(newHealth, 0))
 
-    if wasKill then
+    if wasKilled then
         self:Disable()
     end
 end

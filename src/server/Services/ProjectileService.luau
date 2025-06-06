@@ -36,13 +36,13 @@ function ProjectileService:KnitInit()
         end)
     end)
 
-    self.Client.ProjectileHit:Connect(function(player: Player, projectileId: string, hitPosition: Vector3)
+    self.Client.ProjectileHit:Connect(function(player: Player, projectileId: string, hitPosition: Vector3, hitInstance: BasePart?)
         local projectile = self.LiveProjectiles[projectileId]
         assert(projectile, "Projectile not found")
         assert(projectile.Owner == player, "Player not owner of projectile") 
 
         local munitionData = MunitionData[projectile.MunitionType]
-        self.ExplosionService:SpawnExplosion(player, hitPosition, munitionData.BlastRadius, munitionData.BaseDamage)
+        self.ExplosionService:SpawnExplosion(player, hitPosition, hitInstance, munitionData.BlastRadius, munitionData.BaseDamage)
     end)
 end
 

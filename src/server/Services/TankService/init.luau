@@ -53,7 +53,6 @@ function TankService.Client:RequestTank(player: Player)
         warn("Player does not have a team assigned when requesting a tank:", 
             player.Name, "are you sure this is supposed to happen?")
     end
-    
 
     local tankType = replica.Data.EquippedTank
     local tank = ServerTank.new(player, tankType)

@@ -78,7 +78,6 @@ function TankCamera:ApplyShotImpulse(force: number)
     self.ySpring:Accelerate(force*0.2)
 end
 
-
 function TankCamera:UpdateBarrel(dT: number)
     local maxAngleChange = BARREL_ANG_VELOCITY * dT
 
@@ -87,13 +86,9 @@ function TankCamera:UpdateBarrel(dT: number)
     local rayOrigin = ray.Origin
     local rayDirection = ray.Direction * 1000
 
-    local rayParams = RaycastParams.new()
-    rayParams.FilterDescendantsInstances = {self.Tank}
-    rayParams.FilterType = Enum.RaycastFilterType.Exclude
-
-    local result = workspace:Raycast(rayOrigin, rayDirection, rayParams)
+    local result = workspace:Raycast(rayOrigin, rayDirection, self.Tank.RaycastParamsIgnoreSelf)
     local hitPos = result and result.Position or (rayOrigin + rayDirection)
-
+    
     -- Get turret base position
     local turretBasePos = self.Tank.Turret.Rotator.BarrelConnection.WorldPosition
     local toTarget = (hitPos - turretBasePos).Unit

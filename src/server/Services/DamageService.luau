@@ -18,6 +18,7 @@ local DamageService = Knit.CreateService({
     Client = {
         Killed = Knit.CreateSignal(), -- tells client to show ui fx
         Assisted = Knit.CreateSignal(), -- tells client to show ui fx
+        Damaged = Knit.CreateSignal()
     }
 })
 DamageService.Log = {}
@@ -28,13 +29,13 @@ function DamageService:KnitInit()
     self.CurrencyService = Knit.GetService("CurrencyService")
 end
 
-function DamageService:ReportDamage(sender: Player, receiver: Player, wasKill: boolean)
-    warn("DamageService:ReportDamage", sender.Name, "->", receiver.Name, "wasKill:", wasKill)
-
+function DamageService:ReportDamage(sender: Player, receiver: Player, damage: number, wasKill: boolean, hitbox: string, directHit: boolean?)
     table.insert(DamageService.Log[receiver], {
         Sender = sender,
         Timestamp = os.time(),
     })
+
+    self.Client.Damaged:Fire(sender, damage, hitbox, directHit)
 
     if wasKill then
         -- collect assists
@@ -65,16 +66,18 @@ function DamageService:ReportDamage(sender: Player, receiver: Player, wasKill: b
 
         self.Log[receiver] = {}
         self.GameLoopService:ReportKill(sender, receiver) -- respawning etc
+--[[ TODO
+        else
+            sendHitDataToHit() 
+            ]]
     end
 end
 
 function DamageService:PlayerAdded(player: Player)
-    warn("DamageService TODO: VALIDATE PLAYER REMOVING ACTUALLY WORKS SO THERES NO LEAK :D")
     DamageService.Log[player] = {}
 end
 
 function DamageService:PlayerRemoving(player: Player)
-    warn("WIPING DAMAGE LOG FOR PLAYER", player.Name)
     DamageService.Log[player] = nil
     
 end

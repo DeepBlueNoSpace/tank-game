@@ -37,4 +37,10 @@ export type MunitionData = {
     BlastRadius: number;
     RechargeTime: number,
 }
+
+
+export type HitboxData = {
+    DamageMultiplier: number, 
+    Color: Color3
+}
 return Types 

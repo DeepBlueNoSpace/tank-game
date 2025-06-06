@@ -84,7 +84,7 @@ function Projectile:OnHit(result: RaycastResult)
 
     --Replicate to server
     if self.IsLocal then 
-        self.ProjectileService.ProjectileHit:Fire(self.Id, result.Position)
+        self.ProjectileService.ProjectileHit:Fire(self.Id, result.Position, result.Instance)
     end
 
     --Clean up
@@ -107,7 +107,7 @@ function Projectile:Update(serverTime: number): boolean
     -- Raycast to detect obstacles
     local raycastParams = RaycastParams.new()
     raycastParams.FilterDescendantsInstances = {self.Model} 
-    raycastParams.FilterType = Enum.RaycastFilterType.Blacklist
+    raycastParams.FilterType = Enum.RaycastFilterType.Exclude   
     raycastParams.IgnoreWater = true
 
     local result = workspace:Raycast(currentPosition, direction, raycastParams)

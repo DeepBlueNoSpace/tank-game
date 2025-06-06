@@ -1,3 +1,4 @@
+--!strict
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local CollectionService = game:GetService("CollectionService")
 
@@ -16,19 +17,23 @@ function ExplosionService:KnitInit()
 	self.DamageService = Knit.GetService("DamageService")
 end
 
-function ExplosionService:DamageTanks(sender: Player, position: Vector3, radius: number, damage: number)
-	--Damage tanks
+local SIDE_NORMALS = {
+	Front = Vector3.new(0, 0, -1),
+	Back = Vector3.new(0, 0, 1),
+	Left = Vector3.new(-1, 0, 0),
+	Right = Vector3.new(1, 0, 0),
+	Top = Vector3.new(0, 1, 0),
+	Bottom = Vector3.new(0, -1, 0),
+}
+
+
+function ExplosionService:DamageTanks(sender: Player, position: Vector3, hitInstance: BasePart?, radius: number, damage: number)
 	for _, tank in ipairs(CollectionService:GetTagged("Tank")) do
 		local tankObject = self.TankService:GetTankFromModel(tank)
-		if not tankObject then
-			continue 
-		end
+		if not tankObject then continue end
 
-		local isAlive = tank:GetAttribute("Alive") ::boolean
-		if not isAlive then 
-			continue 
-		end
-		
+		if not tank:GetAttribute("Alive") then continue end
+
 		local primary = tank.PrimaryPart or tank:FindFirstChild("PrimaryPart") or tank:FindFirstChildWhichIsA("BasePart")
 		if not primary then continue end
 
@@ -36,13 +41,42 @@ function ExplosionService:DamageTanks(sender: Player, position: Vector3, radius:
 		if distance > radius then continue end
 
 		local health = tank:GetAttribute("Health")
-		if health <= 0 then
+		if health <= 0 then continue end
+
+		local hitboxFolder = tank:FindFirstChild("Hitbox")
+
+
+		--Determine if direct hit
+		if hitInstance and hitInstance.Parent == tank.Hitbox then 
+			tankObject:TakeDamage(damage, sender, hitInstance.Name, true)
 			continue
 		end
+		--Determine which side the explosion hit
+		local modelCFrame, _ = tank:GetBoundingBox()
+		local toExplosion = (position - modelCFrame.Position).Unit
 
-		warn('yeetimus', damage, distance, radius)
+		local bestPartName = "Unknown"
+		local bestDot = -math.huge
+
+		if hitboxFolder then
+			for _, part in hitboxFolder:GetChildren() do
+				if part:IsA("BasePart") then
+					local sideName = part.Name
+					local baseNormal = SIDE_NORMALS[sideName]
+					if baseNormal then
+						local worldNormal = modelCFrame:VectorToWorldSpace(baseNormal)
+						local dot = worldNormal:Dot(toExplosion)
+						if dot > bestDot then
+							bestDot = dot
+							bestPartName = sideName
+						end
+					end
+				end
+			end
+		end
+
 		local scaledDamage = damage * (1 - (distance / radius))
-		tankObject:TakeDamage(scaledDamage, sender)
+		tankObject:TakeDamage(scaledDamage, sender, bestPartName)
 	end
 end
 
@@ -109,8 +143,9 @@ end
 
 
 
-function ExplosionService:SpawnExplosion(sender: Player, position: Vector3, radius: number, damage: number)
-	self:DamageTanks(sender, position, radius, damage)
+function ExplosionService:SpawnExplosion(sender: Player, position: Vector3, hitInstance: BasePart?, radius: number, damage: number)
+	--Hit isntance could be nil if it exploded when it ran out of range
+	self:DamageTanks(sender, position, hitInstance, radius, damage)
 	self:DamageTerrain(position, radius) 
 	self:DoPhysicsDamage(position, radius)	
 end

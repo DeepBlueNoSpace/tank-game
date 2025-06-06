@@ -3,13 +3,14 @@ local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
 
 local Player = Players.LocalPlayer
-local Assets = ReplicatedStorage.Assets 
-local TankGuiPrefab = Assets.Gui.Tank
+local GuiAssets = ReplicatedStorage.Assets.Gui 
+local TankGuiPrefab = GuiAssets.Tank
 
 local PlayerGui = Player:WaitForChild("PlayerGui")
 
 local Types = require(ReplicatedStorage.Shared.Data.Types)
 local MunitionData = require(ReplicatedStorage.Shared.Data.MunitionData)
+local HitboxData = require(ReplicatedStorage.Shared.Data.HitboxData)
 
 local TankGui = {}
 TankGui.__index = TankGui
@@ -17,7 +18,7 @@ TankGui.__index = TankGui
 function TankGui.new(tank: {})
     local self = setmetatable({}, TankGui)
     self.Tank = tank :: {}
-    
+
     self.Gui = self.Tank.Trove:Add(TankGuiPrefab:Clone()) :: ScreenGui
     self.Aimer = self.Gui.Aimer :: ImageLabel 
     self.HealthFill = self.Gui.Health.Fill :: Frame 
@@ -27,10 +28,6 @@ function TankGui.new(tank: {})
     self.MobileFire = self.Gui:WaitForChild("MobileFire") :: ImageButton
 
     self.Gui.Parent = PlayerGui
-
-    self.Tank.Trove:Add(RunService.Heartbeat:Connect(function()
-        self:Update()
-    end))
 
     self.ThumbstickStart = nil :: ImageLabel?
     self.ThumbstickEnd = nil :: ImageLabel?
@@ -46,6 +43,12 @@ function TankGui.new(tank: {})
             end
         end))
     end
+
+    self:HandleDoingDamage()
+    self.Tank.Trove:Add(RunService.Heartbeat:Connect(function()
+        self:Update()
+    end))
+
     return self
 end
 
@@ -70,6 +73,7 @@ function TankGui:SetUpMobile(touchGui: ScreenGui)
     end)
 end
 
+
 function TankGui:UpdateAimingReticle()
     local barrelEndPosition = self.Tank.Turret.Barrel.BarrelEnd.WorldPosition
     local rayYaw = math.rad(self.Tank.BarrelYaw)
@@ -77,13 +81,10 @@ function TankGui:UpdateAimingReticle()
 
     local direction = CFrame.fromEulerAnglesYXZ(rayPitch, rayYaw, 0).LookVector * 2000
 
-    local raycastParams = RaycastParams.new()
-    raycastParams.FilterDescendantsInstances = {self.Tank}
-    raycastParams.FilterType = Enum.RaycastFilterType.Exclude
-
-    local result = workspace:Raycast(barrelEndPosition, direction, raycastParams)
+    
+    local result = workspace:Raycast(barrelEndPosition, direction, self.Tank.RaycastParamsIgnoreSelf)
     local hitPosition = result and result.Position or (barrelEndPosition + direction)
-
+    
     local camera = workspace.CurrentCamera
     local screenPoint = camera:WorldToViewportPoint(hitPosition)
 
@@ -190,6 +191,22 @@ function TankGui:Update()
     end
 end
 
+function TankGui:HandleDoingDamage()
+    self.Tank.Trove:Add(self.Tank.DamageService.Damaged:Connect(function(damage: number, hitbox: string, directHit: boolean)
+        local hitMessage = string.format("[%s %s]", directHit and "DIRECT" or "INDIRECT", string.upper(hitbox))
+        
+        local damageUI = GuiAssets.Damage:Clone() 
+        damageUI.Side.Text = hitMessage
+        damageUI.Side.TextColor3 = HitboxData[hitbox].Color 
+        damageUI.Value.Text = tostring(math.floor(0.5+damage))
+    
+        damageUI.Parent = self.Gui 
+
+        task.delay(2, function() 
+            damageUI:Destroy()
+        end)
+    end))
+end
 function TankGui:Destroy()
 
 end

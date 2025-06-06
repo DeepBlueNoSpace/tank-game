@@ -3,6 +3,7 @@ local UserInputService = game:GetService("UserInputService")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
 local HttpService = game:GetService("HttpService")
+local CollectionService = game:GetService("CollectionService")
 
 local Player = Players.LocalPlayer
 
@@ -47,7 +48,8 @@ function ClientTank.new(tankModel: Model, type: string)
     self.ProjectileController = Knit.GetController("ProjectileController")
     self.ServerTimeController = Knit.GetController("ServerTimeController")
     self.VFXController = Knit.GetController("VFXController")
-
+    self.DamageService = Knit.GetService("DamageService")
+    
     self.Trove = Trove.new() 
     self.Chassis = self.Trove:Add(Chassis.new(tankModel))
 
@@ -67,7 +69,8 @@ function ClientTank.new(tankModel: Model, type: string)
     self.CurrentRelativeYaw = 0 :: number
     self.Character = character :: Model
     self.Humanoid = self.Character.Humanoid :: Humanoid
-    
+    self.RaycastParamsIgnoreSelf = RaycastParams.new() :: RaycastParams
+
     --State
     self.IsOccupied = false :: boolean
     self.IsJoystickControlled = false :: boolean
@@ -105,6 +108,14 @@ function ClientTank.new(tankModel: Model, type: string)
 
     self.Camera = self.Trove:Add(TankCamera.new(self))
     self.TankGui = self.Trove:Add(TankGui.new(self))
+
+    self.RaycastParamsIgnoreSelf.FilterType = Enum.RaycastFilterType.Exclude
+    self.RaycastParamsIgnoreSelf.FilterDescendantsInstances = CollectionService:GetTagged("RaycastIgnore")
+    self.RaycastParamsIgnoreSelf:AddToFilter{self.Model, Player.Character}
+    
+    self.Trove:Add(CollectionService:GetInstanceAddedSignal("RaycastIgnore"):Connect(function(instance: Instance)
+        self.RaycastParamsIgnoreSelf:AddToFilter{instance}
+    end))
 
     return self 
 end
