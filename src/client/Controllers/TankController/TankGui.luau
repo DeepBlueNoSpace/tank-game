@@ -11,6 +11,7 @@ local PlayerGui = Player:WaitForChild("PlayerGui")
 local Types = require(ReplicatedStorage.Shared.Data.Types)
 local MunitionData = require(ReplicatedStorage.Shared.Data.MunitionData)
 local HitboxData = require(ReplicatedStorage.Shared.Data.HitboxData)
+local HitNeedle = require(script.Parent.HitNeedle)
 
 local TankGui = {}
 TankGui.__index = TankGui
@@ -18,6 +19,7 @@ TankGui.__index = TankGui
 function TankGui.new(tank: {})
     local self = setmetatable({}, TankGui)
     self.Tank = tank :: {}
+    self.HitNeedles = {} :: {[string]:{}}
 
     self.Gui = self.Tank.Trove:Add(TankGuiPrefab:Clone()) :: ScreenGui
     self.Aimer = self.Gui.Aimer :: ImageLabel 
@@ -45,6 +47,7 @@ function TankGui.new(tank: {})
     end
 
     self:HandleDoingDamage()
+    self:HandleReceivingDamage()
     self.Tank.Trove:Add(RunService.Heartbeat:Connect(function()
         self:Update()
     end))
@@ -189,10 +192,17 @@ function TankGui:Update()
     if self.ThumbstickStart and self.ThumbstickEnd then 
         self:ComputeMobileThrottle()
     end
+
+    for playerName, needle in self.HitNeedles do 
+        local removeIndex = needle:Update() 
+        if removeIndex then 
+            self.HitNeedles[playerName] = nil
+        end
+    end
 end
 
 function TankGui:HandleDoingDamage()
-    self.Tank.Trove:Add(self.Tank.DamageService.Damaged:Connect(function(damage: number, hitbox: string, directHit: boolean)
+    self.Tank.Trove:Add(self.Tank.DamageService.DidDamage:Connect(function(damage: number, hitbox: string, directHit: boolean)
         local hitMessage = string.format("[%s %s]", directHit and "DIRECT" or "INDIRECT", string.upper(hitbox))
         
         local damageUI = GuiAssets.Damage:Clone() 
@@ -207,6 +217,29 @@ function TankGui:HandleDoingDamage()
         end)
     end))
 end
+
+function TankGui:HandleReceivingDamage() 
+    self.Tank.Trove:Add(self.Tank.DamageService.TookDamage:Connect(function(playerName: string, damage: number)
+        print'took'
+        local existingNeedle = self.HitNeedles[playerName]
+        if existingNeedle then 
+            existingNeedle:AddDamage(damage)
+            return
+        end
+
+        local attacker = Players[playerName]
+        if not attacker then 
+            return 
+        end
+
+        local needle = HitNeedle.new(attacker, damage)
+        self.HitNeedles[playerName] = needle
+
+        needle.Needle.Parent = self.Gui
+        print'ya'
+    end))
+end
+
 function TankGui:Destroy()
 
 end

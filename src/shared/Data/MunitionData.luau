@@ -18,7 +18,7 @@ MunitionData["Medium"] = {
 
     BaseDamage = 300;
     BlastRadius = 20;
-    RechargeTime = 3;    
+    RechargeTime = .3;    
 }
 
 MunitionData["Light"] = {

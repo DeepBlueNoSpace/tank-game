@@ -18,7 +18,8 @@ local DamageService = Knit.CreateService({
     Client = {
         Killed = Knit.CreateSignal(), -- tells client to show ui fx
         Assisted = Knit.CreateSignal(), -- tells client to show ui fx
-        Damaged = Knit.CreateSignal()
+        DidDamage = Knit.CreateSignal(),
+        TookDamage = Knit.CreateSignal()
     }
 })
 DamageService.Log = {}
@@ -35,8 +36,8 @@ function DamageService:ReportDamage(sender: Player, receiver: Player, damage: nu
         Timestamp = os.time(),
     })
 
-    self.Client.Damaged:Fire(sender, damage, hitbox, directHit)
-
+    self.Client.DidDamage:Fire(sender, damage, hitbox, directHit)
+    self.Client.TookDamage:Fire(receiver, sender.Name, damage)
     if wasKill then
         -- collect assists
         local assists = {}
