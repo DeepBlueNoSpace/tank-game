@@ -4,6 +4,8 @@ local Players = game:GetService("Players")
 local Knit = require(ReplicatedStorage.Packages.Knit)
 local Trove = require(Knit.Packages.Trove)
 
+local Player = Players.LocalPlayer
+
 local DeathmatchGamemodeUI= Knit.CreateController({ Name = "DeathmatchGamemodeUI", Open = false })
 DeathmatchGamemodeUI.Trove = Trove.new()
 DeathmatchGamemodeUI.CachedThumbnails = {}
@@ -118,7 +120,7 @@ function DeathmatchGamemodeUI:KnitInit()
 	self.GameLoopService = Knit.GetService("GameLoopService")
     self.DeathmatchGamemodeService = Knit.GetService("DeathmatchGamemodeService")
 
-	local gameGui = self.UIController.GameGui 
+	local gameGui = Player:WaitForChild("PlayerGui"):WaitForChild"GameGui"
 
 	local GamemodesFrame = gameGui:WaitForChild("Gamemodes")
 	self.Frame = GamemodesFrame:WaitForChild("Deathmatch")
@@ -126,6 +128,7 @@ function DeathmatchGamemodeUI:KnitInit()
 	self.LeaderboardFrame = self.Frame:WaitForChild("Leaderboard")
 
 	self.LeaderboardFrame:WaitForChild("Prefab").Visible = false
+	
 
 end
 

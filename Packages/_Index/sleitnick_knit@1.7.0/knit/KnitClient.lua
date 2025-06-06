@@ -218,8 +218,20 @@ end
 function KnitClient.AddControllersDeep(parent: Instance): { Controller }
 	assert(not started, `Controllers cannot be added after calling "Knit.Start()"`)
 
-	local addedControllers = {}
+		local addedControllers = {}
+
+
+	if parent:FindFirstChild("UIController", true) then 
+		table.insert(addedControllers, require(parent:FindFirstChild("UIController", true)))
+		print'adding uicontroller first'
+	end
+
+
 	for _, v in parent:GetDescendants() do
+		if v.Name == "UIController" then 
+			continue 
+		end
+
 		if not v:IsA("ModuleScript") then
 			continue
 		end

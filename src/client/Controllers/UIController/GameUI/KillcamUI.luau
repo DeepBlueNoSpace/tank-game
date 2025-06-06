@@ -21,7 +21,9 @@ end
 
 function KillcamUI:CloseFrame()
     self.Open = false
-    self.Frame.Visible = false
+    if self.Frame then 
+        self.Frame.Visible = false
+    end
 end
 
 function KillcamUI:LocalReplicaCreated(replica)

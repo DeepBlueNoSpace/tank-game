@@ -57,7 +57,8 @@ function TankService.Client:RequestTank(player: Player)
     local tankType = replica.Data.EquippedTank
     local tank = ServerTank.new(player, tankType)
     TankService.LiveTanks[player] = tank
-
+    
+    task.wait(1)
     return tank.Model, tankType
 end
 
