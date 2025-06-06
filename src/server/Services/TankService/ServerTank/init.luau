@@ -38,7 +38,7 @@ function ServerTank.new(driver: Player, tankType: string)
     self.Alive = true :: boolean
 
     self:SetUpAttributes()
-    self:WeldHitbox()
+    self:SetupHitbox()
    
     self.Model.Parent = workspace:WaitForChild("Tanks")
 
@@ -79,7 +79,19 @@ local function weldTo(x: BasePart, y: BasePart)
 end
 
 
-function ServerTank:WeldHitbox()
+function ServerTank:SetupHitbox()
+    --Make it so it cant collide with itself
+    local parts = table.clone(self.Hitbox)
+    for i = 1, #parts do
+        for j = i + 1, #parts do
+            local noc = Instance.new("NoCollisionConstraint")
+            noc.Part0 = parts[i]
+            noc.Part1 = parts[j]
+            noc.Parent = self.Constraints
+        end
+    end
+
+    --Do welds
     for _, instance in self.Hitbox do 
         local basePart = instance :: BasePart
 
