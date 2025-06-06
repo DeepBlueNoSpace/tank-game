@@ -5,7 +5,7 @@ local Knit = require(ReplicatedStorage.Packages.Knit)
 
 local KillcamUI= Knit.CreateController({ Name = "KillcamUI", Open = false })
 
-function KillcamUI:Open(killer: Player)
+function KillcamUI:OpenFrame(killer: Player)
     self.Open = true
     self.Frame.Visible = true
 
@@ -21,7 +21,9 @@ end
 
 function KillcamUI:CloseFrame()
     self.Open = false
-    self.Frame.Visible = false
+    if self.Frame then
+        self.Frame.Visible = false
+    end
 end
 
 function KillcamUI:LocalReplicaCreated(replica)
@@ -36,12 +38,14 @@ function KillcamUI:KnitInit()
 end
 
 function KillcamUI:KnitStart()
-    self.Frame = self.UIController.GameGui:WaitForChild("KillCam")
+    local gameGui = game.Players.LocalPlayer.PlayerGui:WaitForChild("GameGui") 
+
+    self.Frame = gameGui:WaitForChild("KillCam")
     self.BackgroundFrame = self.Frame:WaitForChild("Background")
 
     self.GameLoopService.PlayerKilled:Connect(function(killer, victim)
         if victim == Players.LocalPlayer then
-            self:Open(killer)
+            self:OpenFrame(killer)
         end
     end)
 end

@@ -42,7 +42,10 @@ function ProjectileService:KnitInit()
         assert(projectile.Owner == player, "Player not owner of projectile") 
 
         local munitionData = MunitionData[projectile.MunitionType]
-        self.ExplosionService:SpawnExplosion(player, hitPosition, munitionData.BlastRadius, munitionData.BlastDamage)
+        
+        -- @NICOLAS MARKHAM
+        -- DID YOU MEAN THIS TO BE "EXPLOSION DAMAGE???"
+        self.ExplosionService:SpawnExplosion(player, hitPosition, munitionData.BlastRadius, munitionData.BaseDamage)
     end)
 end
 
