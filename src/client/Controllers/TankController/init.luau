@@ -24,14 +24,26 @@ function TankController:KnitStart()
     end)
 end
 
-function TankController:GetTankFromPlayer(player)
+function TankController:GetTankFromPlayer(player) : Model?
     if not player then return nil end
-    return workspace:WaitForChild("Tanks"):FindFirstChild(player.Name)
+
+    local tanksFolder = workspace:WaitForChild("Tanks") :: Folder
+    for _, tank in tanksFolder:GetChildren() do 
+        local tankModel = tank :: Model
+        if tankModel:GetAttribute("Alive") and tankModel:GetAttribute("OwnerName") == player.Name then 
+            return tankModel 
+        end
+    end
+
+    return nil
 end
 
 function TankController:InitTank()
-    self.TankService:RequestTank():andThen(function(tank: Model, type: string)
-        self.Tank = ClientTank.new(tank, type) 
+    self.TankService:RequestTank():andThen(function(tankId: string, type: string)
+        local tankModel = workspace:WaitForChild("Tanks"):WaitForChild(tankId, 3) :: Model
+        assert(tankModel, "FUCK FUCK FUCK")
+
+        self.Tank = ClientTank.new(tankModel, type) 
         Knit.GetController("GameUI"):OpenFrame()
     end)
 end

@@ -1,5 +1,6 @@
 --!strict
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local HttpService = game:GetService("HttpService")
 
 local Knit = require(ReplicatedStorage.Packages.Knit)
 local TankService = Knit.CreateService({ Name = "TankService", 
@@ -57,9 +58,11 @@ function TankService.Client:RequestTank(player: Player)
     local tankType = replica.Data.EquippedTank
     local tank = ServerTank.new(player, tankType)
     TankService.LiveTanks[player] = tank
-    
-    task.wait(1)
-    return tank.Model, tankType
+
+    local tankId = HttpService:GenerateGUID() 
+    tank.Model.Name = tankId
+
+    return tankId, tankType
 end
 
 function TankService:DestroyAllTanks()

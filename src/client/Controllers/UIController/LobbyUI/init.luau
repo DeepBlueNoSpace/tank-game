@@ -23,10 +23,8 @@ end
 
 function LobbyMainUI:UpdateCash()
 	local moneyCounter = self.Frame:FindFirstChild("MoneyCounter")
-	moneyCounter.TextLabel.Text = tostring(self.LocalReplica.Data.Currency.Cash)
+	moneyCounter:WaitForChild("TextLabel").Text = tostring(self.LocalReplica.Data.Currency.Cash)
 end
-
-
 
 
 function LobbyMainUI:KnitInit()

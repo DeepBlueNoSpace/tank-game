@@ -38,7 +38,7 @@ function KillcamUI:KnitInit()
 end
 
 function KillcamUI:KnitStart()
-    local gameGui = game.Players.LocalPlayer.PlayerGui:WaitForChild("GameGui") 
+    local gameGui = self.UIController.GameGui
 
     self.Frame = gameGui:WaitForChild("KillCam")
     self.BackgroundFrame = self.Frame:WaitForChild("Background")
