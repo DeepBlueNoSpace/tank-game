@@ -220,7 +220,6 @@ end
 
 function TankGui:HandleReceivingDamage() 
     self.Tank.Trove:Add(self.Tank.DamageService.TookDamage:Connect(function(playerName: string, damage: number)
-        print'took'
         local existingNeedle = self.HitNeedles[playerName]
         if existingNeedle then 
             existingNeedle:AddDamage(damage)

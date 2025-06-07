@@ -23,6 +23,8 @@ function TankService:RemovePlayersTankIndex(player: Player, tankObject: {})
     end
 end
 
+local tankIdGen = 1 
+
 function TankService.Client:RequestTank(player: Player)
     if not player.Character or player.Character.Parent == nil then
         warn("Player does not have a character when requesting a tank:", player)
@@ -54,12 +56,16 @@ function TankService.Client:RequestTank(player: Player)
             player.Name, "are you sure this is supposed to happen?")
     end
 
+
     local tankType = replica.Data.EquippedTank
     local tank = ServerTank.new(player, tankType)
     TankService.LiveTanks[player] = tank
 
-    local tankId = HttpService:GenerateGUID() 
-    tank.Model.Name = tankId
+    local tankId = tankIdGen
+    tank.Model.Name = tostring(tankId)
+    tankIdGen+=1
+    
+    task.wait(1)
 
     return tankId, tankType
 end

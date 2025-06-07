@@ -44,8 +44,17 @@ function ServerTank.new(driver: Player, tankType: string)
 
 
     --Set up
+    -- Spawn 5 studs in front of the player
+    
+
+    local primaryPart = self.Model.PrimaryPart :: BasePart
+    primaryPart:SetNetworkOwner(driver)
+
     local hrp = self.Character:WaitForChild("HumanoidRootPart") :: BasePart
     self.Model.Name = driver.Name
+    
+    local spawnCFrame = hrp.CFrame + hrp.CFrame.LookVector * 5
+    self.Model:PivotTo(spawnCFrame)
     
     local tankSeat = self.Seat
     local humanoid = self.Character:FindFirstChild("Humanoid") :: Humanoid
@@ -55,12 +64,7 @@ function ServerTank.new(driver: Player, tankType: string)
         self:Disable()
     end))
 
-    -- Spawn 5 studs in front of the player
-    local spawnCFrame = hrp.CFrame + hrp.CFrame.LookVector * 5
-    self.Model:PivotTo(spawnCFrame)
-
-    local primaryPart = self.Model.PrimaryPart :: BasePart
-    primaryPart:SetNetworkOwner(driver)
+    
 
     return self
 end
