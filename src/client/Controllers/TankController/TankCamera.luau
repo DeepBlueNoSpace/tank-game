@@ -145,7 +145,6 @@ function TankCamera:Update(dT: number)
 
     local popperPosition = self:GetPopperCamPosition(basePosition, targetCFrame.Position) :: Vector3
     if popperPosition then
-        -- Replace position but keep rotation
         targetCFrame = CFrame.new(popperPosition) * CFrame.fromOrientation(targetCFrame:ToOrientation())
     end
 

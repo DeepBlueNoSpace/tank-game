@@ -98,7 +98,7 @@ function ServerTank:SetupHitbox()
     --Do welds
     for _, instance in self.Hitbox do 
         local basePart = instance :: BasePart
-        basePart.Transparency = 1
+        basePart.Transparency = 0 
         
         if basePart.Name == "Top" then 
             weldTo(self.Model.Turret.Rotator, basePart)

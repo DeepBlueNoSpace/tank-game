@@ -95,6 +95,18 @@ function Projectile:Destroy()
      self.Model:Destroy()
 end
 
+function Projectile:CastRay(currentPosition: Vector3, direction: Vector3, collisionGroup: string) : RaycastResult
+   -- Raycast to detect obstacles
+    local raycastParams = RaycastParams.new()
+    raycastParams.FilterDescendantsInstances = {self.Model} 
+    raycastParams.FilterType = Enum.RaycastFilterType.Exclude   
+    raycastParams.IgnoreWater = true
+    raycastParams.CollisionGroup = collisionGroup
+
+    local result = workspace:Raycast(currentPosition, direction, raycastParams)
+    return result 
+end
+
 function Projectile:Update(serverTime: number): boolean
     --Calculations
     local t = serverTime - self.LastUpdate
@@ -104,14 +116,11 @@ function Projectile:Update(serverTime: number): boolean
     local nextPosition = currentPosition + distanceTravelled
     local direction = nextPosition - currentPosition
 
-    -- Raycast to detect obstacles
-    local raycastParams = RaycastParams.new()
-    raycastParams.FilterDescendantsInstances = {self.Model} 
-    raycastParams.FilterType = Enum.RaycastFilterType.Exclude   
-    raycastParams.IgnoreWater = true
-
-    local result = workspace:Raycast(currentPosition, direction, raycastParams)
-
+    local result = self:CastRay(currentPosition, direction, "TankHitbox")
+    if not result then 
+        self:CastRay(currentPosition, direction, "Default")
+    end
+ 
     if result then
         self:OnHit(result)
         return true
