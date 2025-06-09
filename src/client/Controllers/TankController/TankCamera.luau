@@ -16,11 +16,16 @@ local GAMEPAD_DEAD_ZONE = .1
 local X_SENS_ADJUST = 0.05
 local Y_SENS_ADJUST = -0.05 
 
+local MIN_ZOOM = 0.5
+local MAX_ZOOM = 2
+
 function TankCamera.new(tank: {})
     local self = setmetatable({}, TankCamera)
     self.Tank = tank 
     self.CameraYaw = 0 
     self.CameraPitch = 0
+
+    self.Zoom = 1 
 
     self.zSpring = Spring.new(0, 0, 30,0.5)
     self.ySpring = Spring.new(0, 0, 30,0.5)
@@ -39,6 +44,11 @@ function TankCamera.new(tank: {})
         if inputObject.UserInputType == Enum.UserInputType.MouseMovement then
             self.LastInputDelta  = inputObject.Delta
             return
+        end
+
+        if inputObject.UserInputType == Enum.UserInputType.MouseWheel then
+            local scrollAmount = inputObject.Position.Z/10
+            self.Zoom = math.clamp(self.Zoom+scrollAmount,MIN_ZOOM,MAX_ZOOM)
         end
 
         if inputObject.UserInputType == Enum.UserInputType.Touch then
@@ -103,22 +113,43 @@ function TankCamera:UpdateBarrel(dT: number)
     self.Tank.BarrelPitch = moveToward(self.Tank.BarrelPitch, pitch, maxAngleChange)
 end
 
+local MAX_PITCH = 15 
+local MIN_PITCH = -60
+
+function TankCamera:GetPopperCamPosition(basePosition: Vector3, targetPosition: Vector3): Vector3?
+    local delta = targetPosition-basePosition
+    
+    local result = workspace:Raycast(basePosition, delta, self.Tank.RaycastParamsIgnoreSelf)
+    if not result then 
+        return nil 
+    end
+
+    return result.Position
+end
+
 function TankCamera:Update(dT: number)
     local basePosition = self.Tank.Seat.CameraPostion.WorldPosition
     local xAdjustment = X_SENS_ADJUST * self.LastInputDelta.X 
     local yAdjustment = Y_SENS_ADJUST * self.LastInputDelta.Y 
 
-    self.CameraYaw = self.CameraYaw-xAdjustment
-    self.CameraPitch = self.CameraPitch+yAdjustment
+    self.CameraYaw = self.CameraYaw - xAdjustment
+    self.CameraPitch = math.clamp(self.CameraPitch + yAdjustment, MIN_PITCH, MAX_PITCH)
 
     local ySpringOffset = self.ySpring:Solve(dT)
     local xSpringOffset = self.zSpring:Solve(dT)
 
-    Camera.CFrame = CFrame.new(basePosition) 
-        * CFrame.Angles(0,math.rad(self.CameraYaw),0)
-        * CFrame.Angles(math.rad(self.CameraPitch),0,0)
-        * CFrame.new(0,DEFAULT_Y_OFFSET+ySpringOffset,DEFAULT_Z_OFFSET+xSpringOffset)
+    local targetCFrame = CFrame.new(basePosition) 
+        * CFrame.Angles(0, math.rad(self.CameraYaw), 0)
+        * CFrame.Angles(math.rad(self.CameraPitch), 0, 0)
+        * CFrame.new(0, (DEFAULT_Y_OFFSET * self.Zoom) + ySpringOffset, (DEFAULT_Z_OFFSET * self.Zoom) + xSpringOffset)
 
+    local popperPosition = self:GetPopperCamPosition(basePosition, targetCFrame.Position) :: Vector3
+    if popperPosition then
+        -- Replace position but keep rotation
+        targetCFrame = CFrame.new(popperPosition) * CFrame.fromOrientation(targetCFrame:ToOrientation())
+    end
+
+    Camera.CFrame = targetCFrame
     self.LastInputDelta = Vector2.new()
     self:UpdateBarrel(dT)
 end
