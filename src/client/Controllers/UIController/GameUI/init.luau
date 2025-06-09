@@ -5,6 +5,7 @@ local Knit = require(ReplicatedStorage.Packages.Knit)
 local GameUI= Knit.CreateController({ Name = "GameUI", Open = false })
 
 function GameUI:OpenFrame()
+    game:GetService("StarterGui"):SetCoreGuiEnabled(Enum.CoreGuiType.PlayerList, true)
     local currGamemode = self.GameLoopService.Gamemode:Get()
     if not currGamemode then
         warn("No gamemode set, cannot open UI??")

@@ -26,6 +26,9 @@ export type JoystickThrottle = {
 
 export type TankData = {
     Name: string,
+    Image: string,
+    CurrencyType: string?,
+    Cost: number?,
     Health: number,
 
     Munitions: {[number]: string}

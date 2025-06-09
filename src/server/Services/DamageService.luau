@@ -6,7 +6,9 @@
 --]]
 
 local KILL_CASH_REWARD = 100
+local KILL_XP_REWARD = 100
 local ASSIST_REWARD = 20
+local ASSIST_XP_REWARD = 20
 local ASSIST_WINDOW = 10 -- seconds
 
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
@@ -28,6 +30,7 @@ function DamageService:KnitInit()
 	self.TankService = Knit.GetService("TankService")
     self.GameLoopService = Knit.GetService("GameLoopService")
     self.CurrencyService = Knit.GetService("CurrencyService")
+    self.XPService = Knit.GetService("XPService")
 end
 
 function DamageService:ReportDamage(sender: Player, receiver: Player, damage: number, wasKill: boolean, hitbox: string, directHit: boolean?)
@@ -53,10 +56,12 @@ function DamageService:ReportDamage(sender: Player, receiver: Player, damage: nu
             end
         end
 
-        -- award cash
+        -- award cash + xp
         self.CurrencyService:IncrementCurrency(sender, "Cash", KILL_CASH_REWARD)
+        self.XPService:IncrementXP(sender, KILL_XP_REWARD)
         for assistingPlayer, _ in pairs(assists) do
             self.CurrencyService:IncrementCurrency(assistingPlayer, "Cash", ASSIST_REWARD)
+            self.XPService:IncrementXP(sender, ASSIST_XP_REWARD)
         end
 
         -- send UI updates
