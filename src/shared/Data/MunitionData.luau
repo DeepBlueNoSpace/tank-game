@@ -9,7 +9,7 @@ MunitionData["Heavy"] = {
     Name = "Heavy",
 
     BaseDamage = 500;
-    BlastRadius = 50;
+    BlastRadius = 35;
     RechargeTime = 5;    
 }
 
@@ -17,7 +17,7 @@ MunitionData["Medium"] = {
     Name = "Medium",
 
     BaseDamage = 300;
-    BlastRadius = 20;
+    BlastRadius = 15;
     RechargeTime = 3;    
 }
 

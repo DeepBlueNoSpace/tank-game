@@ -8,13 +8,14 @@ local Knit = require(ReplicatedStorage.Packages.Knit)
 
 local ExplosionService = Knit.CreateService({ Name = "ExplosionService"})
 
-local DEFAULT_PRESSURE = 350
-local PHYSICS_RADIUS_MOD = 0.5
-local TERRAIN_RADIUS_MOD = 0.1 
+local DEFAULT_PRESSURE = 300
+local PHYSICS_RADIUS_MOD = 0.4 
+local TERRAIN_RADIUS_MOD = 0.2
 
 function ExplosionService:KnitInit()
 	self.TankService = Knit.GetService("TankService")
 	self.DamageService = Knit.GetService("DamageService")
+	self.DestructionService = Knit.GetService("DestructionService")
 end
 
 local SIDE_NORMALS = {
@@ -119,16 +120,8 @@ function ExplosionService:DoPhysicsDamage(position: Vector3, radius: number)
 	end
 	parts = filteredParts
 
-	for _, part in ipairs(parts) do
-		for _, constraint in ipairs(part:GetDescendants()) do
-			if constraint:IsA("Weld") or constraint:IsA("WeldConstraint") or constraint:IsA("Motor6D") then
-				constraint:Destroy()
-			end
-		end
-	end
 
 	task.wait()
-
 	for _, part in ipairs(parts) do
 		if part:IsA("BasePart") and not part.Anchored then
 			local direction = (part.Position - position).Unit
@@ -136,9 +129,11 @@ function ExplosionService:DoPhysicsDamage(position: Vector3, radius: number)
 			local falloff = math.clamp(1 - (distance / radius), 0, 1)
 
 			local force = direction * DEFAULT_PRESSURE * falloff
-			part:ApplyImpulse(force * part.AssemblyMass)
+			part:ApplyImpulse(force)
 		end
 	end
+
+	self.DestructionService:DestroyParts(position, radius, DEFAULT_PRESSURE)
 end
 
 
