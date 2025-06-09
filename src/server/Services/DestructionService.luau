@@ -2,8 +2,7 @@
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local CollectionService = game:GetService("CollectionService")
 
-local VoxBreaker = require(ReplicatedStorage.Assets.VoxBreaker)
-
+local VoxBreaker = require(ReplicatedStorage.Shared.Modules.VoxBreaker)
 local Knit = require(ReplicatedStorage.Packages.Knit)
 
 local DestructionService = Knit.CreateService({ Name = "DestructionService", LiveParts = {}})
