@@ -128,7 +128,6 @@ function DeathmatchGamemodeUI:KnitInit()
 	self.LeaderboardFrame = self.Frame:WaitForChild("Leaderboard")
 
 	self.LeaderboardFrame:WaitForChild("Prefab").Visible = false
-	
 
 end
 

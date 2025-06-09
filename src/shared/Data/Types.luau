@@ -46,4 +46,10 @@ export type HitboxData = {
     DamageMultiplier: number, 
     Color: Color3
 }
+
+export type Trove = {
+    Destroy: (...any) -> nil,
+    Add: (...any) -> nil
+}
+
 return Types 

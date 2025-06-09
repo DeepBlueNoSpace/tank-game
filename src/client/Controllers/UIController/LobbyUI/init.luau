@@ -33,7 +33,7 @@ end
 function LobbyMainUI:HookLevelComponent(frame: Frame)
 	local XPUtil = require(Knit.Modules.XPUtil)
 
-	local rankImage = frame:WaitForChild("RankImage")
+	local _rankImage = frame:WaitForChild("RankImage")
 	local levelLabel = frame:WaitForChild("LevelLabel")
 	local barBackground = frame:WaitForChild("BarBackground")
 	local barFill = barBackground:WaitForChild("BarFill")

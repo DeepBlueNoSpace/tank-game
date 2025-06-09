@@ -98,8 +98,8 @@ function ServerTank:SetupHitbox()
     --Do welds
     for _, instance in self.Hitbox do 
         local basePart = instance :: BasePart
-        basePart.Transparency = 0 
-        
+        basePart.Transparency = 1 
+
         if basePart.Name == "Top" then 
             weldTo(self.Model.Turret.Rotator, basePart)
         else
@@ -133,6 +133,7 @@ function ServerTank:Disable(waitTime: number?)
     local actualWaitTime = waitTime or 5 :: number
 
     self.Alive = false
+    self.Model:SetAttribute("Alive", false)
     self.Character:Destroy()
     self.TankService.Client.DestroyClientTank:Fire(self.Driver)
 
@@ -143,7 +144,6 @@ function ServerTank:Disable(waitTime: number?)
 
     task.wait(actualWaitTime*10) -- a long death is cool
     self:Destroy()
-
 end
 
 function ServerTank:Destroy()

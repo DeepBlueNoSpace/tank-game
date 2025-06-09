@@ -118,7 +118,7 @@ function Projectile:Update(serverTime: number): boolean
 
     local result = self:CastRay(currentPosition, direction, "TankHitbox")
     if not result then 
-        self:CastRay(currentPosition, direction, "Default")
+        result = self:CastRay(currentPosition, direction, "Default")
     end
  
     if result then

@@ -43,6 +43,7 @@ function DamageService:ReportDamage(sender: Player, receiver: Player, damage: nu
     self.Client.TookDamage:Fire(receiver, sender.Name, damage)
     if wasKill then
         -- collect assists
+        
         local assists = {}
 
         for i= #DamageService.Log[receiver], 1, -1 do

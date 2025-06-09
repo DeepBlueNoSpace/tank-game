@@ -53,7 +53,7 @@ function DeathmatchGamemode:PlayerAdded(player: Player)
         self.Client.KillLeaderboard:Set(leaderboard)
     end
 
-    self.Trove:Add( player:GetPropertyChangedSignal("Team"):Connect(function()
+    self.Trove:Add(player:GetPropertyChangedSignal("Team"):Connect(function()
         self.Client.KillLeaderboard:Set(self.Client.KillLeaderboard:Get()) -- force update leaderboard on team change, a lil hacky but yolo
     end))
 
