@@ -12,6 +12,7 @@ function TankDisplay:SetTank(tank: string)
         TankDisplay.CurrentTank:Destroy()
     end
 
+    print(tank)
     self.CurrentTank = ReplicatedStorage.Assets.Tanks:FindFirstChild(tank):Clone()
     
 

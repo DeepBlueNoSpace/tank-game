@@ -51,7 +51,7 @@ function ClientTank.new(tankModel: Model, type: string)
     self.DamageService = Knit.GetService("DamageService")
     
     self.Trove = Trove.new() 
-    self.Chassis = self.Trove:Add(Chassis.new(tankModel))
+    self.Chassis = self.Trove:Add(Chassis.new(tankModel, self.TankData.BaseAtrributes))
 
     --Parts
     self.Model = tankModel :: Model

@@ -31,21 +31,17 @@ function ServerTank.new(driver: Player, tankType: string)
     self.Seat = self.Chassis:FindFirstChild("VehicleSeat") :: VehicleSeat
     self.Driver = driver :: Player
     self.Constraints = self.Model:FindFirstChild("Constraints") :: Folder 
-
+    
     local hitboxModel = self.Model:FindFirstChild('Hitbox'):: Model
     self.Hitbox = hitboxModel:GetChildren() :: {}
 
     self.Alive = true :: boolean
 
+    -- Set up
     self:SetUpAttributes()
     self:SetupHitbox()
    
-    self.Model.Parent = workspace:WaitForChild("Tanks")
-
-
-    --Set up
-    -- Spawn 5 studs in front of the player
-    
+    self.Model.Parent = workspace.Tanks
 
     local primaryPart = self.Model.PrimaryPart :: BasePart
     primaryPart:SetNetworkOwner(driver)
@@ -63,8 +59,6 @@ function ServerTank.new(driver: Player, tankType: string)
      self.Trove:Add(humanoid.Died:Connect(function() 
         self:Disable()
     end))
-
-    
 
     return self
 end
@@ -95,23 +89,27 @@ function ServerTank:SetupHitbox()
         end
     end
 
+    local turret = self.Model:FindFirstChild("Turret") :: BasePart
+    local rotator = turret:FindFirstChild("Rotator") :: BasePart
+    local base = turret:FindFirstChild("Base") :: BasePart
+
     --Do welds
     for _, instance in self.Hitbox do 
         local basePart = instance :: BasePart
         basePart.Transparency = 1 
 
         if basePart.Name == "Top" then 
-            weldTo(self.Model.Turret.Rotator, basePart)
+            weldTo(rotator, basePart)
         else
-            weldTo(self.Model.Turret.Base, basePart)
+            weldTo(base, basePart)
         end
     end
 end
 
 --Tank tag is only added once its ready for clients to listen to it
 function ServerTank:SetUpAttributes()
-    self.Model:SetAttribute("Health", self.TankData.Health)
-    self.Model:SetAttribute("MaxHealth", self.TankData.Health)
+    self.Model:SetAttribute("Health", self.TankData.BaseAtrributes.Health)
+    self.Model:SetAttribute("MaxHealth", self.TankData.BaseAtrributes.Health)
     self.Model:SetAttribute("OwnerName", self.Driver.Name)
 
     --Should we break this out to round the ServerTank.new() function?

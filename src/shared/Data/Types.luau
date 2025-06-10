@@ -29,20 +29,19 @@ export type TankData = {
     Image: string,
     CurrencyType: string?,
     Cost: number?,
-    Health: number,
+    BaseAtrributes: TankAttributes,
 
     Munitions: {[number]: string}
 }
 export type TankAttributes = { -- damage etc is in MunitionData
-    Health: number?,
-    Torque: number?,
-    Acceleration: number?,
-    Mass: number?,
-    MaxSpeed: number?,
+    Health: number,
+    Torque: number,
+    Acceleration: number,
+    MaxSpeed: number,
 }
 
 export type TankUpgradeData = {
-    DisplayName: string?,
+    DisplayName: string,
     CurrencyType: string?,
     Cost: number?,
     RequiredLevel: number?,

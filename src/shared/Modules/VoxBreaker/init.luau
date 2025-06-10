@@ -994,7 +994,7 @@ function VoxBreaker:VoxelizePart(Part : Part, MinimumVoxelSize : number, TimeToR
 	return parts
 end
 
-function VoxBreaker:CreateHitbox(Size : Vector3 | string, Cframe : CFrame , Shape : Enum.PartType|MeshPart , MinimumVoxelSize : number , TimeToReset : number, Params : OverlapParams) --Creates one hitbox which divides any applicable parts that are touching it. 
+function VoxBreaker:CreateHitbox(Size : Vector3 | string, Cframe : CFrame , Shape : Enum.PartType|MeshPart? , MinimumVoxelSize : number? , TimeToReset : number?, Params : OverlapParams?) : {BasePart} --Creates one hitbox which divides any applicable parts that are touching it. 
 	--If the TimeToReset parameter is less than 0, then the parts will not reset.
 
 

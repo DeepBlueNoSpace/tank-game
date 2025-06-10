@@ -13,20 +13,12 @@ MunitionData["Heavy"] = {
     RechargeTime = 5;    
 }
 
-MunitionData["Medium"] = {
-    Name = "Medium",
+MunitionData["Heavy"] = {
+    Name = "Heavy",
 
-    BaseDamage = 300;
-    BlastRadius = 15;
-    RechargeTime = 0.1;    
-}
-
-MunitionData["Light"] = {
-    Name = "Light",
-
-    BaseDamage = 200;
-    BlastRadius = 10;
-    RechargeTime = 2;   
+    BaseDamage = 500;
+    BlastRadius = 35;
+    RechargeTime = 5;    
 }
 
 

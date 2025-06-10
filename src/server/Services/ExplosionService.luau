@@ -28,6 +28,53 @@ local SIDE_NORMALS = {
 }
 
 
+local function GetHitSide(tank: Model, hitboxParts: {BasePart}, position: Vector3): string?
+	local modelCFrame, _ = tank:GetBoundingBox()
+	local toExplosion = (position - modelCFrame.Position).Unit
+
+	local bestPartName = nil
+	local bestDot = -math.huge
+
+	for _, part in hitboxParts do
+		if part:IsA("BasePart") then
+			local sideName = part.Name
+			local baseNormal = SIDE_NORMALS[sideName]
+			if baseNormal then
+				local worldNormal = modelCFrame:VectorToWorldSpace(baseNormal)
+				local dot = worldNormal:Dot(toExplosion)
+				if dot > bestDot then
+					bestDot = dot
+					bestPartName = sideName
+				end
+			end
+		end
+	end
+
+	return bestPartName
+end
+
+function ExplosionService:GetHitboxesInLOS(hitboxParts: {BasePart}, tankModel: Model, origin: Vector3): {BasePart}
+	local hitboxesInLOS = {}
+
+	local rayParams = RaycastParams.new()
+	rayParams.FilterType = Enum.RaycastFilterType.Exclude
+	rayParams.FilterDescendantsInstances = {tankModel}
+	rayParams.IgnoreWater = true
+
+	for _, part in ipairs(hitboxParts) do
+		local direction = part.Position - origin
+		local rayResult = workspace:Raycast(origin, direction, rayParams)
+
+		-- if the ray hits nothing or hits the part itself, it's in LOS
+		--it will never hit the part itself as its in a different collision group
+		if not rayResult or rayResult.Instance == nil then
+			table.insert(hitboxesInLOS, part)
+		end
+	end
+
+	return hitboxesInLOS
+end
+
 function ExplosionService:DamageTanks(sender: Player, position: Vector3, hitInstance: BasePart?, radius: number, damage: number)
 	for _, tank in ipairs(CollectionService:GetTagged("Tank")) do
 		local tankObject = self.TankService:GetTankFromModel(tank)
@@ -45,37 +92,18 @@ function ExplosionService:DamageTanks(sender: Player, position: Vector3, hitInst
 		if health <= 0 then continue end
 
 		local hitboxFolder = tank:FindFirstChild("Hitbox")
+		local eligableHitboxParts = self:GetHitboxesInLOS(hitboxFolder:GetChildren(), tankObject.Model, position)
 
+		local bestPartName = GetHitSide(tank, eligableHitboxParts, position)
+		if not bestPartName then 
+			continue 
+		end
 
-		--Determine if direct hit
 		if hitInstance and hitInstance.Parent == tank.Hitbox then 
 			tankObject:TakeDamage(damage, sender, hitInstance.Name, true)
 			continue
 		end
-		--Determine which side the explosion hit
-		local modelCFrame, _ = tank:GetBoundingBox()
-		local toExplosion = (position - modelCFrame.Position).Unit
-
-		local bestPartName = "Unknown"
-		local bestDot = -math.huge
-
-		if hitboxFolder then
-			for _, part in hitboxFolder:GetChildren() do
-				if part:IsA("BasePart") then
-					local sideName = part.Name
-					local baseNormal = SIDE_NORMALS[sideName]
-					if baseNormal then
-						local worldNormal = modelCFrame:VectorToWorldSpace(baseNormal)
-						local dot = worldNormal:Dot(toExplosion)
-						if dot > bestDot then
-							bestDot = dot
-							bestPartName = sideName
-						end
-					end
-				end
-			end
-		end
-
+		
 		local scaledDamage = damage * (1 - (distance / radius))
 		tankObject:TakeDamage(scaledDamage, sender, bestPartName)
 	end

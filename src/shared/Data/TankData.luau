@@ -4,54 +4,147 @@ local Types = require(ReplicatedStorage.Shared.Data.Types)
 
 local TankData = {}
 
-TankData["Sherman"] = {
-    Name = "Sherman",
+TankData["Sherman 1"] = {
+    Name = "Sherman 1",
     Image = "rbxassetid://85716504836651",
     CurrencyType = "Cash",
     Cost = 0,
-    Health = 2000,
+
     Munitions = {
         [1] = "Medium",
         [2] = "Heavy"
+    },
+
+    BaseAtrributes = {
+        Health = 2000,
+        Torque = 200000000, 
+        Acceleration = 8,
+        MaxSpeed = 30,
+        
     }
+
 } :: Types.TankData
 
-TankData["Sherman Blue"] = {
-    Name = "Sherman Blue",
+TankData["Sherman 2"] = {
+    Name = "Sherman 2",
     Image = "rbxassetid://85716504836651",
     CurrencyType = "Cash",
-    Cost = 100,
-    Health = 2000,
+    Cost = 0,
+
     Munitions = {
         [1] = "Medium",
         [2] = "Heavy"
-    }
-}
+    },
 
-TankData["Sherman Red"] = {
-    Name = "Sherman Red",
-    Image = "rbxassetid://85716504836651",
-    CurrencyType = "Cash",
-    Cost = 100,
-    RequiredLevel = 2,
-    Health = 2000,
-    Munitions = {
-        [1] = "Medium",
-        [2] = "Heavy"
+    BaseAtrributes = {
+        Health = 2000,
+        Torque = 200000000, 
+        Acceleration = 8,
+        MaxSpeed = 30
     }
-}
 
-TankData["Panzer"] = {
-    Name = "Panzer",
-    Image = "rbxassetid://85716504836651",
-    CurrencyType = "Cash",
-    Cost = 100,
-    RequiredLevel = 3,
-    Health = 1000,
-    Munitions = {
-        [1] = "Medium",
-        [2] = "Light"
-    }
 } :: Types.TankData
+
+
+TankData["Sherman 3"] = {
+    Name = "Sherman 3",
+    Image = "rbxassetid://85716504836651",
+    CurrencyType = "Cash",
+    Cost = 0,
+
+    Munitions = {
+        [1] = "Medium",
+        [2] = "Heavy"
+    },
+
+    BaseAtrributes = {
+        Health = 2000,
+        Torque = 200000000, 
+        Acceleration = 8,
+        MaxSpeed = 30
+    }
+
+} :: Types.TankData
+
+TankData["Sherman 4"] = {
+    Name = "Sherman 4",
+    Image = "rbxassetid://85716504836651",
+    CurrencyType = "Cash",
+    Cost = 0,
+
+    Munitions = {
+        [1] = "Medium",
+        [2] = "Heavy"
+    },
+
+    BaseAtrributes = {
+        Health = 2000,
+        Torque = 200000000, 
+        Acceleration = 8,
+        MaxSpeed = 30
+    }
+
+} :: Types.TankData
+
+TankData["Sherman 5"] = {
+    Name = "Sherman 5",
+    Image = "rbxassetid://85716504836651",
+    CurrencyType = "Cash",
+    Cost = 0,
+
+    Munitions = {
+        [1] = "Medium",
+        [2] = "Heavy"
+    },
+
+    BaseAtrributes = {
+        Health = 2000,
+        Torque = 200000000, 
+        Acceleration = 8,
+        MaxSpeed = 30
+    }
+
+} :: Types.TankData
+
+TankData["Sherman 6"] = {
+    Name = "Sherman 6",
+    Image = "rbxassetid://85716504836651",
+    CurrencyType = "Cash",
+    Cost = 0,
+
+    Munitions = {
+        [1] = "Medium",
+        [2] = "Heavy"
+    },
+
+    BaseAtrributes = {
+        Health = 2000,
+        Torque = 200000000, 
+        Acceleration = 8,
+        MaxSpeed = 30
+    }
+
+} :: Types.TankData
+
+TankData["Sherman 7"] = {
+    Name = "Sherman 7",
+    Image = "rbxassetid://85716504836651",
+    CurrencyType = "Cash",
+    Cost = 0,
+
+    Munitions = {
+        [1] = "Medium",
+        [2] = "Heavy"
+    },
+
+    BaseAtrributes = {
+        Health = 2000,
+        Torque = 200000000, 
+        Acceleration = 8,
+        MaxSpeed = 30
+    }
+
+} :: Types.TankData
+
 
 return TankData

@@ -87,3 +87,26 @@ for _, entry in ipairs(wheelNames) do
 		oldWheel:Destroy()
 	end
 end
+
+
+
+local function weldTo(x, y)
+
+	local motor = Instance.new("Motor6D")
+	motor.Name = y.Name .. "_Motor"
+	motor.Part0 = x
+	motor.Part1 = y
+
+	-- Create the attachments based on current positions
+	motor.C0 = x.CFrame:ToObjectSpace(y.CFrame)
+	motor.C1 = CFrame.new() -- Assume Part1 is at its origin relative to itself
+
+	motor.Parent = x
+end
+
+local selection = game:GetService("Selection"):Get()
+
+for i = 2, #selection do 
+	local object = selection[i]
+	weldTo(selection[1], object)
+end

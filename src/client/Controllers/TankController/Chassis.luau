@@ -1,5 +1,7 @@
-local Workspace = game:GetService("Workspace")
+--!strict
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
+
+local Types = require(ReplicatedStorage.Shared.Data.Types)
 
 local SoundAssets = ReplicatedStorage.Assets.Sound
 
@@ -38,25 +40,55 @@ local SteerLimit = 0.2 -- Max amount the steering float (-1 to 1) will be limite
 Chassis = {}
 Chassis.__index = Chassis 
 
-function Chassis.new(vehicle) 
-    local self = setmetatable({}, Chassis)
-    self.root = vehicle:FindFirstChild("Chassis") --the root of the Chassis model
-    self.driverSeat = self.root:FindFirstChildOfClass("VehicleSeat")
-    self.constraints = vehicle:WaitForChild("Constraints")
-    self.vehicle = vehicle
-    self.RedressMount = self.root:WaitForChild("RedressMount")
+local REVERSE_SPEED_MULT = 0.5
+local BREAKING_TORQUE_MULT = 10
 
+local function CreateVehicleParameters(tankAttributes: Types.TankAttributes)
+	local parameters = {
+		MaxSpeed = tankAttributes.MaxSpeed/mphConversion,
+		ReverseSpeed = (tankAttributes.MaxSpeed/mphConversion) * REVERSE_SPEED_MULT,
+		AccelerationMax = tankAttributes.Acceleration, 
+		DrivingTorque = tankAttributes.Torque, 
+		BrakingTorque = tankAttributes.Torque * BREAKING_TORQUE_MULT,
+
+		--random crap we dont care about 
+		StrutSpringStiffnessFront = 34000,
+		StrutSpringDampingFront = 1430,
+		StrutSpringStiffnessRear = 32000,
+		StrutSpringDampingRear = 1400,
+		TorsionSpringStiffness = 20000,
+		TorsionSpringDamping = 150,
+		MaxSteer = 0.8,
+		WheelFriction = 2,
+		BaseEngineRPM = 1745
+	}
+
+	print("Acceleration", parameters.AccelerationMax)
+
+	return parameters
+end
+
+function Chassis.new(vehicle: Model, baseAtrributes: Types.TankAttributes) 
+    local self = setmetatable({}, Chassis)
+	self.parameters = CreateVehicleParameters(baseAtrributes)
+
+    self.root = vehicle:FindFirstChild("Chassis") :: BasePart
+    self.driverSeat = self.root:FindFirstChildOfClass("VehicleSeat") :: VehicleSeat
+    self.constraints = vehicle:WaitForChild("Constraints") :: Folder 
+    self.vehicle = vehicle :: Model
+    self.RedressMount = self.root:WaitForChild("RedressMount") :: BasePart
+	self.Motors = {}
 	self.LastFakeRPM = 0 
 
-    self.SteeringPrismatic = self.constraints:FindFirstChild("SteeringPrismatic")
-	self.SteeringPrismatic.UpperLimit = VehicleParameters.MaxSteer
-	self.SteeringPrismatic.LowerLimit = -VehicleParameters.MaxSteer
+    self.SteeringPrismatic = self.constraints:FindFirstChild("SteeringPrismatic") :: PrismaticConstraint
+	self.SteeringPrismatic.UpperLimit = self.parameters.MaxSteer
+	self.SteeringPrismatic.LowerLimit = -self.parameters.MaxSteer
 
-    local randomSuspension = self.root:FindFirstChild("SuspensionFL")
-    local wheelRadius = randomSuspension.Wheel.Size.y/2
-    self.driverSeat.MaxSpeed = VehicleParameters.MaxSpeed * wheelRadius
+    local randomSuspension = self.root:FindFirstChild("SuspensionFL") :: Model
+    local randomWheel = randomSuspension:FindFirstChild("Wheel") :: BasePart
+	local wheelRadius = randomWheel.Size.Y/2 
+    self.driverSeat.MaxSpeed = self.parameters.MaxSpeed * wheelRadius
 
-    self.parameters = VehicleParameters
 	self:InitializeDrivingValues()
 
 	self.StartSound = SoundAssets.TankStart:Clone() :: Sound
@@ -136,15 +168,16 @@ end
 
 function Chassis:setMotorTorqueDamped(torque, velocityDirection, accelDirection)
 	for _, motor in pairs(self.Motors) do
-		if VehicleParameters.MaxSpeed == 0 then 
+		if self.parameters.MaxSpeed == 0 then 
 			motor.MotorMaxTorque = 0
 		else
-			local maxSpeed = VehicleParameters.MaxSpeed
+			local maxSpeed = self.parameters.MaxSpeed
 			if accelDirection < 0 and velocityDirection < 0 then
-				maxSpeed = VehicleParameters.ReverseSpeed
+				maxSpeed = self.parameters.ReverseSpeed
 			end
 			
-			local r = math.abs(self.driverSeat.Velocity.Magnitude / maxSpeed)
+			local speed = self.driverSeat.Velocity.Magnitude :: number
+			local r = math.abs( speed / maxSpeed)
 			motor.MotorMaxTorque = math.exp( -3 * r * r ) * torque * torqueDamping
 		end
 	end
@@ -163,13 +196,13 @@ function Chassis:InitializeDrivingValues()
 	
 	local strutSpringsFront = self:getSprings("StrutFront")
 	local strutSpringsRear = self:getSprings("StrutRear")
-	local torsionSprings = self:getSprings("TorsionBar")
+	local torsionSprings = self:getSprings("TorsionBar") 
 
-	self.RedressMount = self.root:WaitForChild("RedressMount")
+	self.RedressMount = self.root:WaitForChild("RedressMount") :: BasePart
 	
-	self.SteeringPrismatic = self.constraints:FindFirstChild("SteeringPrismatic")
-	self.SteeringPrismatic.UpperLimit = VehicleParameters.MaxSteer
-	self.SteeringPrismatic.LowerLimit = -VehicleParameters.MaxSteer
+	self.SteeringPrismatic = self.constraints:FindFirstChild("SteeringPrismatic") :: PrismaticConstraint
+	self.SteeringPrismatic.UpperLimit = self.parameters.MaxSteer
+	self.SteeringPrismatic.LowerLimit = -self.parameters.MaxSteer
 	
 	for _,s in pairs(strutSpringsFront) do
 		adjustSpring(s, self.parameters.StrutSpringStiffnessFront, self.parameters.StrutSpringDampingFront)
@@ -185,10 +218,10 @@ function Chassis:InitializeDrivingValues()
 	for i = 1, #chassisChildren do
 		local model = chassisChildren[i]
 		if model:IsA("Model") then
-			local wheel = model:FindFirstChild("Wheel")
+			local wheel = model:FindFirstChild("Wheel") :: BasePart
 			if wheel then
 				local old = wheel.CustomPhysicalProperties
-				local new = PhysicalProperties.new(old.Density, VehicleParameters.WheelFriction, old.Elasticity, old.FrictionWeight, old.ElasticityWeight)
+				local new = PhysicalProperties.new(old.Density, self.parameters.WheelFriction, old.Elasticity, old.FrictionWeight, old.ElasticityWeight)
 				wheel.CustomPhysicalProperties = new
 			end
 		end
@@ -234,17 +267,17 @@ function Chassis:EnableHandbrake()
 end
 
 --Set target steering position based on current velocity
-function Chassis:UpdateSteering(steer, currentVel)
-	local maxSteer = VehicleParameters.MaxSteer	
+function Chassis:UpdateSteering(steer:number, currentVel:number)
+	local maxSteer = self.parameters.MaxSteer	
 	if LimitSteerAtHighVel then
-		local c = SteerLimit * (math.abs(currentVel)/VehicleParameters.MaxSpeed) + 1
+		local c = SteerLimit * (math.abs(currentVel)/self.parameters.MaxSpeed) + 1
 		--decrease steer value as speed increases to prevent tipping (handbrake cancels this)
 		steer = steer/c
 	end
 	self.SteeringPrismatic.TargetPosition = steer * steer * steer * maxSteer
 end
 
-local function lerp(v0,v1,t)
+local function lerp(v0: number,v1:number,t:number): number
 	return v0+(v1-v0)*t 
 end
 
@@ -255,34 +288,38 @@ local baseVolume = 0.3
 function Chassis:UpdateThrottle(currentSpeed, throttle)
 	local targetVel = 0
 	
+	print(currentSpeed, ".......", self.parameters.MaxSpeed*mphConversion)
 	local fakeRPM = 0
 	if math.abs(throttle) < 0.1 then
 		-- Idling
-		self:setMotorMaxAcceleration(VehicleParameters.AccelerationMax)
+		self:setMotorMaxAcceleration(self.parameters.AccelerationMax)
 		self:setMotorTorque(self.parameters.BrakingTorque)
 	elseif math.sign(throttle * currentSpeed) > 0 or math.abs(currentSpeed) < 0.5 then
-		self:setMotorMaxAcceleration(VehicleParameters.AccelerationMax)
+		self:setMotorMaxAcceleration(self.parameters.AccelerationMax)
 
 		local velocity = self.driverSeat.Velocity
 		local velocityVector = velocity.Unit
 		local directionalVector = self.driverSeat.CFrame.lookVector
 		local dotProd = velocityVector:Dot(directionalVector) -- Dot product is a measure of how similar two vectors are; if they're facing the same direction, it is 1, if they are facing opposite directions, it is -1, if perpendicular, it is 0
 		
-		self:setMotorTorqueDamped(self.parameters.DrivingTorque * throttle * throttle, dotProd, math.sign(throttle))
+		local torque = self.parameters.DrivingTorque :: number
+		self:setMotorTorqueDamped(torque * throttle * throttle, dotProd, math.sign(throttle))
 
 		local movingBackwards = dotProd < 0
 		local acceleratingBackwards = throttle < 0
 		local useReverse = (movingBackwards and acceleratingBackwards)
 		
-		local maxSpeed = (useReverse and VehicleParameters.ReverseSpeed or VehicleParameters.MaxSpeed)
+		local maxSpeed = (useReverse and self.parameters.ReverseSpeed or self.parameters.MaxSpeed)
 		targetVel = math.sign(throttle) * maxSpeed
 		
 		local normalizedSpeed = math.clamp(currentSpeed / maxSpeed, 0, 1)
 		fakeRPM = 0.3 * normalizedSpeed + 0.7 * math.abs(throttle)
 
 	else
-		self:setMotorMaxAcceleration(VehicleParameters.AccelerationMax*3)
-		self:setMotorTorque(self.parameters.BrakingTorque * throttle * throttle)
+		self:setMotorMaxAcceleration(self.parameters.AccelerationMax*3)
+
+		local torque = self.parameters.BrakingTorque :: number
+		self:setMotorTorque(torque * throttle * throttle)
 		targetVel = math.sign(throttle) * 500
 	end
 

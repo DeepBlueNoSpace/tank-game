@@ -5,9 +5,9 @@ local DATASCHEMA = {}
 DATASCHEMA.Kills = 0
 DATASCHEMA.Deaths = 0;
 
-DATASCHEMA.EquippedTank = "Sherman"
+DATASCHEMA.EquippedTank = "Sherman 1"
 DATASCHEMA.OwnedTanks = {
-    ["Sherman"] = true,
+    ["Sherman 1"] = true,
 }
 
 DATASCHEMA.TankUpgrades = {
