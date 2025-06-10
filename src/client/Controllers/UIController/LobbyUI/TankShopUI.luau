@@ -1,12 +1,20 @@
+--[[
+    TODO: cleanup a bit when implementing real UI
+]]
+
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local Types = require(ReplicatedStorage.Shared.Data.Types)
 local Knit = require(ReplicatedStorage.Packages.Knit)
 
 local TankData = require(Knit.Data.TankData)
 local TankUtil = require(Knit.Modules.TankUtil)
+local UpgradeData = require(Knit.Data.UpgradeData)
 
 local TankShopUI= Knit.CreateController({ Name = "TankShopUI", Open = false })
 TankShopUI.SelectedTank = nil :: string?
+TankShopUI.SelectedUpgrade = nil :: string?
+TankShopUI.SelectedUpgradeType = nil :: string? -- e.g. "Engine", "Armor", "Munition1", "Munition2"
+TankShopUI.Mode = "Tank" -- Tank, Engine, Armor, Munition1, Muntion2
 
 function TankShopUI:OpenFrame()
     self.Open = true
@@ -18,7 +26,7 @@ function TankShopUI:CloseFrame()
     self.Frame.Visible = false
 end
 
-function TankShopUI:RenderTiles(forceSelectTank: string?)
+function TankShopUI:_renderTanks(forceSelectTank: string?)
     -- TODO: add tank types
     local prefab = self.TankScrollingFrame:WaitForChild("Prefab")
     prefab.Visible = false
@@ -48,8 +56,6 @@ function TankShopUI:RenderTiles(forceSelectTank: string?)
         
     end)
 
-    warn("TANK SORT:", tanks)
-
     for i, tankData: Types.TankData in ipairs(tanks) do
         local tile = prefab:Clone()
         tile.LayoutOrder = i
@@ -77,7 +83,78 @@ function TankShopUI:RenderTiles(forceSelectTank: string?)
             self:SelectTank(tankData.Name) -- auto-select equipped tank
         end
     end
+end
+
+function TankShopUI:_renderUpgrades()
+    local selectedTank = self.SelectedTank
+    local selectedUpgrade = self.Mode -- e.g. "Engine", "Armor", "Munition1", "Munition2"
+    local selectedUpgradeType = self.Mode 
+    if selectedUpgradeType == "Munition1" or selectedUpgradeType == "Munition2" then
+        selectedUpgradeType = "Munitions"
+    end
+
+    local prefab = self.TankScrollingFrame:WaitForChild("Prefab")
+    prefab.Visible = false
+
+    -- clear previous tiles
+    for i,v in pairs(self.TankScrollingFrame:GetChildren()) do
+        if v:IsA("GuiObject") and v.Name ~= "Prefab" then
+            v:Destroy()
+        end
+    end
+
+    local upgradeData = UpgradeData[self.LocalReplica.Data.EquippedTank][selectedUpgradeType]
+
+    local upgrades = {}
+    for upgradeName, data: Types.TankUpgradeData in pairs(upgradeData) do
+        table.insert(upgrades, data)
+    end
     
+    table.sort(upgrades, function(a, b)
+        a.RequiredLevel = a.RequiredLevel or 1
+        b.RequiredLevel = b.RequiredLevel or 1
+        if a.RequiredLevel ~= b.RequiredLevel then
+            return a.RequiredLevel < b.RequiredLevel
+        else
+            return (a.Cost or 0) < (b.Cost or 0)
+        end
+    end)
+
+    for i, upgradeData: Types.TankUpgradeData in pairs(upgrades) do
+        warn("ASDF", i, upgradeData)
+        local tile = prefab:Clone()
+        tile.LayoutOrder = i
+        tile.Name = upgradeData.Name
+        
+        tile.ImageLabel.Image = upgradeData.Image or ""
+        tile.TankName.TextLabel.Text = upgradeData.DisplayName
+        tile.MoneyCounter.TextLabel.Text = tostring(upgradeData.Cost)
+
+        local isOwned = TankUtil.IsUpgradeOwned(self.LocalReplica, self.LocalReplica.Data.EquippedTank, selectedUpgradeType, upgradeData.Name)
+        local isEquipped = TankUtil.IsUpgradeEquipped(self.LocalReplica, self.LocalReplica.Data.EquippedTank, selectedUpgrade, upgradeData.Name)
+        
+        tile.MoneyCounter.Visible = not isOwned
+        tile.Equipped.Visible = isEquipped
+        tile.ImageLabel.ImageTransparency = isOwned and 0 or 0.8
+
+        tile.LockedFrame.Visible = not (self.LocalReplica.Data.LevelData.Level >= (upgradeData.RequiredLevel or 1))
+        tile.LockedFrame.TextLabel.Text = "Requires Level " .. (upgradeData.RequiredLevel or 1)
+        
+        tile.Activated:Connect(function()
+            print("CLICKED UPGRADE:", upgradeData.Name)
+        end)
+
+        tile.Visible = true
+        tile.Parent = self.TankScrollingFrame
+    end
+end
+
+function TankShopUI:RenderTiles(forceSelectTank: string?)
+    if self.Mode == "Tank" then
+        self:_renderTanks(forceSelectTank)
+    else
+        self:_renderUpgrades()
+    end
 end
 
 function TankShopUI:SelectTank(tankName: string)
@@ -85,6 +162,10 @@ function TankShopUI:SelectTank(tankName: string)
     self.SelectedTank = tankName
     self.TankDisplay:SetTank(tankName)
     self:UpdateBuyEquipButton()
+end
+
+function TankShopUI:SelectUpgrade(upgradeName: string)
+
 end
 
 function TankShopUI:UpdateBuyEquipButton()
@@ -107,6 +188,19 @@ function TankShopUI:UpdateCash()
     end
 end
 
+function TankShopUI:UpdateEquippedDisplay()
+    local tankData: Types.TankData = TankData[self.LocalReplica.Data.EquippedTank]
+    self.TankButton.ItemNameLabel.TextLabel.Text = self.LocalReplica.Data.EquippedTank
+    self.TankButton.ImageLabel.Image = tankData.Image
+
+    local equippedUpgrades = TankUtil.GetCurrUpgrades(self.LocalReplica)
+
+    self.EngineButton.ItemNameLabel.TextLabel.Text = tostring(equippedUpgrades.Engine)
+    self.ArmorButton.ItemNameLabel.TextLabel.Text = tostring(equippedUpgrades.Armor)
+    self.Munition1Button.ItemNameLabel.TextLabel.Text = tostring(equippedUpgrades.Munition1)
+    self.Munition2Button.ItemNameLabel.TextLabel.Text = tostring(equippedUpgrades.Munition2)
+end
+
 function TankShopUI:KnitInit()
 	self.GameLoopService = Knit.GetService("GameLoopService")
 	self.UIController = Knit.GetController("UIController")
@@ -121,6 +215,13 @@ function TankShopUI:KnitStart()
     self.BackButton = self.Frame:WaitForChild("Back")
     self.TankOptions = self.Frame:WaitForChild("TankOptions")
     self.TankScrollingFrame = self.TankOptions:WaitForChild("TankScrollingFrame")
+
+    self.EquippedDisplay = self.Frame:WaitForChild("EquippedDisplay")
+    self.TankButton = self.EquippedDisplay:WaitForChild("TankButton")
+    self.EngineButton = self.EquippedDisplay:WaitForChild("EngineButton")
+    self.ArmorButton = self.EquippedDisplay:WaitForChild("ArmorButton")
+    self.Munition1Button = self.EquippedDisplay:WaitForChild("Munition1Button")
+    self.Munition2Button = self.EquippedDisplay:WaitForChild("Munition2Button")
 
     self.BackButton.Activated:Connect(function()
         self.UIController:AttemptClose(self)
@@ -158,11 +259,41 @@ function TankShopUI:KnitStart()
         replica:ListenToChange({"EquippedTank"}, function()
             self:RenderTiles()
             self:UpdateBuyEquipButton()
+            self:UpdateEquippedDisplay()
         end)
 
         replica:ListenToChange({"LevelData", "Level"}, function()
             self:RenderTiles()
         end)
+
+
+        self:UpdateEquippedDisplay()
+        replica:ListenToChange({"TankUpgrades", "EquippedUpgrades"}, function()
+            self:UpdateEquippedDisplay()
+        end)
+
+        --- init left side
+
+        local function initLeftButton(button: GuiObject, itemType: string)
+            warn("INIT LEFT BUTTON:", button, itemType)
+            button.Activated:Connect(function()
+                warn("CLICKED:", itemType)
+                self.Mode = itemType
+
+                if itemType ~= "Tank" then
+                    self.SelectedUpgradeType = itemType
+                    self.SelectedUpgrade = nil
+                end
+
+                self:RenderTiles()
+            end)
+        end 
+
+        initLeftButton(self.TankButton, "Tank")
+        initLeftButton(self.EngineButton, "Engine")
+        initLeftButton(self.ArmorButton, "Armor")
+        initLeftButton(self.Munition1Button, "Munition1")
+        initLeftButton(self.Munition2Button, "Munition2")
 	end)
 end
 

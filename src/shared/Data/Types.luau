@@ -33,15 +33,28 @@ export type TankData = {
 
     Munitions: {[number]: string}
 }
+export type TankAttributes = { -- damage etc is in MunitionData
+    Health: number?,
+    Torque: number?,
+    Acceleration: number?,
+    Mass: number?,
+    MaxSpeed: number?,
+}
 
+export type TankUpgradeData = {
+    DisplayName: string?,
+    CurrencyType: string?,
+    Cost: number?,
+    RequiredLevel: number?,
+    Attributes: TankAttributes?,
+    MunitionData: MunitionData,
+}
 export type MunitionData = {
     Name: string,
     BaseDamage: number,
     BlastRadius: number;
     RechargeTime: number,
 }
-
-
 export type HitboxData = {
     DamageMultiplier: number, 
     Color: Color3
