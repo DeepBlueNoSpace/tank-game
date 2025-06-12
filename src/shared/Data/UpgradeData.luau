@@ -55,20 +55,20 @@ local TankUpgradeData = {} :: {
     }
 }
 
-TankUpgradeData["Sherman"] = {
+TankUpgradeData["Sherman 1"] = {
     Engine = {
         Sherman_Engine1 = {
             Name = "Sherman_Engine1",
             DisplayName = "Engine 1",
             CurrencyType = "Cash",
-            Cost = 100,
+            Cost = 5,
             Attributes = PREFAB_ATTRIBUTES.ENGINE.Engine1,
         },
         Sherman_Engine2 = {
             Name = "Sherman_Engine2",
             DisplayName = "Engine 2",
             CurrencyType = "Cash",
-            Cost = 200,
+            Cost = 10,
             Attributes = PREFAB_ATTRIBUTES.ENGINE.Engine2,
         }
     },
@@ -77,14 +77,14 @@ TankUpgradeData["Sherman"] = {
             Name = "Sherman_Armor1",
             DisplayName = "Armor 1",
             CurrencyType = "Cash",
-            Cost = 150,
+            Cost = 10,
             Attributes = PREFAB_ATTRIBUTES.ARMOR.Armor1,
         },
         Sherman_Armor2 = {
             Name = "Sherman_Armor2",
             DisplayName = "Armor 2",
             CurrencyType = "Cash",
-            Cost = 300,
+            Cost = 15,
             Attributes = PREFAB_ATTRIBUTES.ARMOR.Armor2,
         }
     },
@@ -93,14 +93,14 @@ TankUpgradeData["Sherman"] = {
             Name = "Sherman_Medium",
             DisplayName = "Medium",
             CurrencyType = "Cash",
-            Cost = 50,
+            Cost = 20,
             MunitionData = MunitionData["Medium"],
         },
         Sherman_Heavy = {
             Name = "Sherman_Heavy",
             DisplayName = "Heavy",
             CurrencyType = "Cash",
-            Cost = 100,
+            Cost = 30,
             MunitionData = MunitionData["Heavy"],
         },
     },

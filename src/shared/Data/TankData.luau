@@ -29,7 +29,7 @@ TankData["Sherman 2"] = {
     Name = "Sherman 2",
     Image = "rbxassetid://85716504836651",
     CurrencyType = "Cash",
-    Cost = 0,
+    Cost = 1,
 
     Munitions = {
         [1] = "Medium",
@@ -50,7 +50,7 @@ TankData["Sherman 3"] = {
     Name = "Sherman 3",
     Image = "rbxassetid://85716504836651",
     CurrencyType = "Cash",
-    Cost = 0,
+    Cost = 2,
 
     Munitions = {
         [1] = "Medium",
@@ -70,7 +70,7 @@ TankData["Sherman 4"] = {
     Name = "Sherman 4",
     Image = "rbxassetid://85716504836651",
     CurrencyType = "Cash",
-    Cost = 0,
+    Cost = 3,
 
     Munitions = {
         [1] = "Medium",
@@ -90,7 +90,7 @@ TankData["Sherman 5"] = {
     Name = "Sherman 5",
     Image = "rbxassetid://85716504836651",
     CurrencyType = "Cash",
-    Cost = 0,
+    Cost = 4,
 
     Munitions = {
         [1] = "Medium",
@@ -110,7 +110,7 @@ TankData["Sherman 6"] = {
     Name = "Sherman 6",
     Image = "rbxassetid://85716504836651",
     CurrencyType = "Cash",
-    Cost = 0,
+    Cost = 5,
 
     Munitions = {
         [1] = "Medium",
@@ -130,7 +130,7 @@ TankData["Sherman 7"] = {
     Name = "Sherman 7",
     Image = "rbxassetid://85716504836651",
     CurrencyType = "Cash",
-    Cost = 0,
+    Cost = 6,
 
     Munitions = {
         [1] = "Medium",

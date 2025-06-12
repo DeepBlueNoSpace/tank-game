@@ -1,3 +1,9 @@
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local Knit = require(ReplicatedStorage.Packages.Knit)
+
+local UpgradeData = require(Knit.Data.UpgradeData)
+
+
 local TankUtil = {}
 
 function TankUtil.OwnsTank(replica, tankName)
@@ -23,7 +29,15 @@ function TankUtil.GetCurrUpgrades(replica)
 end
 
 function TankUtil.IsUpgradeOwned(replica, tankName, upgradeType, upgradeName)
+    if upgradeType == "Munition1" or upgradeType == "Munition2" then
+        upgradeType = "Munitions"
+    end
+    
     if not replica.Data.TankUpgrades.OwnedUpgrades[tankName] then
+        return false
+    end
+
+    if not replica.Data.TankUpgrades.OwnedUpgrades[tankName][upgradeType] then
         return false
     end
 
@@ -36,6 +50,30 @@ function TankUtil.IsUpgradeEquipped(replica, tankName, upgradeType, upgradeName)
     end
 
     return replica.Data.TankUpgrades.EquippedUpgrades[tankName][upgradeType] == upgradeName
+end
+
+function TankUtil.GetUpgradeData(tankName, upgradeType, upgradeName)
+    if upgradeType == "Munition1" or upgradeType == "Munition2" then
+        upgradeType = "Munitions"
+    end
+
+    local data = UpgradeData[tankName]
+    if not data then
+        return nil
+    end
+
+
+    data = data[upgradeType]
+    if not data then
+        return nil
+    end
+
+    data = data[upgradeName]
+    if not data then
+        return nil
+    end
+
+    return data
 end
 
 return TankUtil

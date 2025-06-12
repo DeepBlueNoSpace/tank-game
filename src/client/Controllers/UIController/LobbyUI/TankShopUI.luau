@@ -16,6 +16,8 @@ TankShopUI.SelectedUpgrade = nil :: string?
 TankShopUI.SelectedUpgradeType = nil :: string? -- e.g. "Engine", "Armor", "Munition1", "Munition2"
 TankShopUI.Mode = "Tank" -- Tank, Engine, Armor, Munition1, Muntion2
 
+TankShopUI._buyButtonConnection = nil :: RBXScriptConnection?
+
 function TankShopUI:OpenFrame()
     self.Open = true
     self.Frame.Visible = true
@@ -103,10 +105,12 @@ function TankShopUI:_renderUpgrades()
         end
     end
 
-    local upgradeData = UpgradeData[self.LocalReplica.Data.EquippedTank][selectedUpgradeType]
+    --local upgradeData = UpgradeData[self.LocalReplica.Data.EquippedTank][selectedUpgradeType]
+    local availableUpgrades = UpgradeData[selectedTank] or {}
+    availableUpgrades = availableUpgrades[selectedUpgradeType] or {}
 
     local upgrades = {}
-    for upgradeName, data: Types.TankUpgradeData in pairs(upgradeData) do
+    for upgradeName, data: Types.TankUpgradeData in pairs(availableUpgrades) do
         table.insert(upgrades, data)
     end
     
@@ -141,7 +145,7 @@ function TankShopUI:_renderUpgrades()
         tile.LockedFrame.TextLabel.Text = "Requires Level " .. (upgradeData.RequiredLevel or 1)
         
         tile.Activated:Connect(function()
-            print("CLICKED UPGRADE:", upgradeData.Name)
+            self:SelectUpgrade(upgradeData.Name)
         end)
 
         tile.Visible = true
@@ -165,19 +169,62 @@ function TankShopUI:SelectTank(tankName: string)
 end
 
 function TankShopUI:SelectUpgrade(upgradeName: string)
-
+    self.SelectedUpgrade = upgradeName
+    self:UpdateBuyEquipButton()
 end
 
 function TankShopUI:UpdateBuyEquipButton()
-    local data: Types.TankData = TankData[self.SelectedTank]
+    if self._buyButtonConnection then
+        self._buyButtonConnection:Disconnect()
+    end
 
-    local meetsLevelReq = self.LocalReplica.Data.LevelData.Level >= (data.RequiredLevel or 1)
-    self.BuyEquipButton.Visible = (self.LocalReplica.Data.EquippedTank ~= self.SelectedTank) and (meetsLevelReq) -- hide buy button if tank is already equipped or if level requirement is not met
+    if self.Mode == "Tank" then
+        local data: Types.TankData = TankData[self.SelectedTank]
 
-    if TankUtil.OwnsTank(self.LocalReplica, self.SelectedTank) then
-        self.BuyEquipButton.TextLabel.Text = "Equip"
+        local meetsLevelReq = self.LocalReplica.Data.LevelData.Level >= (data.RequiredLevel or 1)
+        self.BuyEquipButton.Visible = (self.LocalReplica.Data.EquippedTank ~= self.SelectedTank) and (meetsLevelReq) -- hide buy button if tank is already equipped or if level requirement is not met
+
+        if TankUtil.OwnsTank(self.LocalReplica, self.SelectedTank) then
+            self.BuyEquipButton.TextLabel.Text = "Equip"
+            self._buyButtonConnection = self.BuyEquipButton.Activated:Connect(function()
+                self.TankShopService:RequestEquipTank(self.SelectedTank)
+            end)
+        else
+            self.BuyEquipButton.TextLabel.Text = "Buy"
+            self._buyButtonConnection = self.BuyEquipButton.Activated:Connect(function()
+                self.TankShopService:RequestBuyTank(self.SelectedTank)
+            end)
+        end
     else
-        self.BuyEquipButton.TextLabel.Text = "Buy"
+        local upgradeType = self.Mode
+        if upgradeType == "Munition1" or upgradeType == "Munition2" then
+            upgradeType = "Munitions"
+        end
+        local selectedTank  = self.SelectedTank
+        local selectedUpgrade = self.SelectedUpgrade
+
+        local upgradeData: Types.TankUpgradeData = TankUtil.GetUpgradeData(selectedTank, upgradeType, selectedUpgrade)
+        local isOwned = TankUtil.IsUpgradeOwned(self.LocalReplica, selectedTank, upgradeType, selectedUpgrade)
+        local isEquipped = TankUtil.IsUpgradeEquipped(self.LocalReplica, selectedTank, upgradeType, selectedUpgrade)
+        local meetsLevelReq = self.LocalReplica.Data.LevelData.Level >= (upgradeData.RequiredLevel or 1)
+
+        self.BuyEquipButton.Visible = meetsLevelReq
+
+        if isOwned then
+            if isEquipped then
+                self.BuyEquipButton.TextLabel.Text = "Unequip"
+            else
+                self.BuyEquipButton.TextLabel.Text = "Equip"
+            end
+            self._buyButtonConnection = self.BuyEquipButton.Activated:Connect(function()
+                self.UpgradeService:RequestEquipUpgrade(selectedTank, self.Mode, selectedUpgrade, not isEquipped) -- pass in mode to keep granularity of Munition1, Munition2
+            end)
+        else
+            self.BuyEquipButton.TextLabel.Text = "Buy"
+            self._buyButtonConnection = self.BuyEquipButton.Activated:Connect(function()
+                self.UpgradeService:RequestBuyUpgrade(selectedTank, upgradeType, selectedUpgrade)
+            end)
+        end
     end
 end
 
@@ -207,6 +254,7 @@ function TankShopUI:KnitInit()
     self.TankDisplay = Knit.GetController("TankDisplay")
 
     self.TankShopService = Knit.GetService("TankShopService")
+    self.UpgradeService = Knit.GetService("UpgradeService")
 end
 
 function TankShopUI:KnitStart()
@@ -228,20 +276,7 @@ function TankShopUI:KnitStart()
         Knit.GetController("LobbyMainUI"):OpenFrame()
     end)
 
-    self.BuyEquipButton.Activated:Connect(function()
-        if self.SelectedTank == nil then
-            warn("No tank selected!")
-            return
-        end
-        
-        if TankUtil.OwnsTank(self.LocalReplica, self.SelectedTank) then
-            -- Equip the tank
-            self.TankShopService:RequestEquipTank(self.SelectedTank)
-        else
-            -- Buy the tank
-            self.TankShopService:RequestBuyTank(self.SelectedTank)
-        end
-    end)
+    
 
 	Knit.GetController("DataController"):GetReplicaPromise(game.Players.LocalPlayer):andThen(function(replica)
 		self.LocalReplica = replica
@@ -270,6 +305,12 @@ function TankShopUI:KnitStart()
         self:UpdateEquippedDisplay()
         replica:ListenToChange({"TankUpgrades", "EquippedUpgrades"}, function()
             self:UpdateEquippedDisplay()
+            self:RenderTiles()
+        end)
+
+        replica:ListenToChange({"TankUpgrades", "OwnedUpgrades"}, function()
+            self:UpdateEquippedDisplay()
+            self:RenderTiles()
         end)
 
         --- init left side
