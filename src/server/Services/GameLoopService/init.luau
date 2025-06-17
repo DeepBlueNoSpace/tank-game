@@ -1,3 +1,4 @@
+--!strict
 local ROUND_TIME = 60 * 10
 
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
@@ -65,10 +66,41 @@ function GameLoopService:ReportKill(killer: Player, victim: Player)
     self.Client.PlayerKilled:FireAll(killer, victim)
 end
 
+local function makeCharacterInvisible(character)
+	for _, descendant in ipairs(character:GetDescendants()) do
+		if descendant:IsA("BasePart") then
+			descendant.Transparency = 1
+			descendant.CanCollide = false
+		elseif descendant:IsA("Decal") or descendant:IsA("Texture") or descendant:IsA("SpecialMesh") or descendant:IsA("MeshPart") then
+			descendant.Transparency = 1
+		elseif descendant:IsA("Accessory") then
+			local handle = descendant:FindFirstChild("Handle")
+			if handle and handle:IsA("BasePart") then
+				handle.Transparency = 1
+				handle.CanCollide = false
+				for _, child in ipairs(handle:GetDescendants()) do
+					if child:IsA("Decal") or child:IsA("Texture") then
+						child.Transparency = 1
+					end
+				end
+			end
+		elseif descendant:IsA("Shirt") or descendant:IsA("Pants") or descendant:IsA("ShirtGraphic") then
+			descendant:Destroy()
+		end
+	end
+end
+
 function GameLoopService:PlayerAdded(player)
     player.CharacterAdded:Connect(function(character)
         local humanoid = character:WaitForChild("Humanoid")
         humanoid.WalkSpeed = 0
+
+        makeCharacterInvisible(character)
+
+        local ff = character:FindFirstChildOfClass("ForceField")
+		if ff then
+			ff:Destroy()
+		end
     end)
 end
 
