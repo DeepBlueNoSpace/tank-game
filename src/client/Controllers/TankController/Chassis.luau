@@ -10,6 +10,7 @@ local mphConversion = 0.6263 -- using a 28cm = 1stud conversion rate
 local torqueDamping = 0.6
 
 --[[ Chassis Variables ]]--
+--[[
 local VehicleParameters = { -- These are default values in the case the package structure is broken
 	MaxSpeed = 40/mphConversion,
 	ReverseSpeed = 20/mphConversion,
@@ -26,7 +27,7 @@ local VehicleParameters = { -- These are default values in the case the package 
 	WheelFriction = 2,
 	BaseEngineRPM = 1745
 }
-
+]]
 
 local Chassis = nil
 local LimitSteerAtHighVel = true
@@ -62,8 +63,6 @@ local function CreateVehicleParameters(tankAttributes: Types.TankAttributes)
 		WheelFriction = 2,
 		BaseEngineRPM = 1745
 	}
-
-	print("Acceleration", parameters.AccelerationMax)
 
 	return parameters
 end
@@ -288,7 +287,6 @@ local baseVolume = 0.3
 function Chassis:UpdateThrottle(currentSpeed, throttle)
 	local targetVel = 0
 	
-	print(currentSpeed, ".......", self.parameters.MaxSpeed*mphConversion)
 	local fakeRPM = 0
 	if math.abs(throttle) < 0.1 then
 		-- Idling
