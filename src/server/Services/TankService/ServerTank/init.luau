@@ -6,6 +6,7 @@ local Trove = require(ReplicatedStorage.Packages.Trove)
 local TankData = require(ReplicatedStorage.Shared.Data.TankData)
 local Types = require(ReplicatedStorage.Shared.Data.Types)
 local HitboxData = require(ReplicatedStorage.Shared.Data.HitboxData)
+local TankUtil = require(Knit.Modules.TankUtil)
 
 local TankPrefabs = ReplicatedStorage.Assets.Tanks
 
@@ -25,6 +26,7 @@ function ServerTank.new(driver: Player, tankType: string)
     self.Type = tankType :: string 
 
     self.TankData = TankData[self.Type] :: Types.TankData
+    self.Attributes = {} :: Types.TankAttributes
     self.Character = driver.Character :: Model
     self.Model = self.Trove:Add(TankPrefabs[tankType]:Clone()) :: Model
     self.Chassis = self.Model:FindFirstChild("Chassis") :: Model 
@@ -62,7 +64,6 @@ function ServerTank.new(driver: Player, tankType: string)
 
     return self
 end
-
 
 local function weldTo(x: BasePart, y: BasePart)
 	local motor = Instance.new("Motor6D")
@@ -106,10 +107,58 @@ function ServerTank:SetupHitbox()
     end
 end
 
+function ServerTank:PullUpgrades()
+    warn("PULLING UPGRADES")
+
+    for i,v in pairs(self.TankData.BaseAtrributes) do
+        self.Attributes[i] = v
+    end
+
+    local replica = Knit.GetService("DataService"):GetReplica(self.Driver)
+    if not replica then
+        warn("No replica found for driver: " .. self.Driver.Name)
+        return
+    end
+
+
+    local engineData : Types.TankUpgradeData? = TankUtil.GetUpgradeData(self.Type, "Engine", TankUtil.GetEquippedUpgrade(replica, self.Type, "Engine"))
+    local armorData : Types.TankUpgradeData? = TankUtil.GetUpgradeData(self.Type, "Armor", TankUtil.GetEquippedUpgrade(replica, self.Type, "Armor"))
+    local munition1Data : Types.TankUpgradeData? = TankUtil.GetUpgradeData(self.Type, "Munition1", TankUtil.GetEquippedUpgrade(replica, self.Type, "Munition1"))
+    local munition2Data : Types.TankUpgradeData? = TankUtil.GetUpgradeData(self.Type, "Munition2", TankUtil.GetEquippedUpgrade(replica, self.Type, "Munition2"))
+
+    local function sumUpgradeAttributes(upgradeData: Types.TankUpgradeData?)
+        if not upgradeData then
+            return
+        end
+
+        if not upgradeData.Attributes then
+            warn("No attributes found for upgrade: " .. upgradeData.Name)
+            return
+        end
+
+        for name, val in pairs(upgradeData.Attributes) do
+            self.Attributes[name] = (self.Attributes[name] or 0) + val
+        end
+    end
+
+    sumUpgradeAttributes(engineData)
+    sumUpgradeAttributes(armorData)
+
+    warn(engineData, armorData)
+
+    -- muntions handled slightly differently --- TBD....
+    --sumUpgradeAttributes(munition1Data)
+    --sumUpgradeAttributes(munition2Data)
+
+    warn("FINAL ATTRIBUTES FOR TANK: " .. self.Type, self.Attributes)
+end
+
 --Tank tag is only added once its ready for clients to listen to it
 function ServerTank:SetUpAttributes()
-    self.Model:SetAttribute("Health", self.TankData.BaseAtrributes.Health)
-    self.Model:SetAttribute("MaxHealth", self.TankData.BaseAtrributes.Health)
+    self:PullUpgrades()
+
+    self.Model:SetAttribute("Health", self.Attributes.Health)
+    self.Model:SetAttribute("MaxHealth", self.Attributes.Health)
     self.Model:SetAttribute("OwnerName", self.Driver.Name)
 
     --Should we break this out to round the ServerTank.new() function?

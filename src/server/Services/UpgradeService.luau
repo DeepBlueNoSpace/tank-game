@@ -24,7 +24,7 @@ function UpgradeService:EquipUpgrade(player: Player, tank: string, upgradeType: 
         return
     end
 
-    if not TankUtil.IsUpgradeOwned(replica, tank, upgradeType, upgradeName) then
+    if not TankUtil.IsUpgradeOwned(replica, tank, upgradeName) then
         warn("UpgradeService:EquipUpgrade - Upgrade NOT owned:", tank, upgradeType, upgradeName)
         return
     end
@@ -50,8 +50,8 @@ function UpgradeService.Client:RequestBuyUpgrade(player: Player, tank: string, u
         return
     end
 
-    if TankUtil.IsUpgradeOwned(replica, tank, upgradeType, upgradeName) then
-        warn("UpgradeService:RequestBuyUpgrade - Upgrade already owned:", tank, upgradeType, upgradeName)
+    if TankUtil.IsUpgradeOwned(replica, tank, upgradeName) then
+        warn("UpgradeService:RequestBuyUpgrade - Upgrade already owned:", tank, upgradeName)
         return
     end
 
@@ -63,8 +63,7 @@ function UpgradeService.Client:RequestBuyUpgrade(player: Player, tank: string, u
 
     local ownedUpgrades = replica.Data.TankUpgrades.OwnedUpgrades
     ownedUpgrades[tank] = ownedUpgrades[tank] or {}
-    ownedUpgrades[tank][upgradeType] = ownedUpgrades[tank][upgradeType] or {}
-    ownedUpgrades[tank][upgradeType][upgradeName] = true
+    ownedUpgrades[tank][upgradeName] = true
     replica:SetValue({"TankUpgrades", "OwnedUpgrades"}, ownedUpgrades)
 end
 

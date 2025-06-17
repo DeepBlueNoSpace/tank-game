@@ -134,10 +134,10 @@ function TankShopUI:_renderUpgrades()
         tile.TankName.TextLabel.Text = upgradeData.DisplayName
         tile.MoneyCounter.TextLabel.Text = tostring(upgradeData.Cost)
 
-        local isOwned = TankUtil.IsUpgradeOwned(self.LocalReplica, self.LocalReplica.Data.EquippedTank, selectedUpgradeType, upgradeData.Name)
+        local isOwned = TankUtil.IsUpgradeOwned(self.LocalReplica, self.LocalReplica.Data.EquippedTank, upgradeData.Name)
         local isEquipped = TankUtil.IsUpgradeEquipped(self.LocalReplica, self.LocalReplica.Data.EquippedTank, selectedUpgrade, upgradeData.Name)
         
-        tile.MoneyCounter.Visible = not isOwned
+        tile.MoneyCounter.Visible = not isOwned and not isEquipped
         tile.Equipped.Visible = isEquipped
         tile.ImageLabel.ImageTransparency = isOwned and 0 or 0.8
 
@@ -197,14 +197,11 @@ function TankShopUI:UpdateBuyEquipButton()
         end
     else
         local upgradeType = self.Mode
-        if upgradeType == "Munition1" or upgradeType == "Munition2" then
-            upgradeType = "Munitions"
-        end
         local selectedTank  = self.SelectedTank
         local selectedUpgrade = self.SelectedUpgrade
 
         local upgradeData: Types.TankUpgradeData = TankUtil.GetUpgradeData(selectedTank, upgradeType, selectedUpgrade)
-        local isOwned = TankUtil.IsUpgradeOwned(self.LocalReplica, selectedTank, upgradeType, selectedUpgrade)
+        local isOwned = TankUtil.IsUpgradeOwned(self.LocalReplica, selectedTank, selectedUpgrade)
         local isEquipped = TankUtil.IsUpgradeEquipped(self.LocalReplica, selectedTank, upgradeType, selectedUpgrade)
         local meetsLevelReq = self.LocalReplica.Data.LevelData.Level >= (upgradeData.RequiredLevel or 1)
 
