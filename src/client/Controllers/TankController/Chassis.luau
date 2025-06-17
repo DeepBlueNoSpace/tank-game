@@ -288,7 +288,7 @@ local baseVolume = 0.3
 function Chassis:UpdateThrottle(currentSpeed, throttle)
 	local targetVel = 0
 	
-	print(currentSpeed, ".......", self.parameters.MaxSpeed*mphConversion)
+	--print(currentSpeed, ".......", self.parameters.MaxSpeed*mphConversion)
 	local fakeRPM = 0
 	if math.abs(throttle) < 0.1 then
 		-- Idling
