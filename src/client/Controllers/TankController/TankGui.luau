@@ -9,7 +9,6 @@ local TankGuiPrefab = GuiAssets.Tank
 local PlayerGui = Player:WaitForChild("PlayerGui")
 
 local Types = require(ReplicatedStorage.Shared.Data.Types)
-local MunitionData = require(ReplicatedStorage.Shared.Data.MunitionData)
 local HitboxData = require(ReplicatedStorage.Shared.Data.HitboxData)
 local HitNeedle = require(script.Parent.HitNeedle)
 
@@ -26,7 +25,6 @@ function TankGui.new(tank: {})
     self.HealthFill = self.Gui.Health.Fill :: Frame 
     self.HealthValue = self.Gui.Health.Value :: TextLabel 
     self.MunitionsFrame = self.Gui.Munitions :: Frame 
-    self.MunitionSlots = self:SetUpMunitionsSlots()
     self.MobileFire = self.Gui:WaitForChild("MobileFire") :: ImageButton
 
     self.Gui.Parent = PlayerGui
@@ -104,56 +102,6 @@ function TankGui:UpdateHealthBar()
     self.HealthValue.Text = string.format("%s/%s HP", tostring(math.floor(0.5+health)), maxHealth)
 end
 
-type MunitionSlot = {
-    Frame: Frame, 
-    MunitionData: Types.MunitionData
-}
-
-function TankGui:UpdateMunitionsSlots()
-    for sort, munitionSlot in self.MunitionSlots do 
-        if sort == self.Tank.EquippedMunitionSlot then  
-            munitionSlot.Frame.BackgroundTransparency = 0.3
-            munitionSlot.Frame.Fill.Visible = true 
-
-            local timeDelta = (tick() - self.Tank.LastShotTime) / munitionSlot.MunitionData.RechargeTime
-            if timeDelta > 1 then 
-                munitionSlot.Frame.Fill.Size = UDim2.fromScale(1,1)
-                munitionSlot.Frame.Transparency = 0
-            else
-                munitionSlot.Frame.Fill.Size = UDim2.fromScale(timeDelta,1)
-                munitionSlot.Frame.Transparency = 0.5
-            end
-        else
-            munitionSlot.Frame.BackgroundTransparency = 0.8
-            munitionSlot.Frame.Fill.Visible = false
-        end
-    end
-end
-
-function TankGui:SetUpMunitionsSlots()
-   local prefab = self.MunitionsFrame.MunitionsPrefab:Clone() 
-
-   local slots = {} :: {[number]: MunitionSlot}
-
-   for slotNumber: number, munitionName in self.Tank.TankData.Munitions do 
-        local munitionData = MunitionData[munitionName] :: Types.MunitionData
-
-        local slot = prefab:Clone() 
-        slot.Parent = self.MunitionsFrame 
-        slot.Value.Text = munitionData.Name
-        slot.LayoutOrder = slotNumber
-
-        slots[slotNumber] = {
-            Frame = slot, 
-            MunitionData = munitionData
-        }
-
-        slot.Visible = true
-   end
-
-   return slots
-end
-
 local zScaling = 100 -- TODO: Scale to screen size
 function TankGui:ComputeMobileThrottle()
     self.Tank.IsJoystickControlled = true 
@@ -183,7 +131,7 @@ end
 function TankGui:Update()
     self:UpdateAimingReticle()
     self:UpdateHealthBar()
-    self:UpdateMunitionsSlots()
+
     local mobileJumpButton = PlayerGui:FindFirstChild("JumpButton", true)
     if mobileJumpButton then 
         mobileJumpButton.Visible = false 

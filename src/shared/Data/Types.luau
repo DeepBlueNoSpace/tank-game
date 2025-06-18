@@ -3,13 +3,12 @@ local Types = {}
 
 export type ProjectileData = {
     Origin: Vector3; 
-    MuzzleVelocity: Vector3;
     StartTime: number; 
     Id: string;
     Owner: Player?,
     BarrelEnd: Attachment?,
-
-    MunitionType: string
+    MuzzleVelocity: Vector3;
+    BlastRadius: number,
 }
 
 export type VFXInfo = {
@@ -31,29 +30,52 @@ export type TankData = {
     Cost: number?,
     BaseAtrributes: TankAttributes,
 
-    Munitions: {[number]: string}
+    RequiredLevel: number, 
 }
+
+export type UpgradeTrack = {
+    [number]: UpgradeData
+}
+
+export type UpgradeType = {
+    DisplayIcon: string,
+    EffectDescription: string,
+    HeadlineEffect: string
+}
+
+export type UpgradeData = {
+    PriceMultiplier: number, 
+    Effects: {
+        [string]: number
+    }
+}
+
 export type TankAttributes = { -- damage etc is in MunitionData
     Health: number,
     Torque: number,
     Acceleration: number,
     MaxSpeed: number,
+
+    BlastRadius: number, 
+    BlastPressure: number,
+
+    RecoilForce: number,
+    MuzzleVelocity: number, 
+
+    MaxDamage: number,
+    Cooldown: number,
+
+    TurretAngularVelocity: number
 }
 
-export type TankUpgradeData = {
-    DisplayName: string,
-    CurrencyType: string?,
-    Cost: number?,
-    RequiredLevel: number?,
-    Attributes: TankAttributes?,
-    MunitionData: MunitionData,
+
+export type TankUpgrades = {
+    Wrap: string?,
+    Armor: number,
+    Engine: number,
+    Damage: number
 }
-export type MunitionData = {
-    Name: string,
-    BaseDamage: number,
-    BlastRadius: number;
-    RechargeTime: number,
-}
+
 export type HitboxData = {
     DamageMultiplier: number, 
     Color: Color3

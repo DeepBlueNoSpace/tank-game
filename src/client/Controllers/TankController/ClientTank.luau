@@ -4,18 +4,14 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
 local HttpService = game:GetService("HttpService")
 local CollectionService = game:GetService("CollectionService")
-
 local Player = Players.LocalPlayer
-
-local MUZZLE_VELOCITY = 600 
-local RECOIL_FORCE = 15000
 
 local Knit = require(ReplicatedStorage.Packages.Knit)
 local Trove = require(Knit.Packages.Trove)
 local Types = require(ReplicatedStorage.Shared.Data.Types)
 local TankData = require(ReplicatedStorage.Shared.Data.TankData)
-local MunitionData = require(ReplicatedStorage.Shared.Data.MunitionData)
 local GetSafeCharacter = require(Knit.Modules.GetSafeCharacter)
+local TankUtil = require(ReplicatedStorage.Shared.Modules.TankUtil)
 local Chassis = require(script.Parent.Chassis)
 local Keymap = require(script.Parent.Keymap)
 local TankCamera = require(script.Parent.TankCamera)
@@ -41,8 +37,12 @@ function ClientTank.new(tankModel: Model, type: string)
     end
 
     --Data 
+    self.Replica = Knit.GetController("DataController"):GetReplica(Player)
+
     self.TankType = type :: string
     self.TankData = TankData[type] :: Types.TankData
+    self.UpgradeData = self.Replica.Data.OwnedTanks[self.TankType]
+    self.Cooldown = TankUtil.GetAttribute("Cooldown", self.TankType, self.UpgradeData)
 
     --Knit controllers/services
     self.ProjectileController = Knit.GetController("ProjectileController")
@@ -50,6 +50,7 @@ function ClientTank.new(tankModel: Model, type: string)
     self.VFXController = Knit.GetController("VFXController")
     self.DamageService = Knit.GetService("DamageService")
     
+
     self.Trove = Trove.new() 
     self.Chassis = self.Trove:Add(Chassis.new(tankModel, self.TankData.BaseAtrributes))
 
@@ -75,7 +76,6 @@ function ClientTank.new(tankModel: Model, type: string)
     self.IsOccupied = false :: boolean
     self.IsJoystickControlled = false :: boolean
     self.LastShotTime = 0 :: number 
-    self.EquippedMunitionSlot = 1 :: number 
 
     self.JoystickThrottle = {
         Z = 0,
@@ -196,11 +196,6 @@ function ClientTank:Update()
     end
 end
 
-function ClientTank:EquipMunitionSlot(slotNumber: number)
-    self.EquippedMunitionSlot = slotNumber
-    self.LastShotTime = tick()
-end
-
 function ClientTank:HandleInput(inputObject: InputObject, gameProcessed: boolean)
     if gameProcessed then 
         return 
@@ -211,11 +206,6 @@ function ClientTank:HandleInput(inputObject: InputObject, gameProcessed: boolean
         return 
     end
 
-    if inputObject.KeyCode == Enum.KeyCode.One then 
-        self:EquipMunitionSlot(1)
-    elseif inputObject.KeyCode == Enum.KeyCode.Two then 
-        self:EquipMunitionSlot(2)
-    end
 end
 
 local function lerp(v0,v1,t)
@@ -251,16 +241,14 @@ function ClientTank:UpdateTurret()
 end
 
 function ClientTank:AttemptFire()
-    local equippedMunitionType = self.TankData.Munitions[self.EquippedMunitionSlot]
-    local munitionData = MunitionData[equippedMunitionType]
-    if tick() - self.LastShotTime < munitionData.RechargeTime then 
+    if tick() - self.LastShotTime < self.Cooldown then 
         return 
     end
 
-    self:Fire(equippedMunitionType)
+    self:Fire()
 end
 
-function ClientTank:Fire(munitionType: string)
+function ClientTank:Fire()
     self.LastShotTime = tick() 
 
     local barrel = self.Turret.Barrel :: BasePart
@@ -271,17 +259,19 @@ function ClientTank:Fire(munitionType: string)
 
     local projectileData = {
         Id = HttpService:GenerateGUID(),
-        MuzzleVelocity = MUZZLE_VELOCITY * directionOfFire,
+
         Origin = barrel.BarrelEnd.WorldPosition,
         StartTime = self.ServerTimeController:GetTime(),
         BarrelEnd = barrel.BarrelEnd,
 
-        MunitionType = munitionType
+        MuzzleVelocity = self.TankData.BaseAtrributes.MuzzleVelocity * directionOfFire,
+        BlastRadius = TankUtil.GetAttribute("BlastRadius", self.TankType, self.UpgradeData),
+
     } :: Types.ProjectileData
 
     self.ProjectileController:AddProjectile(true, projectileData)
 
-    self.Seat:ApplyImpulse(directionOfFire*RECOIL_FORCE*-1)
+    self.Seat:ApplyImpulse(directionOfFire*TankUtil.GetAttribute("RecoilForce", self.TankType, self.UpgradeData)*-1)
     self.Camera:ApplyShotImpulse(200)
 end
 function ClientTank:Destroy() 

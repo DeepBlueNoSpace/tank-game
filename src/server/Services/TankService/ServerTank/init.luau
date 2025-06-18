@@ -108,49 +108,10 @@ function ServerTank:SetupHitbox()
 end
 
 function ServerTank:PullUpgrades()
-    warn("PULLING UPGRADES")
-
     for i,v in pairs(self.TankData.BaseAtrributes) do
         self.Attributes[i] = v
     end
 
-    local replica = Knit.GetService("DataService"):GetReplica(self.Driver)
-    if not replica then
-        warn("No replica found for driver: " .. self.Driver.Name)
-        return
-    end
-
-
-    local engineData : Types.TankUpgradeData? = TankUtil.GetUpgradeData(self.Type, "Engine", TankUtil.GetEquippedUpgrade(replica, self.Type, "Engine"))
-    local armorData : Types.TankUpgradeData? = TankUtil.GetUpgradeData(self.Type, "Armor", TankUtil.GetEquippedUpgrade(replica, self.Type, "Armor"))
-    local munition1Data : Types.TankUpgradeData? = TankUtil.GetUpgradeData(self.Type, "Munition1", TankUtil.GetEquippedUpgrade(replica, self.Type, "Munition1"))
-    local munition2Data : Types.TankUpgradeData? = TankUtil.GetUpgradeData(self.Type, "Munition2", TankUtil.GetEquippedUpgrade(replica, self.Type, "Munition2"))
-
-    local function sumUpgradeAttributes(upgradeData: Types.TankUpgradeData?)
-        if not upgradeData then
-            return
-        end
-
-        if not upgradeData.Attributes then
-            warn("No attributes found for upgrade: " .. upgradeData.Name)
-            return
-        end
-
-        for name, val in pairs(upgradeData.Attributes) do
-            self.Attributes[name] = (self.Attributes[name] or 0) + val
-        end
-    end
-
-    sumUpgradeAttributes(engineData)
-    sumUpgradeAttributes(armorData)
-
-    warn(engineData, armorData)
-
-    -- muntions handled slightly differently --- TBD....
-    --sumUpgradeAttributes(munition1Data)
-    --sumUpgradeAttributes(munition2Data)
-
-    warn("FINAL ATTRIBUTES FOR TANK: " .. self.Type, self.Attributes)
 end
 
 --Tank tag is only added once its ready for clients to listen to it

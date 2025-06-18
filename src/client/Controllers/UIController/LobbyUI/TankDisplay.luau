@@ -1,8 +1,6 @@
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
-local Types = require(ReplicatedStorage.Shared.Data.Types)
 local Knit = require(ReplicatedStorage.Packages.Knit)
 
-local LocalSaveReplica = nil
 
 local TankDisplay = Knit.CreateController { Name = "TankDisplay" }
 TankDisplay.CurrentTank = nil
@@ -12,9 +10,7 @@ function TankDisplay:SetTank(tank: string)
         TankDisplay.CurrentTank:Destroy()
     end
 
-    print(tank)
-    self.CurrentTank = ReplicatedStorage.Assets.Tanks:FindFirstChild(tank):Clone()
-    
+    self.CurrentTank = ReplicatedStorage.Assets.Tanks:FindFirstChild(tank):Clone()    
 
     if self.CurrentTank:FindFirstChild("Hitbox") then
         for _, part in pairs(self.CurrentTank.Hitbox:GetChildren()) do

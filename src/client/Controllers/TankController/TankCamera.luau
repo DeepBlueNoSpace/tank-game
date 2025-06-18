@@ -73,7 +73,6 @@ function TankCamera.new(tank: {})
 
     return self
 end
-local BARREL_ANG_VELOCITY = 60
 
 local function moveToward(current, target, maxDelta)
     local delta = (target - current + 180) % 360 - 180 -- shortest angle difference
@@ -89,7 +88,7 @@ function TankCamera:ApplyShotImpulse(force: number)
 end
 
 function TankCamera:UpdateBarrel(dT: number)
-    local maxAngleChange = BARREL_ANG_VELOCITY * dT
+    local maxAngleChange = self.Tank.TankData.BaseAtrributes.TurretAngularVelocity * dT
 
     local camera = workspace.CurrentCamera
     local ray = camera:ViewportPointToRay(camera.ViewportSize.X / 2, camera.ViewportSize.Y *0.35)

@@ -8,7 +8,7 @@ function Spring.new(start, target, speed, damping)
 		equilibriumPos = damping and target or (isVector and Vector3.new() or 0),
 		angularFrequency = damping and speed or target,
 		dampingRatio = damping or speed,
-	}
+	} :: SpringType
 
 	setmetatable(data, { __index = Spring })
 
@@ -99,5 +99,21 @@ function Spring:Solve(deltaTime)
 		return pPos, pVel
 	end
 end
+
+export type SpringType = {
+	pPos: Vector3 | number,
+	pVel: Vector3 | number,
+	equilibriumPos: Vector3 | number,
+	angularFrequency: number,
+	dampingRatio: number,
+
+	SetPosition: (self: SpringType, p: Vector3 | number) -> (),
+	IncrementPosition: (self: SpringType, p: Vector3 | number) -> (),
+	SetSpeed: (self: SpringType, s: number) -> (),
+	SetDamping: (self: SpringType, d: number) -> (),
+	SetTarget: (self: SpringType, t: Vector3 | number) -> (),
+	Accelerate: (self: SpringType, v: Vector3 | number) -> (),
+	Solve: (self: SpringType, deltaTime: number) -> (number),
+}
 
 return Spring

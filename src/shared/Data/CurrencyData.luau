@@ -2,6 +2,6 @@ return {
     Cash = {
         DisplayName = "Cash",
         Icon = "",
-        DefaultValue = 100,
+        DefaultValue = 10000,
     }
 }

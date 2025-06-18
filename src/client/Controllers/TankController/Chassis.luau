@@ -71,11 +71,13 @@ function Chassis.new(vehicle: Model, baseAtrributes: Types.TankAttributes)
     local self = setmetatable({}, Chassis)
 	self.parameters = CreateVehicleParameters(baseAtrributes)
 
-    self.root = vehicle:FindFirstChild("Chassis") :: BasePart
+    self.root = vehicle:FindFirstChild("Chassis") :: Model
     self.driverSeat = self.root:FindFirstChildOfClass("VehicleSeat") :: VehicleSeat
     self.constraints = vehicle:WaitForChild("Constraints") :: Folder 
     self.vehicle = vehicle :: Model
     self.RedressMount = self.root:WaitForChild("RedressMount") :: BasePart
+	self.CosmeticWheelMotors = self.root:WaitForChild("FloorPanel"):WaitForChild("WheelMotors"):GetChildren() :: {}
+
 	self.Motors = {}
 	self.LastFakeRPM = 0 
 
@@ -86,6 +88,11 @@ function Chassis.new(vehicle: Model, baseAtrributes: Types.TankAttributes)
     local randomSuspension = self.root:FindFirstChild("SuspensionFL") :: Model
     local randomWheel = randomSuspension:FindFirstChild("Wheel") :: BasePart
 	local wheelRadius = randomWheel.Size.Y/2 
+	self.RandomWheel = randomWheel
+
+	self.TotalDistanceTravelled = 0 :: number
+	self.LastPosition = self.driverSeat.Position :: Vector3
+	
     self.driverSeat.MaxSpeed = self.parameters.MaxSpeed * wheelRadius
 
 	self:InitializeDrivingValues()
@@ -327,6 +334,30 @@ function Chassis:UpdateThrottle(currentSpeed, throttle)
 	self.LastFakeRPM = newRPM
 	
 	self:SetMotorVelocity(targetVel)
+	self:UpdateWheelMotors()
+end
+
+
+function Chassis:UpdateWheelMotors()
+	local newPosition = self.driverSeat.Position :: Vector3
+	local forward = self.driverSeat.CFrame.LookVector :: Vector3 
+	local delta = self.LastPosition - newPosition 
+
+	local signedDistance = delta:Dot(forward) :: number
+	self.TotalDistanceTravelled += signedDistance 
+
+	self.LastPosition = newPosition
+
+	for _, motor: Motor6D in self.CosmeticWheelMotors do
+		local wheel = motor.Part1 :: BasePart
+		local wheelRadius = wheel.Size.Y/2 
+		local baseC0 = motor.C0
+		local _, y, z = baseC0:ToEulerAnglesXYZ()
+		local pos = baseC0.Position
+
+			local totalAngle = self.TotalDistanceTravelled / wheelRadius
+		motor.C0 = CFrame.new(pos) * CFrame.Angles(totalAngle, y, z)
+	end
 end
 
 function Chassis:Destroy() 
