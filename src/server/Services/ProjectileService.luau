@@ -46,8 +46,6 @@ function ProjectileService:KnitInit()
         assert(projectile, "Projectile not found")
         assert(projectile.Owner == player, "Player not owner of projectile") 
 
-
-        print('doing damage', projectile.MaxDamage)
         self.ExplosionService:SpawnExplosion(player, hitPosition, hitInstance, DEFAULT_RADIUS, projectile.MaxDamage)
     end)
 end

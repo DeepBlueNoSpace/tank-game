@@ -34,7 +34,7 @@ TankData["Sherman 1"] = {
         BlastRadius = 20;
         BlastPressure = 300,
 
-        MuzzleVelocity = 20,
+        MuzzleVelocity = 600,
         RecoilForce = 15000,
 
         MaxDamage = 220,
@@ -59,7 +59,7 @@ TankData["Sherman 2"] = {
         BlastRadius = 20;
         BlastPressure = 300,
 
-        MuzzleVelocity = 300,
+        MuzzleVelocity = 600,
         RecoilForce = 15000,
 
         MaxDamage = 260,
@@ -84,7 +84,7 @@ TankData["Sherman 3"] = {
         BlastRadius = 20;
         BlastPressure = 300,
 
-        MuzzleVelocity = 400,
+        MuzzleVelocity = 600,
         RecoilForce = 15000,
 
         MaxDamage = 310,
@@ -109,7 +109,7 @@ TankData["Sherman 4"] = {
         BlastRadius = 20;
         BlastPressure = 300,
 
-        MuzzleVelocity = 500,
+        MuzzleVelocity = 600,
         RecoilForce = 15000,
 
         MaxDamage = 360,
@@ -159,7 +159,7 @@ TankData["Sherman 6"] = {
         BlastRadius = 20;
         BlastPressure = 300,
 
-        MuzzleVelocity = 700,
+        MuzzleVelocity = 600,
         RecoilForce = 15000,
 
         MaxDamage = 460,
@@ -184,7 +184,7 @@ TankData["Sherman 7"] = {
         BlastRadius = 20;
         BlastPressure = 300,
 
-        MuzzleVelocity = 800,
+        MuzzleVelocity = 600,
         RecoilForce = 15000,
 
         MaxDamage = 520,

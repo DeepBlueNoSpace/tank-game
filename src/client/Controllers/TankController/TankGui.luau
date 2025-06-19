@@ -21,12 +21,15 @@ function TankGui.new(tank: {})
     self.HitNeedles = {} :: {[string]:{}}
 
     self.Gui = self.Tank.Trove:Add(TankGuiPrefab:Clone()) :: ScreenGui
-    self.Aimer = self.Gui.Aimer :: ImageLabel 
-    self.HealthFill = self.Gui.Health.Fill :: Frame 
-    self.HealthValue = self.Gui.Health.Value :: TextLabel 
-    self.MunitionsFrame = self.Gui.Munitions :: Frame 
+    self.Aimer = self.Gui:FindFirstChild("Aimer") :: ImageLabel 
+    self.HealthFill = self.Gui:FindFirstChild("Health").Fill :: Frame 
+    self.HealthValue = self.Gui:FindFirstChild("Health").Value :: TextLabel 
+    self.MunitionsFrame = self.Gui:FindFirstChild("Munitions") :: Frame 
     self.MobileFire = self.Gui:WaitForChild("MobileFire") :: ImageButton
-
+    self.Reticle = self.Gui:FindFirstChild("Reticle") :: ImageLabel
+    self.CooldownProgress = self.Reticle.Progress 
+    self.CooldownGradient1 = self.CooldownProgress.Frame1.Top.UIGradient 
+    self.CooldownGradient2 = self.CooldownProgress.Frame2.Top.UIGradient 
     self.Gui.Parent = PlayerGui
 
     self.ThumbstickStart = nil :: ImageLabel?
@@ -82,7 +85,6 @@ function TankGui:UpdateAimingReticle()
 
     local direction = CFrame.fromEulerAnglesYXZ(rayPitch, rayYaw, 0).LookVector * 2000
 
-    
     local result = workspace:Raycast(barrelEndPosition, direction, self.Tank.RaycastParamsIgnoreSelf)
     local hitPosition = result and result.Position or (barrelEndPosition + direction)
     
@@ -128,9 +130,23 @@ function TankGui:ComputeMobileThrottle()
     self.Tank.JoystickThrottle = throttle 
 end
 
+function TankGui:UpdateCooldown()
+    local i = (tick() - self.Tank.LastShotTime)/self.Tank.Cooldown 
+    if i > 1 then 
+        self.CooldownProgress.Visible = false 
+    else
+        self.CooldownProgress.Visible = true 
+    end 
+
+    local degs = 360*i 
+    self.CooldownGradient1.Rotation = math.clamp(180-degs, 0,180)
+    self.CooldownGradient2.Rotation = math.clamp(180-degs, -180,0)
+end
+
 function TankGui:Update()
     self:UpdateAimingReticle()
     self:UpdateHealthBar()
+    self:UpdateCooldown()
 
     local mobileJumpButton = PlayerGui:FindFirstChild("JumpButton", true)
     if mobileJumpButton then 
