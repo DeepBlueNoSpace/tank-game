@@ -15,13 +15,21 @@ local ProjectileService = Knit.CreateService({ Name = "ProjectileService",
 
 function ProjectileService:KnitStart() 
     self.ExplosionService = Knit.GetService("ExplosionService")
+    self.TankService = Knit.GetService("TankService")
 end
 
 local DEFAULT_RADIUS = 10
 
 function ProjectileService:KnitInit()
     self.Client.SpawnProjectile:Connect(function(player: Player, projectileData: Types.ProjectileData)
+        local firingTank = self.TankService.LiveTanks[player]
+        if not firingTank then 
+            return 
+        end
+
         projectileData.Owner = player
+        projectileData.MaxDamage = firingTank.Attributes.MaxDamage
+
         self.LiveProjectiles[projectileData.Id] = projectileData
 
         self.Client.SpawnProjectile:FireAll(projectileData)
@@ -39,7 +47,8 @@ function ProjectileService:KnitInit()
         assert(projectile.Owner == player, "Player not owner of projectile") 
 
 
-        self.ExplosionService:SpawnExplosion(player, hitPosition, hitInstance, DEFAULT_RADIUS, BASE_DAMAGE)
+        print('doing damage', projectile.MaxDamage)
+        self.ExplosionService:SpawnExplosion(player, hitPosition, hitInstance, DEFAULT_RADIUS, projectile.MaxDamage)
     end)
 end
 

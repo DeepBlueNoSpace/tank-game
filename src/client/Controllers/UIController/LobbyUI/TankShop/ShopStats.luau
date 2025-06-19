@@ -5,6 +5,7 @@ local RunService = game:GetService("RunService")
 local Knit = require(ReplicatedStorage.Packages.Knit)
 local TankData = require(ReplicatedStorage.Shared.Data.TankData)
 local Spring = require(ReplicatedStorage.Shared.Modules.Spring)
+local UpgradeTracks = require(ReplicatedStorage.Shared.Data.UpgradeTracks)
 
 local ShopStats = Knit.CreateController({ Name = "ShopStats"})
 
@@ -14,6 +15,7 @@ local Stats = {
         Max = 0,
         Spring = Spring.new(0, 0, 30, 1),
         AbsValue = 0, 
+        UpgradeTrack = "Damage",
     },
     Acceleration = {
         Min = math.huge, 
@@ -26,6 +28,7 @@ local Stats = {
         Max = 0,
         Spring = Spring.new(0, 0, 30, 1),
         AbsValue = 0, 
+        UpgradeTrack = "Armor",
     },
     Cooldown = {
         Min = math.huge, 
@@ -39,8 +42,9 @@ local Stats = {
         Max = 0,
         Spring = Spring.new(0, 0, 30, 1),
         AbsValue = 0, 
+        UpgradeTrack = "Engine"
     },
-} :: {[string]: {Min: number, Inverse: boolean?, Max: number, Spring: Spring.SpringType}}
+} :: {[string]: {Min: number, Inverse: boolean?, UpgradeTrack: string?, Max: number, Spring: Spring.SpringType}}
 
 function ShopStats:KnitInit()
     self.UIController = Knit.GetController("UIController")
@@ -72,27 +76,39 @@ function ShopStats:CalculateBaseStats()
     for _, tankData in TankData do 
         local attributes = tankData.BaseAtrributes
 
-        for statName, values in Stats do 
-
+        for statName, statData in Stats do 
+            local maxMultiplier = 1 
+            if statData.UpgradeTrack then 
+                maxMultiplier = UpgradeTracks[statData.UpgradeTrack][4].Effects[statName]
+            end
 
             --TODO: augment these stats as if they were maxed out
-            if attributes[statName] > values.Max then 
-                values.Max = attributes[statName]
-            elseif attributes[statName] < values.Min then
-                values.Min = attributes[statName]
+            if attributes[statName] > statData.Max then 
+                statData.Max = attributes[statName]*maxMultiplier
+            elseif attributes[statName] < statData.Min then
+                statData.Min = attributes[statName]
             end
         end
     end
-
-    print(Stats)
 end
 
 function ShopStats:SetStatsForTank(tankName: string)
     local tankData = TankData[tankName]
     local tankAttributes = tankData.BaseAtrributes
 
+    local tankUpgradeData = self.TankShop.LocalReplica.Data.OwnedTanks[tankName]
+
     for statName, statData in Stats do 
-        local value = tankAttributes[statName]
+        local multiplier = 1 
+        if statData.UpgradeTrack and tankUpgradeData then 
+            local upgradeProgress = tankUpgradeData[statData.UpgradeTrack]
+            local upgradeTrack = UpgradeTracks[statData.UpgradeTrack]
+            if upgradeProgress > 0 then 
+                multiplier = upgradeTrack[upgradeProgress].Effects[statName]
+            end
+        end
+
+        local value = tankAttributes[statName]*multiplier
         local i = (value-statData.Min)/(statData.Max-statData.Min)
         if statData.Inverse then 
             i = 1 - i 

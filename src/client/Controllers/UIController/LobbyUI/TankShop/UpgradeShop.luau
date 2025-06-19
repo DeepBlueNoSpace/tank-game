@@ -16,7 +16,7 @@ function UpgradeShop:KnitInit()
     self.UIController = Knit.GetController("UIController")
     self.DataController = Knit.GetController("DataController")
     self.TankShop = Knit.GetController("TankShopUI")
-
+    self.ShopStats = Knit.GetController("ShopStats")
     self.UpgradeService = Knit.GetService("UpgradeService")
 end
 
@@ -41,6 +41,7 @@ function UpgradeShop:KnitStart()
     self.DataController:GetReplicaPromise(Player):andThen(function(replica)
         replica:ListenToChange("OwnedTanks", function() 
             self:RenderTrack(self.CurrentTrack)
+            self.ShopStats:SetStatsForTank(self.TankShop.SelectedTank )
         end)
     end)
 

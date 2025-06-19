@@ -6,7 +6,7 @@ local Trove = require(ReplicatedStorage.Packages.Trove)
 local TankData = require(ReplicatedStorage.Shared.Data.TankData)
 local Types = require(ReplicatedStorage.Shared.Data.Types)
 local HitboxData = require(ReplicatedStorage.Shared.Data.HitboxData)
-local TankUtil = require(Knit.Modules.TankUtil)
+local UpgradeTracks = require(ReplicatedStorage.Shared.Data.UpgradeTracks)
 
 local TankPrefabs = ReplicatedStorage.Assets.Tanks
 
@@ -14,24 +14,24 @@ local ServerTank = {}
 ServerTank.__index = ServerTank
 
 
-function ServerTank.new(driver: Player, tankType: string) 
+function ServerTank.new(driver: Player, tankType: string, tankUpgrades: {}) 
     local self = setmetatable({}, ServerTank)
 
     --Variables
     self.TankService = Knit.GetService("TankService")
     self.DamageService = Knit.GetService("DamageService")
-    
+    self.DataService = Knit.GetService("DataService")
+
     self.Trove = Trove.new() 
 
     self.Type = tankType :: string 
-
+    self.Driver = driver :: Player
     self.TankData = TankData[self.Type] :: Types.TankData
-    self.Attributes = {} :: Types.TankAttributes
     self.Character = driver.Character :: Model
     self.Model = self.Trove:Add(TankPrefabs[tankType]:Clone()) :: Model
+    self.Attributes = self:GetAttributes(tankUpgrades) :: Types.TankAttributes
     self.Chassis = self.Model:FindFirstChild("Chassis") :: Model 
     self.Seat = self.Chassis:FindFirstChild("VehicleSeat") :: VehicleSeat
-    self.Driver = driver :: Player
     self.Constraints = self.Model:FindFirstChild("Constraints") :: Folder 
     
     local hitboxModel = self.Model:FindFirstChild('Hitbox'):: Model
@@ -39,8 +39,6 @@ function ServerTank.new(driver: Player, tankType: string)
 
     self.Alive = true :: boolean
 
-    -- Set up
-    self:SetUpAttributes()
     self:SetupHitbox()
    
     self.Model.Parent = workspace.Tanks
@@ -107,23 +105,34 @@ function ServerTank:SetupHitbox()
     end
 end
 
-function ServerTank:PullUpgrades()
-    for i,v in pairs(self.TankData.BaseAtrributes) do
-        self.Attributes[i] = v
-    end
+function ServerTank:PullUpgrades(tankUpgrades)
+    local attributes = table.clone(self.TankData.BaseAtrributes) :: Types.TankAttributes
 
+    for upgradeName, progress in tankUpgrades do 
+        local upgradeTrack = UpgradeTracks[upgradeName]
+        if upgradeTrack then -- filter out the wrap upgrade
+            if progress > 0 then 
+                local effects = upgradeTrack[progress].Effects
+                for effectName, value in effects do 
+                    attributes[effectName] *= value
+                end
+            end
+        end
+    end 
+
+    return attributes
 end
 
 --Tank tag is only added once its ready for clients to listen to it
-function ServerTank:SetUpAttributes()
-    self:PullUpgrades()
-
-    self.Model:SetAttribute("Health", self.Attributes.Health)
-    self.Model:SetAttribute("MaxHealth", self.Attributes.Health)
+function ServerTank:GetAttributes(tankUpgrades)
+    local attributes = self:PullUpgrades(tankUpgrades)
+    self.Model:SetAttribute("Health", attributes.Health)
+    self.Model:SetAttribute("MaxHealth", attributes.Health)
     self.Model:SetAttribute("OwnerName", self.Driver.Name)
 
-    --Should we break this out to round the ServerTank.new() function?
     self.Model:AddTag("Tank")
+
+    return attributes
 end
 
 function ServerTank:EndClientPhysics()

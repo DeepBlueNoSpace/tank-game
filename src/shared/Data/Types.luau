@@ -9,6 +9,7 @@ export type ProjectileData = {
     BarrelEnd: Attachment?,
     MuzzleVelocity: Vector3;
     BlastRadius: number,
+    MaxDamage: number?
 }
 
 export type VFXInfo = {

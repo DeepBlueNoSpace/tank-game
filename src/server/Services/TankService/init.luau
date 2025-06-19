@@ -58,7 +58,9 @@ function TankService.Client:RequestTank(player: Player)
 
 
     local tankType = replica.Data.EquippedTank
-    local tank = ServerTank.new(player, tankType)
+    local tankUpgrades = replica.Data.OwnedTanks[tankType]
+    local tank = ServerTank.new(player, tankType, tankUpgrades)
+    
     TankService.LiveTanks[player] = tank
 
     local tankId = tankIdGen
