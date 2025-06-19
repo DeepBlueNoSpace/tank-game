@@ -183,7 +183,14 @@ function TankShopUI:KnitStart()
         replica:ListenToChange({"OwnedTanks"}, function()
             self:RenderTiles()
             self:UpdateBuyEquipButton()
+
+            if self.LocalReplica.Data.OwnedTanks[self.SelectedTank] then 
+                self.UpgradeShop:Open()
+            else
+                self.UpgradeShop:Close()
+            end
         end)
+        
         replica:ListenToChange({"EquippedTank"}, function()
             self:RenderTiles()
             self:UpdateBuyEquipButton()
