@@ -157,8 +157,10 @@ function ServerTank:Disable(waitTime: number?)
     self:EndClientPhysics()
     
     task.wait(actualWaitTime)
-    self.Driver:LoadCharacter()
-
+    if self.Driver:IsDescendantOf(game) then 
+        self.Driver:LoadCharacter()
+    end
+    
     task.wait(actualWaitTime*10) -- a long death is cool
     self:Destroy()
 end
