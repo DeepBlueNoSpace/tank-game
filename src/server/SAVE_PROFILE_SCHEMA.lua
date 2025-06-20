@@ -16,6 +16,11 @@ DATASCHEMA.OwnedTanks = {
 }
 
 
+DATASCHEMA.Quests = {
+    Completed = {}, -- [QuestName] = true
+    --IncrementalStartCount = {}, -- stores stat count at the start of an incremental quest
+}
+
 DATASCHEMA.Currency = {}
 
 for currencyName, data in pairs(CurrencyData) do
@@ -25,6 +30,12 @@ end
 DATASCHEMA.LevelData = {
     Level = 1,
     XP = 0,
+}
+
+DATASCHEMA.Stats = {
+    TanksPurchased = 0,
+    EquipmentPurchased = 0,
+    Kills = 0
 }
 
 return DATASCHEMA
