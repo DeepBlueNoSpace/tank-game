@@ -223,7 +223,6 @@ function KnitClient.AddControllersDeep(parent: Instance): { Controller }
 
 	if parent:FindFirstChild("UIController", true) then 
 		table.insert(addedControllers, require(parent:FindFirstChild("UIController", true)))
-		print'adding uicontroller first'
 	end
 
 
