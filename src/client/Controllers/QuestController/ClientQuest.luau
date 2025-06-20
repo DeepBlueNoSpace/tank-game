@@ -31,7 +31,7 @@ function ClientQuest.new(questName: string)
 end
 
 function ClientQuest:HookPlayerData()
-    Knit.GetController("DataController"):GetReplicaPromise(LocalPlayer):andThen(function(replica)
+    Knit.GetController("DataController"):GetReplicaPromise(game.Players.LocalPlayer):andThen(function(replica)
         self.Replica = replica
 
         self.Trove:Add(self.Replica:ListenToChange({"Stats", self.Data.StatName}, function()
@@ -65,16 +65,26 @@ function ClientQuest:Update()
 
     local hasCompleted, previouslyCompleted = QuestUtil.IsQuestCompleted(self.Replica, self.QuestName)
     if hasCompleted and not previouslyCompleted then
+        warn("ClientQuest - Completing quest:", self.QuestName)
         Knit.GetService("QuestService"):RequestCompleteQuest(self.QuestName) -- asks for rewards to be distributed
     end
 
     local currCount, requiredCount = self.Replica.Data.Stats[self.Data.StatName], self.Data.StatCount
-    local progressAlhpa = math.clamp(currCount / requiredCount, 0, 1)
+    local progressAlpha = math.clamp(currCount / requiredCount, 0, 1)
 
     for i, frame in pairs(self.UIComponents) do
-        frame.DescriptionLabel.Text = self.Data.Description
-        frame.ProgressBar.Fill.Size = UDim2.new(progressAlhpa, 0, 1, 0)
-        frame.ProgressBar.TextLabel.Text = string.format("%d/%d", math.min(currCount,requiredCount), requiredCount)
+        local descriptionLabel = frame:WaitForChild("DescriptionLabel")
+        local progressBar = frame:WaitForChild("ProgressBar")
+        
+        descriptionLabel.Text = self.Data.Description
+        progressBar:WaitForChild("Fill").Size = UDim2.new(progressAlpha, 0, 1, 0)
+        progressBar:WaitForChild("TextLabel").Text = string.format("%d/%d", math.min(currCount,requiredCount), requiredCount)
+
+        frame:WaitForChild("Reward"):WaitForChild("TextLabel").Text = string.format("$%d", self.Data.Reward.Amount)
+
+        if hasCompleted then
+            frame:WaitForChild("Completed").Visible = true
+        end
     end
 end
 

@@ -54,8 +54,10 @@ DATASCHEMA.LevelData = {
 
 DATASCHEMA.Stats = {
     TanksPurchased = 0,
-    EquipmentPurchased = 0,
-    Kills = 0
+    UpgradesPurchased = 0,
+    Kills = 0,
+    Deaths = 0,
+    Wins = 0,
 }
 
 return DATASCHEMA

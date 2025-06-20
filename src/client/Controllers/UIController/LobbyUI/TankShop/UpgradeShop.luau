@@ -51,10 +51,12 @@ function UpgradeShop:KnitStart()
 end
 
 function UpgradeShop:Open()
+    if not self.Frame then repeat task.wait() until self.Frame end
     self.Frame.Visible = true 
 end
 
 function UpgradeShop:Close()
+    if not self.Frame then repeat task.wait() until self.Frame end
     self.Frame.Visible = false 
 end
 

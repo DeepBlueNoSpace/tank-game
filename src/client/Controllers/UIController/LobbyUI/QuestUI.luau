@@ -26,10 +26,11 @@ function QuestUI:AddQuestTile(questName: string)
 		repeat task.wait() until self.Prefab
 	end
 
-	local prefab = self.Prefab:Clone()
-	prefab.Parent = self.Container
-	prefab.Visible = true
-	return prefab
+	local uiComponent = self.Prefab:Clone()
+	uiComponent.Name = questName
+	uiComponent.Parent = self.Container
+	uiComponent.Visible = true
+	return uiComponent
 end
 
 
@@ -47,8 +48,8 @@ function QuestUI:KnitStart()
 	self.BackButton = self.Frame:WaitForChild("Back")
 
 	self.BackButton.Activated:Connect(function()
-		self:CloseFrame()
-		Knit.GetController("LobbyMainUI"):OpenFrame()
+		self.UIController:AttemptClose(self)
+        Knit.GetController("LobbyMainUI"):OpenFrame()
 	end)
 	
 end

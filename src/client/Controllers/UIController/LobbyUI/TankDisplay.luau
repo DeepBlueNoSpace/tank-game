@@ -6,6 +6,7 @@ local TankDisplay = Knit.CreateController { Name = "TankDisplay" }
 TankDisplay.CurrentTank = nil
 
 function TankDisplay:SetTank(tank: string)
+    warn("Set Tank:", tank)
     if TankDisplay.CurrentTank then
         TankDisplay.CurrentTank:Destroy()
     end

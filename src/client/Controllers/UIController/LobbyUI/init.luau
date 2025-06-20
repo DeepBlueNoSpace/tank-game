@@ -12,7 +12,6 @@ function LobbyMainUI:OpenFrame()
 
 	self.Open = true
 	self.Frame.Visible = true
-
 	
 	Knit.GetController("DataController"):GetReplicaPromise(game.Players.LocalPlayer):andThen(function(replica)
 		self.TankDisplay:SetTank(replica.Data.EquippedTank)

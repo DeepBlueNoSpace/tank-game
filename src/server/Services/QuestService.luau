@@ -11,13 +11,13 @@ local QuestService = Knit.CreateService {
 }
 
 function QuestService:AttemptCompleteQuest(player: Player, questName: string)
-    local data = QuestUtil.GetQuestData(questName)
+    local data: Types.QuestData = QuestUtil.GetQuestData(questName)
     if not data then
-    warn("QuestService:AttemptCompleteQuest - Invalid quest name:", questName)
+        warn("QuestService:AttemptCompleteQuest - Invalid quest name:", questName)
         return false
     end
 
-    local replica = Knit.GetController("DataController"):GetReplica(player)
+    local replica = Knit.GetService("DataService"):GetReplica(player)
     if not replica then
         warn("QuestService.Client:RequestCompleteQuest - No replica found for player", player.Name)
         return
@@ -31,28 +31,17 @@ function QuestService:AttemptCompleteQuest(player: Player, questName: string)
 
     local completedQuests = replica.Data.Quests.Completed
     completedQuests[questName] = true
+    replica:SetValue({"Quests", "Completed"}, completedQuests)
 
-    if hasCompleted then
-        if previouslyCompleted then
-            return false
-        else
-            -- Logic to reward the player for completing the quest
-            replica.Data.Quests.Completed[questName] = true
-            replica.Data.Stats[questName] = (replica.Data.Stats[questName] or 0) + 1
-            
-            -- Notify client of completion
-            self.Client.OnQuestCompleted:Fire(player, questName)
-        end
-    else
-        warn("QuestService.Client:RequestCompleteQuest - Quest not completed yet:", questName)
-    end
+    self.RewardService:GiveReward(player, data.Reward)   
 end
 
 function QuestService.Client:RequestCompleteQuest(player: Player, questName: string)
-
+    QuestService:AttemptCompleteQuest(player, questName)
 end
 
 function QuestService:KnitInit()
+    self.RewardService = Knit.GetService("RewardService")
     
 end
 

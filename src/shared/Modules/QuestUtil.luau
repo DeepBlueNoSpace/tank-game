@@ -12,7 +12,7 @@ function QuestUtil.IsQuestCompleted(replica, questName: string)
         return false, nil
     end
 
-    local data = QuestData[questName]
+    local data = QuestUtil.GetQuestData(questName)
     if not data then
         warn("QuestUtil.IsQuestCompleted - Invalid quest name: " .. tostring(questName))
         return false, nil
