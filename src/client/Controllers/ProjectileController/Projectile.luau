@@ -15,6 +15,7 @@ function Projectile.new(isLocal: boolean, projectileData: Types.ProjectileData)
     local self = setmetatable({}, Projectile)
     self.ProjectileService = Knit.GetService("ProjectileService")
     self.VFXController = Knit.GetController("VFXController")
+    self.TankController = Knit.GetController("TankController")
 
     self.Id = projectileData.Id :: string
     self.Origin = projectileData.Origin :: Vector3
@@ -25,6 +26,25 @@ function Projectile.new(isLocal: boolean, projectileData: Types.ProjectileData)
     self.BlastRadius =  projectileData.BlastRadius :: number
     self.IsLocal = isLocal :: boolean
     
+    self.TankHitboxParams = RaycastParams.new() :: RaycastParams
+    self.TankHitboxParams.FilterDescendantsInstances = {self.Model} 
+    self.TankHitboxParams.FilterType = Enum.RaycastFilterType.Exclude   
+    self.TankHitboxParams.IgnoreWater = true
+    self.TankHitboxParams.CollisionGroup = "TankHitbox"
+
+    self.DefaultParams = RaycastParams.new() :: RaycastParams
+    self.DefaultParams.FilterDescendantsInstances = {self.Model} 
+    self.DefaultParams.FilterType = Enum.RaycastFilterType.Exclude   
+    self.DefaultParams.IgnoreWater = true
+    self.DefaultParams.CollisionGroup = "Default"
+
+    if self.IsLocal then 
+        if self.TankController.Tank then 
+            self.DefaultParams:AddToFilter(self.TankController.Tank.Model)
+            self.TankHitboxParams:AddToFilter(self.TankController.Tank.Model)
+        end
+    end
+
     self.Position = self.Origin :: Vector3
     self.Velocity = self.MuzzleVelocity :: Vector3
 
@@ -72,7 +92,7 @@ local BaseRadius = 20
 
 function Projectile:OnHit(result: RaycastResult)
     local blastScalar = self.BlastRadius/BaseRadius
-    
+
     local explosionInfo = {
         ScaleSize = 2*blastScalar, 
         CFrame = CFrame.new(result.Position)
@@ -93,14 +113,7 @@ function Projectile:Destroy()
      self.Model:Destroy()
 end
 
-function Projectile:CastRay(currentPosition: Vector3, direction: Vector3, collisionGroup: string) : RaycastResult
-   -- Raycast to detect obstacles
-    local raycastParams = RaycastParams.new()
-    raycastParams.FilterDescendantsInstances = {self.Model} 
-    raycastParams.FilterType = Enum.RaycastFilterType.Exclude   
-    raycastParams.IgnoreWater = true
-    raycastParams.CollisionGroup = collisionGroup
-
+function Projectile:CastRay(currentPosition: Vector3, direction: Vector3, raycastParams: RaycastParams) : RaycastResult
     local result = workspace:Raycast(currentPosition, direction, raycastParams)
     return result 
 end
@@ -114,9 +127,9 @@ function Projectile:Update(serverTime: number): boolean
     local nextPosition = currentPosition + distanceTravelled
     local direction = nextPosition - currentPosition
 
-    local result = self:CastRay(currentPosition, direction, "TankHitbox")
+    local result = self:CastRay(currentPosition, direction, self.TankHitboxParams)
     if not result then 
-        result = self:CastRay(currentPosition, direction, "Default")
+        result = self:CastRay(currentPosition, direction, self.DefaultParams)
     end
  
     if result then
