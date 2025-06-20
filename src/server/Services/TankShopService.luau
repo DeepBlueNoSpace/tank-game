@@ -56,22 +56,17 @@ function TankShopService.Client:RequestBuyTank(player: Player, tankType: string)
     end
 
     local ownedTanks = replica.Data.OwnedTanks
-<<<<<<< Updated upstream
+
     ownedTanks[tankType] = {
         Wrap = nil,
         Armor = 0;
         Engine = 0;
         Damage = 0;
     }
-=======
-    ownedTanks[tankType] = true
-    replica:SetValue({"OwnedTanks"}, ownedTanks) -- do it like this to prompt update on the ownedtanks field
-    
-    Knit.GetService("StatService"):IncrementStat(player, "TanksPurchased", 1)
->>>>>>> Stashed changes
 
     replica:SetValue({"OwnedTanks"}, ownedTanks) -- do it like this to prompt update on the ownedtanks field
     replica:SetValue({"EquippedTank"}, tankType)
+    Knit.GetService("StatService"):IncrementStat(player, "TanksPurchased", 1)
     return true
 end
 
