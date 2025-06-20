@@ -26,6 +26,11 @@ DATASCHEMA.Quests = {
     --IncrementalStartCount = {}, -- stores stat count at the start of an incremental quest
 }
 
+DATASCHEMA.Quests = {
+    Completed = {}, -- [QuestName] = true
+    --IncrementalStartCount = {}, -- stores stat count at the start of an incremental quest
+}
+
 DATASCHEMA.Currency = {}
 
 for currencyName, data in pairs(CurrencyData) do
