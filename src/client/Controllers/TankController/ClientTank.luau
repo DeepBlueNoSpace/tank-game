@@ -49,7 +49,6 @@ function ClientTank.new(tankModel: Model, type: string)
     self.ServerTimeController = Knit.GetController("ServerTimeController")
     self.VFXController = Knit.GetController("VFXController")
     self.DamageService = Knit.GetService("DamageService")
-    
 
     self.Trove = Trove.new() 
     self.Chassis = self.Trove:Add(Chassis.new(tankModel, self.TankData.BaseAtrributes))

@@ -16,6 +16,9 @@ local GAMEPAD_DEAD_ZONE = .1
 local X_SENS_ADJUST = 0.05
 local Y_SENS_ADJUST = -0.05 
 
+local DEFAULT_FOV = 70
+local SCOPED_FOV = 50
+
 local MIN_ZOOM = 0.5
 local MAX_ZOOM = 2
 
@@ -25,12 +28,15 @@ function TankCamera.new(tank: {})
     self.Tank = tank 
     self.CameraYaw = 0 
     self.CameraPitch = 0
+    self.IsScoped = false 
 
     self.Zoom = 1 
 
     self.zSpring = Spring.new(0, 0, 30,0.5)
     self.ySpring = Spring.new(0, 0, 30,0.5)
- 
+    
+    self.ScopeSpring = Spring.new(0, 0, 30,1)
+
     self.LastInputDelta = Vector2.new() 
 
     Camera.CameraType = Enum.CameraType.Scriptable
@@ -39,6 +45,17 @@ function TankCamera.new(tank: {})
 
     self.Tank.Trove:Add(RunService.Heartbeat:Connect(function(dT: number)
         self:Update(dT)
+    end))
+    self.Tank.Trove:Add(UserInputService.InputBegan:Connect(function(inputObject: InputObject, gameProcessedEvent: boolean)
+        if gameProcessedEvent then return end
+        if inputObject.UserInputType == Enum.UserInputType.MouseButton2 then
+            self.IsScoped = not self.IsScoped
+            if self.IsScoped then 
+                self.ScopeSpring:SetTarget(1)
+            else
+                self.ScopeSpring:SetTarget(0)
+            end
+        end
     end))
 
     self.Tank.Trove:Add(UserInputService.InputChanged:Connect(function(inputObject: InputObject)    
@@ -92,18 +109,22 @@ function TankCamera:UpdateBarrel(dT: number)
     local maxAngleChange = self.Tank.TankData.BaseAtrributes.TurretAngularVelocity * dT
 
     local camera = workspace.CurrentCamera
-    local ray = camera:ViewportPointToRay(camera.ViewportSize.X / 2, camera.ViewportSize.Y *0.35)
+
+    local yOffset = 0.35
+    if self.IsScoped then 
+        yOffset = 0.5
+    end
+
+    local ray = camera:ViewportPointToRay(camera.ViewportSize.X / 2, camera.ViewportSize.Y * yOffset)
     local rayOrigin = ray.Origin
     local rayDirection = ray.Direction * 1000
 
     local result = workspace:Raycast(rayOrigin, rayDirection, self.Tank.RaycastParamsIgnoreSelf)
     local hitPos = result and result.Position or (rayOrigin + rayDirection)
     
-    -- Get turret base position
     local turretBasePos = self.Tank.Turret.Rotator.BarrelConnection.WorldPosition
     local toTarget = (hitPos - turretBasePos).Unit
 
-    -- Compute yaw and corrected pitch
     local yaw = math.deg(math.atan2(-toTarget.X, -toTarget.Z))
     local flatDist = math.sqrt(toTarget.X^2 + toTarget.Z^2)
     local pitch = math.deg(math.atan2(toTarget.Y, flatDist))
@@ -111,6 +132,7 @@ function TankCamera:UpdateBarrel(dT: number)
     -- Smoothly move towards target yaw and pitch
     self.Tank.BarrelYaw = moveToward(self.Tank.BarrelYaw, yaw, maxAngleChange)
     self.Tank.BarrelPitch = moveToward(self.Tank.BarrelPitch, pitch, maxAngleChange)
+    return yaw, pitch
 end
 
 local MAX_PITCH = 15 
@@ -127,6 +149,54 @@ function TankCamera:GetPopperCamPosition(basePosition: Vector3, targetPosition: 
     return result.Position
 end
 
+function TankCamera:GetFreeCamUpdate(basePosition: Vector3, yOffset: number, xOffset: number)
+    local targetCFrame = CFrame.new(basePosition) 
+        * CFrame.Angles(0, math.rad(self.CameraYaw), 0)
+        * CFrame.Angles(math.rad(self.CameraPitch), 0, 0)
+        * CFrame.new(0, (DEFAULT_Y_OFFSET * self.Zoom) + yOffset, (DEFAULT_Z_OFFSET * self.Zoom) + xOffset)
+
+    local popperPosition = self:GetPopperCamPosition(basePosition, targetCFrame.Position) :: Vector3
+    if popperPosition then
+        targetCFrame = CFrame.new(popperPosition) * CFrame.fromOrientation(targetCFrame:ToOrientation())
+    end
+
+    return targetCFrame
+end
+
+function TankCamera:GetScopedUpdate(basePosition: Vector3, yOffset: number, xOffset: number)
+    local targetCFrame = CFrame.new(basePosition) 
+        * CFrame.Angles(0, math.rad(self.CameraYaw), 0)
+        * CFrame.Angles(math.rad(self.CameraPitch), 0, 0)
+        * CFrame.new(0, yOffset, xOffset)
+
+    return targetCFrame
+end
+
+local function lerp(v0:number,v1:number,t:number): number
+    return v0+(v1-v0)*t 
+end
+
+function TankCamera:SetScopedProgress(progress)
+    self.Tank.Model.Body.Turret.Transparency = progress
+    self.Tank.TankGui.Scope.ImageTransparency = 1-progress
+    self.Tank.TankGui.Crosshair.ImageTransparency = 1-progress
+    for _, frame in self.Tank.TankGui.ScopeBacking do 
+        if frame:IsA("Frame") then 
+            frame.BackgroundTransparency = 1-progress
+        end
+    end
+
+    for _, frame in self.Tank.TankGui.AimerHairs do 
+        frame.BackgroundTransparency = progress
+    end
+
+    self.Tank.TankGui.Reticle.ImageTransparency = progress
+
+    Camera.FieldOfView = lerp(DEFAULT_FOV, SCOPED_FOV, progress)
+
+    self.Tank.TankGui.Crosshair.Position = self.Tank.TankGui.Aimer.Position
+end
+
 function TankCamera:Update(dT: number)
     local basePosition = self.Tank.Seat.CameraPostion.WorldPosition
     local xAdjustment = X_SENS_ADJUST * self.LastInputDelta.X 
@@ -138,19 +208,15 @@ function TankCamera:Update(dT: number)
     local ySpringOffset = self.ySpring:Solve(dT)
     local xSpringOffset = self.zSpring:Solve(dT)
 
-    local targetCFrame = CFrame.new(basePosition) 
-        * CFrame.Angles(0, math.rad(self.CameraYaw), 0)
-        * CFrame.Angles(math.rad(self.CameraPitch), 0, 0)
-        * CFrame.new(0, (DEFAULT_Y_OFFSET * self.Zoom) + ySpringOffset, (DEFAULT_Z_OFFSET * self.Zoom) + xSpringOffset)
-
-    local popperPosition = self:GetPopperCamPosition(basePosition, targetCFrame.Position) :: Vector3
-    if popperPosition then
-        targetCFrame = CFrame.new(popperPosition) * CFrame.fromOrientation(targetCFrame:ToOrientation())
-    end
-
-    Camera.CFrame = targetCFrame
     self.LastInputDelta = Vector2.new()
-    self:UpdateBarrel(dT)
+    local _barrelYaw, _barrelPitch = self:UpdateBarrel(dT)
+
+    local scopedPosition = self:GetScopedUpdate(basePosition,  ySpringOffset, xSpringOffset)
+    local freecamPosition = self:GetFreeCamUpdate(basePosition, ySpringOffset, xSpringOffset)
+
+    local scopeProgress = self.ScopeSpring:Solve(dT)
+    Camera.CFrame = freecamPosition:Lerp(scopedPosition, scopeProgress)
+    self:SetScopedProgress(scopeProgress)
 end
 
 function TankCamera:Destroy()

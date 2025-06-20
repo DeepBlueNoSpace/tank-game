@@ -22,17 +22,21 @@ function TankGui.new(tank: {})
     self.HitNeedles = {} :: {[string]:{}}
 
     self.Gui = self.Tank.Trove:Add(TankGuiPrefab:Clone()) :: ScreenGui
-    self.Aimer = self.Gui:FindFirstChild("Aimer") :: ImageLabel 
+    self.Aimer = self.Gui:FindFirstChild("Aimer") :: Frame 
+    self.AimerHairs = self.Aimer:GetChildren() :: {Frame}
     self.HealthFill = self.Gui:FindFirstChild("Health").Fill :: Frame 
     self.HealthValue = self.Gui:FindFirstChild("Health").Value :: TextLabel 
     self.MunitionsFrame = self.Gui:FindFirstChild("Munitions") :: Frame 
     self.MobileFire = self.Gui:WaitForChild("MobileFire") :: ImageButton
     self.Reticle = self.Gui:FindFirstChild("Reticle") :: ImageLabel
+    self.Scope = self.Gui:FindFirstChild("Scope") :: ImageLabel
+    self.ScopeBacking = self.Scope:GetChildren() :: {Frame}
+    self.Crosshair = self.Gui:FindFirstChild("Crosshair") :: ImageLabel
+
     self.CooldownProgress = self.Reticle.Progress 
     self.CooldownGradient1 = self.CooldownProgress.Frame1.Top.UIGradient 
     self.CooldownGradient2 = self.CooldownProgress.Frame2.Top.UIGradient 
     self.Gui.Parent = PlayerGui
-
     self.ThumbstickStart = nil :: ImageLabel?
     self.ThumbstickEnd = nil :: ImageLabel?
 

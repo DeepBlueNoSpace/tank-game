@@ -120,7 +120,6 @@ function Projectile:Update(serverTime: number): boolean
     end
  
     if result then
-        print(result.Instance)
         self:OnHit(result)
         return true
     else
