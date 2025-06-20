@@ -77,6 +77,16 @@ function TankGui:SetUpMobile(touchGui: ScreenGui)
     end)
 end
 
+local part = Instance.new("Part")
+part.Anchored = true 
+part.CanCollide = false 
+part.CanQuery = false 
+part.CanTouch = false 
+part.Color = Color3.fromRGB(255, 0, 0)
+part.Material = Enum.Material.Neon
+part.Size = Vector3.new(0.2, 0.2, 1) -- Initial dummy size
+part.Name = "RayVisual"
+part.Parent = workspace
 
 function TankGui:UpdateAimingReticle()
     local barrelEndPosition = self.Tank.Turret.Barrel.BarrelEnd.WorldPosition
@@ -88,6 +98,12 @@ function TankGui:UpdateAimingReticle()
     local result = workspace:Raycast(barrelEndPosition, direction, self.Tank.RaycastParamsIgnoreSelf)
     local hitPosition = result and result.Position or (barrelEndPosition + direction)
     
+    -- Visualize ray
+    local rayVector = hitPosition - barrelEndPosition
+    part.Size = Vector3.new(0.2, 0.2, rayVector.Magnitude)
+    part.CFrame = CFrame.new(barrelEndPosition, hitPosition) * CFrame.new(0, 0, -rayVector.Magnitude / 2)
+
+    -- UI aiming reticle
     local camera = workspace.CurrentCamera
     local screenPoint = camera:WorldToViewportPoint(hitPosition)
 
@@ -96,7 +112,6 @@ function TankGui:UpdateAimingReticle()
 
     self.Tank.TankAimPosition = hitPosition
 end
-
 function TankGui:UpdateHealthBar()
     local health = self.Tank.Model:GetAttribute("Health")
     local maxHealth = self.Tank.Model:GetAttribute("MaxHealth")

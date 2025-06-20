@@ -28,12 +28,13 @@ local SIDE_NORMALS = {
 }
 
 
-local function GetHitSide(tank: Model, hitboxParts: {BasePart}, position: Vector3): string?
+local function GetHitSide(tank: Model, hitboxParts: {BasePart}, position: Vector3): (string?, number)
 	local modelCFrame, _ = tank:GetBoundingBox()
 	local toExplosion = (position - modelCFrame.Position).Unit
 
 	local bestPartName = nil
 	local bestDot = -math.huge
+	local bestDistance = math.huge
 
 	for _, part in hitboxParts do
 		if part:IsA("BasePart") then
@@ -42,15 +43,17 @@ local function GetHitSide(tank: Model, hitboxParts: {BasePart}, position: Vector
 			if baseNormal then
 				local worldNormal = modelCFrame:VectorToWorldSpace(baseNormal)
 				local dot = worldNormal:Dot(toExplosion)
-				if dot > bestDot then
+				local distance = (part.Position-position).Magnitude
+				if (dot+0.1) >= bestDot and distance<bestDistance then
 					bestDot = dot
 					bestPartName = sideName
+					bestDistance = distance
 				end
 			end
 		end
 	end
 
-	return bestPartName
+	return bestPartName, bestDistance
 end
 
 function ExplosionService:GetHitboxesInLOS(hitboxParts: {BasePart}, tankModel: Model, origin: Vector3): {BasePart}
@@ -85,16 +88,17 @@ function ExplosionService:DamageTanks(sender: Player, position: Vector3, hitInst
 		local primary = tank.PrimaryPart or tank:FindFirstChild("PrimaryPart") or tank:FindFirstChildWhichIsA("BasePart")
 		if not primary then continue end
 
-		local distance = (primary.Position - position).Magnitude
-		if distance > radius then continue end
-
 		local health = tank:GetAttribute("Health")
 		if health <= 0 then continue end
 
 		local hitboxFolder = tank:FindFirstChild("Hitbox")
 		local eligableHitboxParts = self:GetHitboxesInLOS(hitboxFolder:GetChildren(), tankObject.Model, position)
 
-		local bestPartName = GetHitSide(tank, eligableHitboxParts, position)
+		local bestPartName, distance = GetHitSide(tank, eligableHitboxParts, position)
+		if distance > radius then 
+			continue 
+		end
+	
 		if not bestPartName then 
 			continue 
 		end

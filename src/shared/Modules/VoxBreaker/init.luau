@@ -431,6 +431,7 @@ local function CutPartinHalf(block : Part, TimeToReset : number) --Cuts part int
 
 	block.Transparency = 1
 	block.CanCollide = false
+	block.CanTouch = false
 	block.CanQuery = false
 	block:SetAttribute(TagName,false)
 
@@ -477,6 +478,7 @@ local function CutPartinHalf(block : Part, TimeToReset : number) --Cuts part int
 			end
 			if block:GetAttribute("Collide") then
 				block.CanCollide = block:GetAttribute("Collide")
+				block.CanTouch = block:GetAttribute("Collide")
 			end
 
 			block:SetAttribute(TagName,true)

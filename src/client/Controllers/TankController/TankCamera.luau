@@ -19,6 +19,7 @@ local Y_SENS_ADJUST = -0.05
 local MIN_ZOOM = 0.5
 local MAX_ZOOM = 2
 
+
 function TankCamera.new(tank: {})
     local self = setmetatable({}, TankCamera)
     self.Tank = tank 

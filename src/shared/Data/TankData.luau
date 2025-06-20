@@ -19,6 +19,8 @@ Cooldown: number,
 
 TurretAngularVelocity: number
 ]]
+
+--TODO: Add maxturn jfc
 TankData["Sherman 1"] = {
     Name = "Sherman 1",
     Image = "rbxassetid://85716504836651",
@@ -28,7 +30,7 @@ TankData["Sherman 1"] = {
     BaseAtrributes = {
         Health = 1400,
         Torque = 150000000, 
-        Acceleration = 1.5,
+        Acceleration = 10,
         MaxSpeed = 18,
 
         BlastRadius = 20;
