@@ -3,8 +3,10 @@ local Knit = require(ReplicatedStorage.Packages.Knit)
 
 local Promise = require(Knit.Util.Promise)
 local Trove = require(Knit.Packages.Trove)
+local Signal = require(Knit.Packages.Signal)
 
 local DataController = Knit.CreateController({ Name = "DataController" })
+DataController.ReplicaOfClassCreatedPassThru = Signal.new()
 DataController.SaveReplicas = {}
 DataController.TempReplicas = {}
 
@@ -46,10 +48,18 @@ function DataController:GetReplicaPromise(player)
 				trove:Destroy()
 			end)
 
-			trove:Add(ReplicaController.ReplicaOfClassCreated("SaveProfile", function(replica)
+			trove:Add(self.ReplicaOfClassCreatedPassThru:Connect(function(replicaToken, replica)
+				if replicaToken ~= "SaveProfile" then
+					return
+				end
+
+				print(player, type(player), "----", replica.Tags.Player, type(replica.Tags.Player))
 				if player == replica.Tags.Player then
-					trove:Destroy()
+					print("resolving :)")
 					resolve(replica)
+					trove:Destroy()
+				else
+					print("unable to resolve")
 				end
 			end))
 
@@ -60,10 +70,11 @@ function DataController:GetReplicaPromise(player)
 				end
 			end))
 
-			if not game.Players:FindFirstChild(player.Name) then
+			--[[if not game.Players:FindFirstChild(player.Name) then
+				warn("Player doesnt exist?")
 				trove:Destroy()
 				reject()
-			end
+			end]]
 		end
 	end)
 end
@@ -95,6 +106,8 @@ function DataController:KnitInit()
 				end
 			end
 		end
+
+		self.ReplicaOfClassCreatedPassThru:Fire("SaveProfile", replica)
 	end)
 
 	ReplicaController.RequestData()
