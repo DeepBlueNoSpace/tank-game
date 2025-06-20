@@ -57,6 +57,7 @@ export type TankAttributes = { -- damage etc is in MunitionData
     Torque: number,
     Acceleration: number,
     MaxSpeed: number,
+    MaxSteer: number, 
 
     BlastRadius: number, 
     BlastPressure: number,

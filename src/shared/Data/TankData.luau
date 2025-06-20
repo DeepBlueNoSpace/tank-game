@@ -32,6 +32,7 @@ TankData["Sherman 1"] = {
         Torque = 150000000, 
         Acceleration = 10,
         MaxSpeed = 18,
+        MaxSteer = 1.3, 
 
         BlastRadius = 20;
         BlastPressure = 300,
@@ -57,6 +58,7 @@ TankData["Sherman 2"] = {
         Torque = 150000000, 
         Acceleration = 1.8,
         MaxSpeed = 20,
+        MaxSteer = 1.3, 
 
         BlastRadius = 20;
         BlastPressure = 300,
@@ -82,6 +84,7 @@ TankData["Sherman 3"] = {
         Torque = 150000000, 
         Acceleration = 2.1,
         MaxSpeed = 21,
+        MaxSteer = 1.3, 
 
         BlastRadius = 20;
         BlastPressure = 300,
@@ -107,6 +110,7 @@ TankData["Sherman 4"] = {
         Torque = 150000000, 
         Acceleration = 2.4,
         MaxSpeed = 22,
+        MaxSteer = 1.3, 
 
         BlastRadius = 20;
         BlastPressure = 300,
@@ -132,6 +136,7 @@ TankData["Sherman 5"] = {
         Torque = 150000000, 
         Acceleration = 2.7,
         MaxSpeed = 23,
+        MaxSteer = 1.3, 
 
         BlastRadius = 20;
         BlastPressure = 300,
@@ -157,6 +162,7 @@ TankData["Sherman 6"] = {
         Torque = 150000000, 
         Acceleration = 3.0,
         MaxSpeed = 24,
+        MaxSteer = 1.3, 
 
         BlastRadius = 20;
         BlastPressure = 300,
@@ -182,6 +188,7 @@ TankData["Sherman 7"] = {
         Torque = 150000000, 
         Acceleration = 3.3,
         MaxSpeed = 25,
+        MaxSteer = 1.3, 
 
         BlastRadius = 20;
         BlastPressure = 300,

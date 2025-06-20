@@ -51,6 +51,7 @@ local function CreateVehicleParameters(tankAttributes: Types.TankAttributes)
 		AccelerationMax = tankAttributes.Acceleration, 
 		DrivingTorque = tankAttributes.Torque, 
 		BrakingTorque = tankAttributes.Torque * BREAKING_TORQUE_MULT,
+		MaxSteer = tankAttributes.MaxSteer,
 
 		--random crap we dont care about 
 		StrutSpringStiffnessFront = 34000,
@@ -59,7 +60,6 @@ local function CreateVehicleParameters(tankAttributes: Types.TankAttributes)
 		StrutSpringDampingRear = 1400,
 		TorsionSpringStiffness = 20000,
 		TorsionSpringDamping = 150,
-		MaxSteer = 0.8,
 		WheelFriction = 2,
 		BaseEngineRPM = 1745
 	}
