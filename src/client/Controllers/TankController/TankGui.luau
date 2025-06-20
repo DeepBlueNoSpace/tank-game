@@ -221,7 +221,6 @@ function TankGui:HandleReceivingDamage()
         self.HitNeedles[playerName] = needle
 
         needle.Needle.Parent = self.Gui
-        print'ya'
     end))
 end
 

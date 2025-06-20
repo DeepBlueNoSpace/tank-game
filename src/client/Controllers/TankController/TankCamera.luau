@@ -191,9 +191,7 @@ function TankCamera:SetScopedProgress(progress)
     end
 
     self.Tank.TankGui.Reticle.ImageTransparency = progress
-
     Camera.FieldOfView = lerp(DEFAULT_FOV, SCOPED_FOV, progress)
-
     self.Tank.TankGui.Crosshair.Position = self.Tank.TankGui.Aimer.Position
 end
 

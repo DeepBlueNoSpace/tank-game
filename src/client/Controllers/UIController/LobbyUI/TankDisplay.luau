@@ -6,7 +6,6 @@ local TankDisplay = Knit.CreateController { Name = "TankDisplay" }
 TankDisplay.CurrentTank = nil
 
 function TankDisplay:SetTank(tank: string)
-    warn("Set Tank:", tank)
     if TankDisplay.CurrentTank then
         TankDisplay.CurrentTank:Destroy()
     end
@@ -20,13 +19,7 @@ function TankDisplay:SetTank(tank: string)
             end
         end
     end
-
-    --for i,v in pairs(self.CurrentTank:GetDescendants()) do
-    --    if v:IsA("BasePart") then
-    --        v.Anchored = true
-    --    end
-    --end
-
+    
     self.CurrentTank:SetPrimaryPartCFrame(self.TankOrigin.CFrame)
     self.CurrentTank.Parent = self.LobbyScene
 end
