@@ -16,6 +16,7 @@ export type VFXInfo = {
     ScaleSize: number?, -- Times all particles by this flat amount (has no effect on sound)
     Parent: Instance?, --Instead of just putting it in workspace, it will instead parent the items individually under this
     CFrame: CFrame?,
+    SoundSource: Folder? -- a folder with sounds the effect will pull a random sound from
 }
 
 export type JoystickThrottle = {

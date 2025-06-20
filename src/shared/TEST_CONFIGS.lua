@@ -5,7 +5,7 @@ TEST_CONFIGS.TESTING = true
 --configurables
 TEST_CONFIGS.CLEAN_DATA = true -- data is fresh each time
 
-TEST_CONFIGS.TANK_DMG = false  -- force set damage all tank bullets do
+TEST_CONFIGS.TANK_DMG = 100000  -- force set damage all tank bullets do
 TEST_CONFIGS.VISUALISE_AIM = false  -- force set damage all tank bullets do
 
 TEST_CONFIGS.SOUNDTRACK_OFF = true

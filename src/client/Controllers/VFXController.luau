@@ -8,7 +8,17 @@ local Trove = require(Knit.Packages.Trove)
 local VFXController = Knit.CreateController({ Name = "VFXController"})
 
 function VFXController:KnitInit()
-    
+    self.VFXService = Knit.GetService("VFXService")
+end
+
+function VFXController:KnitStart()
+    self.VFXService.TransmitEffect:Connect(function(vfxType: string, info: Types.VFXInfo)
+        if info.Parent == nil and info.CFrame == nil then 
+            return 
+        end
+
+        self:SpawnVFX(vfxType, info)
+    end)
 end
 
 local function scaleParticleSize(particle, factor: number)
@@ -26,6 +36,13 @@ local function scaleParticleSize(particle, factor: number)
 	particle.Size = NumberSequence.new(newKeypoints)
 end
 
+local function PlaySoundByRemoving(sound: Sound, newParent: Instance)
+    local newSound = sound:Clone()
+    newSound.Parent = newParent
+    newSound.PlayOnRemove = true 
+    newSound:Destroy()
+end
+
 
 function VFXController:SpawnVFX(vfxType: string, info: Types.VFXInfo)
     info = (info or {}) :: Types.VFXInfo
@@ -41,6 +58,7 @@ function VFXController:SpawnVFX(vfxType: string, info: Types.VFXInfo)
         effectParent = vfxTrove:Add(Instance.new("Part"))
         effectParent.Parent = workspace 
         effectParent.CFrame = info.CFrame
+        effectParent.CanQuery = false
         effectParent.Anchored = true 
         effectParent.CanCollide = false 
         effectParent.Transparency =1 
@@ -53,14 +71,15 @@ function VFXController:SpawnVFX(vfxType: string, info: Types.VFXInfo)
 
     local despawnTime = 0 
 
+    if info.SoundSource then 
+        local selectedSound = info.SoundSource:GetChildren()[math.random(1,#info.SoundSource:GetChildren())]
+        PlaySoundByRemoving(selectedSound, effectParent)        
+    end
+
     for _, object: ParticleEmitter | Sound in baseVFX:GetDescendants() do 
         --Handle sounds
         if object:IsA("Sound") then 
-            local clone = object:Clone()
-            clone.Parent = effectParent
-            clone.PlayOnRemove = true 
-            clone:Destroy()
-            continue
+            PlaySoundByRemoving(object, effectParent)    
         end
 
         --If its not a particle emiiter we don't care
@@ -92,3 +111,10 @@ function VFXController:SpawnVFX(vfxType: string, info: Types.VFXInfo)
 end
 
 return VFXController
+--[[
+VFX TESTER
+
+for _, object in game:GetService("Selection"):Get()[1]:GetChildren() do 
+    object:Emit(object.Rate)
+end
+]]

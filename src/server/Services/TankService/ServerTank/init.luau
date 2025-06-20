@@ -1,5 +1,6 @@
 --!strict
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local Assets = ReplicatedStorage.Assets
 local TestConfigs = require(ReplicatedStorage.Shared.TEST_CONFIGS)
 local Knit = require(ReplicatedStorage.Packages.Knit)
 local Trove = require(ReplicatedStorage.Packages.Trove)
@@ -8,7 +9,7 @@ local Types = require(ReplicatedStorage.Shared.Data.Types)
 local HitboxData = require(ReplicatedStorage.Shared.Data.HitboxData)
 local UpgradeTracks = require(ReplicatedStorage.Shared.Data.UpgradeTracks)
 
-local TankPrefabs = ReplicatedStorage.Assets.Tanks
+local TankPrefabs = Assets.Tanks
 
 local ServerTank = {}
 ServerTank.__index = ServerTank
@@ -21,6 +22,7 @@ function ServerTank.new(driver: Player, tankType: string, tankUpgrades: {})
     self.TankService = Knit.GetService("TankService")
     self.DamageService = Knit.GetService("DamageService")
     self.DataService = Knit.GetService("DataService")
+    self.VFXService = Knit.GetService("VFXService")
 
     self.Trove = Trove.new() 
 
@@ -29,6 +31,7 @@ function ServerTank.new(driver: Player, tankType: string, tankUpgrades: {})
     self.TankData = TankData[self.Type] :: Types.TankData
     self.Character = driver.Character :: Model
     self.Model = self.Trove:Add(TankPrefabs[tankType]:Clone()) :: Model
+    self.Body = self.Model:FindFirstChild("Body") :: Model
     self.Attributes = self:GetAttributes(tankUpgrades) :: Types.TankAttributes
     self.Chassis = self.Model:FindFirstChild("Chassis") :: Model 
     self.Seat = self.Chassis:FindFirstChild("VehicleSeat") :: VehicleSeat
@@ -143,11 +146,34 @@ function ServerTank:EndClientPhysics()
     primaryPart.AssemblyLinearVelocity = Vector3.zero
 end
 
+function ServerTank:PlayDeathAnimation()
+    for _, object in self.Body:GetChildren() do 
+        if object:IsA("BasePart") then 
+            object.Color = Color3.fromRGB(27,42,53)
+            local surfaceAppearence = object:FindFirstChild("SurfaceAppearance")
+            if surfaceAppearence then 
+                surfaceAppearence:Destroy() -- not ideal
+            end
+        end
+    end
+
+    self.VFXService:DoEffect("TankExplosion", {
+        Parent = self.Body.Body,
+        SoundSource = ReplicatedStorage.Assets.Sound.TankDestroyed
+    })
+
+    for _, object in Assets.VFX.DestroyedTank:GetChildren() do 
+        object:Clone().Parent = self.Body.Body
+    end
+end
+
 function ServerTank:Disable(waitTime: number?)
     --Flow:
     --disabled (so its not alive now) --> wait --> clean
     --Only time disable shouldnt be called first is when the round is over or the player leaves.
     local actualWaitTime = waitTime or 5 :: number
+
+    self:PlayDeathAnimation()
 
     self.Alive = false
     self.Model:SetAttribute("Alive", false)
