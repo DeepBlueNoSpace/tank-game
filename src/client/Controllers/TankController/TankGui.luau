@@ -10,6 +10,7 @@ local PlayerGui = Player:WaitForChild("PlayerGui")
 
 local Types = require(ReplicatedStorage.Shared.Data.Types)
 local HitboxData = require(ReplicatedStorage.Shared.Data.HitboxData)
+local TestConfigs = require(ReplicatedStorage.Shared.TEST_CONFIGS)
 local HitNeedle = require(script.Parent.HitNeedle)
 
 local TankGui = {}
@@ -86,7 +87,6 @@ part.Color = Color3.fromRGB(255, 0, 0)
 part.Material = Enum.Material.Neon
 part.Size = Vector3.new(0.2, 0.2, 1) -- Initial dummy size
 part.Name = "RayVisual"
-part.Parent = workspace
 
 function TankGui:UpdateAimingReticle()
     local barrelEndPosition = self.Tank.Turret.Barrel.BarrelEnd.WorldPosition
@@ -99,10 +99,13 @@ function TankGui:UpdateAimingReticle()
     local hitPosition = result and result.Position or (barrelEndPosition + direction)
     
     -- Visualize ray
-    local rayVector = hitPosition - barrelEndPosition
-    part.Size = Vector3.new(0.2, 0.2, rayVector.Magnitude)
-    part.CFrame = CFrame.new(barrelEndPosition, hitPosition) * CFrame.new(0, 0, -rayVector.Magnitude / 2)
+    if TestConfigs.Is("VISUALISE_AIM") then 
+        part.Parent = workspace
 
+        local rayVector = hitPosition - barrelEndPosition
+        part.Size = Vector3.new(0.2, 0.2, rayVector.Magnitude)
+        part.CFrame = CFrame.new(barrelEndPosition, hitPosition) * CFrame.new(0, 0, -rayVector.Magnitude / 2)
+    end
     -- UI aiming reticle
     local camera = workspace.CurrentCamera
     local screenPoint = camera:WorldToViewportPoint(hitPosition)

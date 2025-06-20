@@ -112,7 +112,8 @@ function ClientTank.new(tankModel: Model, type: string)
     self.RaycastParamsIgnoreSelf.FilterType = Enum.RaycastFilterType.Exclude
     self.RaycastParamsIgnoreSelf.FilterDescendantsInstances = CollectionService:GetTagged("RaycastIgnore")
     self.RaycastParamsIgnoreSelf:AddToFilter{self.Model, Player.Character}
-    
+    self.RaycastParamsIgnoreSelf.RespectCanCollide = false 
+
     self.Trove:Add(CollectionService:GetInstanceAddedSignal("RaycastIgnore"):Connect(function(instance: Instance)
         self.RaycastParamsIgnoreSelf:AddToFilter{instance}
     end))
