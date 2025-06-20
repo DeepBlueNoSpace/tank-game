@@ -54,6 +54,7 @@ function UpgradeService.Client:RequestUpgrade(player: Player, tankName: string, 
     tankUpgrades[trackName] = nextProgress
 
     replica:SetValue({"OwnedTanks"}, ownedTanks)
+    Knit.GetService("StatService"):IncrementStat(player, "UpgradesPurchased", 1)
 
     return true
 end

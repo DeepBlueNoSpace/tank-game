@@ -12,7 +12,6 @@ function LobbyMainUI:OpenFrame()
 
 	self.Open = true
 	self.Frame.Visible = true
-
 	
 	Knit.GetController("DataController"):GetReplicaPromise(game.Players.LocalPlayer):andThen(function(replica)
 		self.TankDisplay:SetTank(replica.Data.EquippedTank)
@@ -76,10 +75,16 @@ function LobbyMainUI:KnitStart()
 	self.Options = self.Frame:WaitForChild("Options")
 
 	self.TankShopButton = self.Options:WaitForChild("Tanks")
+	self.QuestsButton = self.Options:WaitForChild("Quests")
 
 	self.TankShopButton.Activated:Connect(function()
 		self:CloseFrame()
 		self.UIController:AttemptOpen(Knit.GetController("TankShopUI"))
+	end)
+
+	self.QuestsButton.Activated:Connect(function()
+		self:CloseFrame()
+		self.UIController:AttemptOpen(Knit.GetController("QuestUI"))
 	end)
 	
 	self:HookLevelComponent(self.Frame:WaitForChild("LevelComponent"))

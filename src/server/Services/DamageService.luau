@@ -73,10 +73,9 @@ function DamageService:ReportDamage(sender: Player, receiver: Player, damage: nu
 
         self.Log[receiver] = {}
         self.GameLoopService:ReportKill(sender, receiver) -- respawning etc
---[[ TODO
-        else
-            sendHitDataToHit() 
-            ]]
+        Knit.GetService("StatService"):IncrementStat(sender, "Kills", 1)
+        Knit.GetService("StatService"):IncrementStat(receiver, "Deaths", 1)
+
     end
 end
 
