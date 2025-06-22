@@ -9,7 +9,7 @@ local Knit = require(ReplicatedStorage.Packages.Knit)
 local ExplosionService = Knit.CreateService({ Name = "ExplosionService"})
 
 local DEFAULT_PRESSURE = 300
-local PHYSICS_RADIUS_MOD = 0.4 
+local PHYSICS_RADIUS_MOD = 0.8
 local TERRAIN_RADIUS_MOD = 0.2
 
 function ExplosionService:KnitInit()

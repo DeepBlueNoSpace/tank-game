@@ -16,6 +16,8 @@ local Chassis = require(script.Parent.Chassis)
 local Keymap = require(script.Parent.Keymap)
 local TankCamera = require(script.Parent.TankCamera)
 local TankGui = require(script.Parent.TankGui)
+local Tracks = require(script.Parent.Tracks)
+
 
 local ClientTank = {}
 ClientTank.__index = ClientTank
@@ -27,6 +29,7 @@ local function _clearInput()
 		_rawInput[k] = 0
 	end
 end
+
 
 
 function ClientTank.new(tankModel: Model, type: string)
@@ -51,7 +54,7 @@ function ClientTank.new(tankModel: Model, type: string)
     self.DamageService = Knit.GetService("DamageService")
 
     self.Trove = Trove.new() 
-    self.Chassis = self.Trove:Add(Chassis.new(tankModel, self.TankData.BaseAtrributes))
+    self.Chassis = self.Trove:Add(Chassis.new(tankModel, self.TankData.BaseAtrributes, self))
 
     --Parts
     self.Model = tankModel :: Model
@@ -84,6 +87,9 @@ function ClientTank.new(tankModel: Model, type: string)
 
 
     --Functions
+    self.LeftTracks = self.Trove:Add(Tracks.new(self.Model.Body.LeftWheels, self))
+    self.RightTracks = self.Trove:Add(Tracks.new(self.Model.Body.RightWheels, self))
+
     self.Trove:Add(RunService.Heartbeat:Connect(function()
         self:Update()
     end))
@@ -190,6 +196,14 @@ end
 
 function ClientTank:Update()
     self:UpdateTurret()
+    self.IsOccupied = self.Seat.Occupant == Player.Character.Humanoid
+
+    if self.IsOccupied then 
+        self:UpdateTurret()
+    end
+
+    self.LeftTracks:Update()
+    self.RightTracks:Update()
 end
 
 function ClientTank:HandleInput(inputObject: InputObject, gameProcessed: boolean)

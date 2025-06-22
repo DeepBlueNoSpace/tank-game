@@ -43,6 +43,7 @@ Chassis.__index = Chassis
 
 local REVERSE_SPEED_MULT = 0.5
 local BREAKING_TORQUE_MULT = 10
+local DISTANCE_PER_TREAD = 1
 
 local function CreateVehicleParameters(tankAttributes: Types.TankAttributes)
 	local parameters = {
@@ -67,7 +68,7 @@ local function CreateVehicleParameters(tankAttributes: Types.TankAttributes)
 	return parameters
 end
 
-function Chassis.new(vehicle: Model, baseAtrributes: Types.TankAttributes) 
+function Chassis.new(vehicle: Model, baseAtrributes: Types.TankAttributes, tank: {}) 
     local self = setmetatable({}, Chassis)
 	self.parameters = CreateVehicleParameters(baseAtrributes)
 
@@ -77,7 +78,8 @@ function Chassis.new(vehicle: Model, baseAtrributes: Types.TankAttributes)
     self.vehicle = vehicle :: Model
     self.RedressMount = self.root:WaitForChild("RedressMount") :: BasePart
 	self.CosmeticWheelMotors = self.root:WaitForChild("FloorPanel"):WaitForChild("WheelMotors"):GetChildren() :: {}
-
+	self.Tank = tank
+	
 	self.Motors = {}
 	self.LastFakeRPM = 0 
 
@@ -92,7 +94,8 @@ function Chassis.new(vehicle: Model, baseAtrributes: Types.TankAttributes)
 
 	self.TotalDistanceTravelled = 0 :: number
 	self.LastPosition = self.driverSeat.Position :: Vector3
-	
+	self.DistanceTravelledSinceLastTread = 0 :: number
+
     self.driverSeat.MaxSpeed = self.parameters.MaxSpeed * wheelRadius
 
 	self:InitializeDrivingValues()
@@ -345,6 +348,14 @@ function Chassis:UpdateWheelMotors()
 
 	local signedDistance = delta:Dot(forward) :: number
 	self.TotalDistanceTravelled += signedDistance 
+	self.DistanceTravelledSinceLastTread += signedDistance
+
+	if math.abs(self.DistanceTravelledSinceLastTread) > DISTANCE_PER_TREAD then 
+		local emitFromBack = self.DistanceTravelledSinceLastTread<0
+		self.Tank.LeftTracks:Emit(emitFromBack)
+		self.Tank.RightTracks:Emit(emitFromBack)
+		self.DistanceTravelledSinceLastTread = 0 
+	end	
 
 	self.LastPosition = newPosition
 
