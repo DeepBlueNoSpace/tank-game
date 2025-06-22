@@ -33,6 +33,16 @@ function TankUtil.GetEquippedPlayerTankAndUpgrades(player) : (string?, Types.Tan
     return equippedTankType, baseData, tankUpgrades
 end
 
+function TankUtil.SpawnTankModelAtPart(tankType: string, part: BasePart)
+    local tankModel = ReplicatedStorage.Assets.Tanks[tankType]:Clone()
+
+    local cf, bbSize = tankModel:GetBoundingBox()
+    local bbOffset = tankModel.PrimaryPart.CFrame:ToObjectSpace(cf)
+
+    tankModel:SetPrimaryPartCFrame(part.CFrame * CFrame.new(0,-part.Size.Y/2 + bbSize.Y/2,0) * bbOffset)
+
+    return tankModel
+end
 
 
 

@@ -43,11 +43,7 @@ function KillcamUI:KnitStart()
     self.Frame = gameGui:WaitForChild("KillCam")
     self.BackgroundFrame = self.Frame:WaitForChild("Background")
 
-    self.GameLoopService.PlayerKilled:Connect(function(killer, victim)
-        if victim == Players.LocalPlayer then
-            self:OpenFrame(killer)
-        end
-    end)
+    
 end
 
 return KillcamUI

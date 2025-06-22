@@ -19,7 +19,6 @@ function DeathmatchGamemode:Start()
         self:PlayerAdded(plyr)
     end
     
-    
     self.Trove:Add(game:GetService("RunService").Heartbeat:Connect(function(deltaTime)
         if self:CheckWinCondition() then
             self:End()
@@ -32,8 +31,57 @@ function DeathmatchGamemode:CheckWinCondition()
 end
 
 function DeathmatchGamemode:End()
+    local winners: {[string]: boolean} = {}
+    local endgameDataPackage: {Types.EndgamePlayerPackage} = {}
+
+    -- get winners
+    local leaderboardHash = self.Client.KillLeaderboard:Get()
+    local leaderboardArr = {}
+
+    for player: Player, kills: number in pairs(leaderboardHash) do
+        local playerObj = game.Players:FindFirstChild(player)
+        if not playerObj then
+            continue -- player left, skip them
+        end
+        local replica = self.DataService:GetReplica(playerObj)
+        if not replica then
+            continue -- no replica, skip them
+        end
+
+        table.insert(leaderboardArr, {
+            Player = playerObj,
+            Kills = kills,
+            Replica = replica,
+        })
+    end
+
+    table.sort(leaderboardArr, function(a, b)
+        return a.Kills > b.Kills
+    end)
+
+    if #leaderboardArr > 0 then -- probably overkill but make sure no edge case server crashes with 0 players
+        -- first 1/2 of the leaderboard is winners, rest are losers
+        -- doesn't handle case where players are tied
+        for i = 1, math.max(math.floor(#leaderboardArr / 2),1) do
+            winners[leaderboardArr[i].Player.Name] = true
+        end
+
+        -- populate endgameDataPackage with players sorted by performance
+        for i, data in pairs(leaderboardArr) do
+            table.insert(endgameDataPackage, {
+                PlayerName = data.Player.Name,
+                Player = data.Player,
+                Tank = data.Replica.Data.EquippedTank,
+                Rank = i,
+                IsWinner = winners[data.Player.Name] == true,
+                Kills = data.Kills,
+                Team = data.Player.Team,
+            })
+        end
+    end
+
     self.Trove:Clean()
-    self.Ended:Fire()
+    self.Ended:Fire(winners, endgameDataPackage)
 end
 
 function DeathmatchGamemode:ReportKill(killer: Player, victim: Player)
@@ -60,6 +108,7 @@ function DeathmatchGamemode:PlayerAdded(player: Player)
 end
 
 function DeathmatchGamemode:KnitInit()
+    self.DataService = Knit.GetService("DataService")
     self.GameLoopService = Knit.GetService("GameLoopService")
     self.ServerTimeService = Knit.GetService("ServerTimeService")
 end

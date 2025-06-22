@@ -13,6 +13,7 @@ local TeamUtil = require(ReplicatedStorage.Shared.Modules.TeamUtil)
 
 function TankService:KnitInit() 
     self.DataService = Knit.GetService("DataService")
+    self.GameLoopService = Knit.GetService("GameLoopService")
 
 end
 
@@ -26,9 +27,9 @@ end
 local tankIdGen = 1 
 
 function TankService.Client:RequestTank(player: Player)
-    if not player.Character or player.Character.Parent == nil then
-        warn("Player does not have a character when requesting a tank:", player)
-        return
+    if TankService.GameLoopService.Client.State:Get() ~= "Active" then
+        warn("Player tried to request a tank when the game is not active:", player, TankService.GameLoopService.Client.State:Get())
+        return false
     end
 
     local replica = TankService.DataService:GetReplica(player)
@@ -36,30 +37,33 @@ function TankService.Client:RequestTank(player: Player)
         return 
     end
 
-    if player.Team then
-        local playerTeam = tostring(player.Team)
-        local teamIndex = TeamUtil.GetTeamIndex(playerTeam)
-
-        local map = workspace:WaitForChild("Map") -- TODO get from gamemode controller
-        local spawns = map:WaitForChild("Spawns"):WaitForChild(tostring(teamIndex))
-        local chosenSpawn = spawns:GetChildren()[math.random(1, #spawns:GetChildren())]
-
-        local humanoid = player.Character:FindFirstChild("Humanoid") :: Humanoid
-        if not humanoid then 
-            return 
-        end
-
-        local height = humanoid and humanoid.HipHeight or 0
-        player.Character:PivotTo(chosenSpawn.CFrame * CFrame.new(Vector3.new(0,height,0)))
-    else
+    if not player.Team then
         warn("Player does not have a team assigned when requesting a tank:", 
-            player.Name, "are you sure this is supposed to happen?")
+            player, " -- not handled rn")
+        return
     end
+
+
+    local playerTeam = tostring(player.Team)
+    local teamIndex = TeamUtil.GetTeamIndex(playerTeam)
+
+    local map = workspace:WaitForChild("Map") -- TODO get from gamemode controller
+    local spawns = map:WaitForChild("Spawns"):WaitForChild(tostring(teamIndex))
+    local chosenSpawn = spawns:GetChildren()[math.random(1, #spawns:GetChildren())]
+
+    --local humanoid = player.Character:FindFirstChild("Humanoid") :: Humanoid
+    --if not humanoid then 
+    --    return 
+    --end
+
+    --local height = humanoid and humanoid.HipHeight or 0
+    --player.Character:PivotTo(chosenSpawn.CFrame * CFrame.new(Vector3.new(0,height,0)))
+ 
 
 
     local tankType = replica.Data.EquippedTank
     local tankUpgrades = replica.Data.OwnedTanks[tankType]
-    local tank = ServerTank.new(player, tankType, tankUpgrades)
+    local tank = ServerTank.new(player, tankType, tankUpgrades, chosenSpawn.CFrame)
     
     TankService.LiveTanks[player] = tank
 

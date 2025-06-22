@@ -12,6 +12,7 @@ local TankController = Knit.CreateController({ Name = "TankController",
 
 function TankController:KnitInit()
     self.TankService = Knit.GetService("TankService")
+    self.GameLoopService = Knit.GetService("GameLoopService")
     
 end
 
@@ -41,7 +42,7 @@ end
 function TankController:InitTank()
     self.TankService:RequestTank():andThen(function(tankId: string, type: string)
         local tankModel = workspace:WaitForChild("Tanks"):WaitForChild(tankId, 3) :: Model
-        assert(tankModel, "FUCK FUCK FUCK")
+        assert(tankModel, "no tankey wankey")
 
         self.Tank = ClientTank.new(tankModel, type) 
         Knit.GetController("GameUI"):OpenFrame()
@@ -49,7 +50,7 @@ function TankController:InitTank()
 end
 
 function TankController:AttemptDeploy()
-    if Knit.GetService("GameLoopService").State:Get() ~= "Active" then
+    if self.GameLoopService.State:Get() ~= "Active" then
 		warn("Cannot deploy, game state is:", self.GameLoopService.State:Get())
 		return
 	end

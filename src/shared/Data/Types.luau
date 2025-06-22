@@ -104,6 +104,15 @@ export type QuestData = {
     Reward: RewardData, -- The reward for completing the quest
 }
 
+export type EndgamePlayerPackage = {
+    PlayerName: string, -- The name of the player, needed for client replication
+    Player: Player?,
+    Tank: string, -- The last tank player used
+    Rank: number, -- The rank of the player in the endgame leaderboard
+    IsWinner: boolean, -- Yes/no was player a winner
+    Kills: number,
+    Team: Team,
+}
 
 
 return Types 
