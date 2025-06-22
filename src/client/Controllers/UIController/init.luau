@@ -6,6 +6,8 @@ local Knit = require(ReplicatedStorage.Packages.Knit)
 local Player = game.Players.LocalPlayer
 local PlayerGui = Player:WaitForChild("PlayerGui")
 
+game:GetService("StarterGui"):SetCoreGuiEnabled(Enum.CoreGuiType.PlayerList, false)
+
 local UIController = Knit.CreateController({
 	Name = "UIController",
 	activeController = nil,
