@@ -38,7 +38,7 @@ function DestructionService:DestroyParts(position: Vector3, radius: number, blas
     local Voxels = VoxBreaker:CreateHitbox(Vector3.new(radius,radius,radius), CFrame.new(position), Enum.PartType.Ball, 2)
 
     for _, x in pairs(Voxels) do
-        if math.random() < 0.8 then -- destroy roughly 80% of the voxels
+        if math.random() < 0.6 then -- destroy roughly 60% of the voxels
             x:Destroy()
         else
             x:SetAttribute("Destroyable", false)

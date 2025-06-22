@@ -34,6 +34,8 @@ function ServerTank.new(driver: Player, tankType: string, tankUpgrades: {})
     self.Body = self.Model:FindFirstChild("Body") :: Model
     self.Attributes = self:GetAttributes(tankUpgrades) :: Types.TankAttributes
     self.Chassis = self.Model:FindFirstChild("Chassis") :: Model 
+    self.FloorPanel = self.Chassis:FindFirstChild("FloorPanel") :: BasePart 
+
     self.Seat = self.Chassis:FindFirstChild("VehicleSeat") :: VehicleSeat
     self.Constraints = self.Model:FindFirstChild("Constraints") :: Folder 
     
@@ -42,6 +44,7 @@ function ServerTank.new(driver: Player, tankType: string, tankUpgrades: {})
 
     self.Alive = true :: boolean
 
+    self:WeldWheels()
     self:SetupHitbox()
    
     self.Model.Parent = workspace.Tanks
@@ -66,7 +69,7 @@ function ServerTank.new(driver: Player, tankType: string, tankUpgrades: {})
     return self
 end
 
-local function weldTo(x: BasePart, y: BasePart)
+local function weldTo(x: BasePart, y: BasePart): Motor6D
 	local motor = Instance.new("Motor6D")
 	motor.Name = x.Name .. "_Motor"
 	motor.Part0 = x
@@ -76,8 +79,21 @@ local function weldTo(x: BasePart, y: BasePart)
 	motor.C1 = CFrame.new()
 
 	motor.Parent = x
+    return motor
 end
 
+function ServerTank:WeldWheelSet(wheelSet: Model, namePrefix: string)
+    for _, wheel in wheelSet:GetChildren() do 
+        local motor = weldTo(self.FloorPanel , wheel)
+        motor.Name = string.format("%s%s", namePrefix, tostring(wheel.Name))
+        motor.Parent = self.FloorPanel.WheelMotors
+    end
+end
+
+function ServerTank:WeldWheels()
+    self:WeldWheelSet(self.Model.Body.LeftWheels, "L")
+    self:WeldWheelSet(self.Model.Body.RightWheels, "R")
+end
 
 function ServerTank:SetupHitbox()
     --Make it so it cant collide with itself
