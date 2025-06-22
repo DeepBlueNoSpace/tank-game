@@ -8,7 +8,6 @@ local LobbyMainUI= Knit.CreateController({ Name = "LobbyMainUI", Open = false })
 
 function LobbyMainUI:OpenFrame()
 	Knit.GetController("GameUI"):CloseFrame()
-	game:GetService("StarterGui"):SetCoreGuiEnabled(Enum.CoreGuiType.PlayerList, false)
 
 	self.Open = true
 	self.Frame.Visible = true
@@ -17,6 +16,8 @@ function LobbyMainUI:OpenFrame()
 		self.TankDisplay:SetTank(replica.Data.EquippedTank)
 		self.TankDisplay:EnableCamera()
 	end)
+
+	self.GameLoopService:RequestReplicationFocus(game.Players.LocalPlayer, "Lobby")
 end
 
 function LobbyMainUI:CloseFrame()

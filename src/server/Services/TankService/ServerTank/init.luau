@@ -15,7 +15,7 @@ local ServerTank = {}
 ServerTank.__index = ServerTank
 
 
-function ServerTank.new(driver: Player, tankType: string, tankUpgrades: {}) 
+function ServerTank.new(driver: Player, tankType: string, tankUpgrades: {}, spawnCFrame: CFrame) 
     local self = setmetatable({}, ServerTank)
 
     --Variables
@@ -52,16 +52,18 @@ function ServerTank.new(driver: Player, tankType: string, tankUpgrades: {})
     local hrp = self.Character:WaitForChild("HumanoidRootPart") :: BasePart
     self.Model.Name = driver.Name
     
-    local spawnCFrame = hrp.CFrame + hrp.CFrame.LookVector * 5
+    --local spawnCFrame = hrp.CFrame + hrp.CFrame.LookVector * 5
     self.Model:PivotTo(spawnCFrame)
     
     local tankSeat = self.Seat
-    local humanoid = self.Character:FindFirstChild("Humanoid") :: Humanoid
-    tankSeat:Sit(humanoid)
+    --local humanoid = self.Character:FindFirstChild("Humanoid") :: Humanoid
+    --tankSeat:Sit(humanoid)
 
-     self.Trove:Add(humanoid.Died:Connect(function() 
-        self:Disable()
-    end))
+    -- self.Trove:Add(humanoid.Died:Connect(function() 
+    --    self:Disable()
+    --end))
+
+    driver.ReplicationFocus = self.Model.PrimaryPart
 
     return self
 end
@@ -177,15 +179,9 @@ function ServerTank:Disable(waitTime: number?)
 
     self.Alive = false
     self.Model:SetAttribute("Alive", false)
-    self.Character:Destroy()
     self.TankService.Client.DestroyClientTank:Fire(self.Driver)
 
     self:EndClientPhysics()
-    
-    task.wait(actualWaitTime)
-    if self.Driver:IsDescendantOf(game) then 
-        self.Driver:LoadCharacter()
-    end
     
     task.wait(actualWaitTime*10) -- a long death is cool
     self:Destroy()

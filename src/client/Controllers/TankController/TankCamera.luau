@@ -43,9 +43,11 @@ function TankCamera.new(tank: {})
 	UserInputService.MouseBehavior = Enum.MouseBehavior.LockCenter
     UserInputService.MouseIconEnabled = false
 
-    self.Tank.Trove:Add(RunService.Heartbeat:Connect(function(dT: number)
+    self.Heartbeat = self.Tank.Trove:Add(RunService.Heartbeat:Connect(function(dT: number)
         self:Update(dT)
     end))
+
+
     self.Tank.Trove:Add(UserInputService.InputBegan:Connect(function(inputObject: InputObject, gameProcessedEvent: boolean)
         if gameProcessedEvent then return end
         if inputObject.UserInputType == Enum.UserInputType.MouseButton2 then
@@ -218,6 +220,7 @@ function TankCamera:Update(dT: number)
 end
 
 function TankCamera:Destroy()
+    self.Heartbeat:Disconnect()
     Camera.CameraType = Enum.CameraType.Custom
     UserInputService.MouseIconEnabled = true
     UserInputService.MouseBehavior = Enum.MouseBehavior.Default

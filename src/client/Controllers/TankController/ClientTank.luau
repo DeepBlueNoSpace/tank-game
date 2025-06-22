@@ -72,7 +72,7 @@ function ClientTank.new(tankModel: Model, type: string)
     self.RaycastParamsIgnoreSelf = RaycastParams.new() :: RaycastParams
 
     --State
-    self.IsOccupied = false :: boolean
+    --self.IsOccupied = false :: boolean
     self.IsJoystickControlled = false :: boolean
     self.LastShotTime = 0 :: number 
 
@@ -189,11 +189,7 @@ function ClientTank:GetInputValues()
 end
 
 function ClientTank:Update()
-    self.IsOccupied = self.Seat.Occupant == Player.Character.Humanoid
-
-    if self.IsOccupied then 
-        self:UpdateTurret()
-    end
+    self:UpdateTurret()
 end
 
 function ClientTank:HandleInput(inputObject: InputObject, gameProcessed: boolean)
