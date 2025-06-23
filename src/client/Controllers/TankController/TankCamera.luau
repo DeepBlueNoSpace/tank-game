@@ -132,7 +132,7 @@ function TankCamera:UpdateBarrel(dT: number)
     local pitch = math.deg(math.atan2(toTarget.Y, flatDist))
 
     -- Smoothly move towards target yaw and pitch
-    self.Tank.BarrelYaw = moveToward(self.Tank.BarrelYaw, yaw, maxAngleChange)
+    self.Tank.TargetBarrelYaw = yaw--moveToward(self.Tank.TargetBarrelYaw, yaw, maxAngleChange)
     self.Tank.BarrelPitch = moveToward(self.Tank.BarrelPitch, pitch, maxAngleChange)
     return yaw, pitch
 end

@@ -97,7 +97,7 @@ part.Name = "RayVisual"
 
 function TankGui:UpdateAimingReticle()
     local barrelEndPosition = self.Tank.Turret.Barrel.BarrelEnd.WorldPosition
-    local rayYaw = math.rad(self.Tank.BarrelYaw)
+    local rayYaw = math.rad(self.Tank.BarrelWorldYaw)
     local rayPitch = math.rad(self.Tank.BarrelPitch)
 
     local direction = CFrame.fromEulerAnglesYXZ(rayPitch, rayYaw, 0).LookVector * 2000

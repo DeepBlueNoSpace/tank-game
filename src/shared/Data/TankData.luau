@@ -32,7 +32,7 @@ TankData["Sherman 1"] = {
         Torque = 150000000, 
         Acceleration = 10,
         MaxSpeed = 18,
-        MaxSteer = 1.3, 
+        MaxSteer = 1.1, 
 
         BlastRadius = 20;
         BlastPressure = 300,
@@ -43,7 +43,7 @@ TankData["Sherman 1"] = {
         MaxDamage = 220,
         Cooldown = 4.5,
 
-        TurretAngularVelocity = 30,
+        TurretAngularVelocity = 35,
     }
 } :: Types.TankData
 
@@ -58,7 +58,7 @@ TankData["Sherman 2"] = {
         Torque = 150000000, 
         Acceleration = 1.8,
         MaxSpeed = 20,
-        MaxSteer = 1.3, 
+        MaxSteer = 1.1, 
 
         BlastRadius = 20;
         BlastPressure = 300,
@@ -69,7 +69,7 @@ TankData["Sherman 2"] = {
         MaxDamage = 260,
         Cooldown = 4.2,
 
-        TurretAngularVelocity = 30,
+        TurretAngularVelocity = 35,
     }
 } :: Types.TankData
 

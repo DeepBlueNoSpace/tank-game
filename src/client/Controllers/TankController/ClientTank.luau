@@ -65,7 +65,8 @@ function ClientTank.new(tankModel: Model, type: string)
     self.TargetBarrelAngle = 0 :: number 
     self.TargetRotatorAngle = 0 :: number 
     self.TankAimPosition = Vector3.new() :: Vector3 
-    self.BarrelYaw = 0 :: number
+    self.TargetBarrelYaw = 0 :: number
+    self.BarrelWorldYaw = 0 :: number
     self.BarrelPitch = 0 :: number
     self.CurrentRelativeYaw = 0 :: number
     self.Character = character :: Model
@@ -89,8 +90,8 @@ function ClientTank.new(tankModel: Model, type: string)
     self.LeftTracks = self.Trove:Add(Tracks.new(self.Model.Body.LeftWheels, self))
     self.RightTracks = self.Trove:Add(Tracks.new(self.Model.Body.RightWheels, self))
 
-    self.Trove:Add(RunService.Heartbeat:Connect(function()
-        self:Update()
+    self.Trove:Add(RunService.Heartbeat:Connect(function(dT)
+        self:Update(dT)
     end))
 
     self.Trove:Add(UserInputService.InputBegan:Connect(function(inputObject: InputObject, gameProcessed: boolean) 
@@ -198,13 +199,10 @@ function ClientTank:GetInputValues()
     return throttle, steering, handbreak
 end
 
-function ClientTank:Update()
-    self:UpdateTurret()
+function ClientTank:Update(dT: number)
+    self:UpdateTurret(dT)
     self.IsOccupied = self.Seat.Occupant == Player.Character.Humanoid
 
-    if self.IsOccupied then 
-        self:UpdateTurret()
-    end
 
     self.LeftTracks:Update()
     self.RightTracks:Update()
@@ -226,11 +224,20 @@ local function lerp(v0,v1,t)
     return v0+(v1-v0) * t 
 end
 
-function ClientTank:UpdateTurret()
-    -- YAW
+local function moveToward(current, target, maxDelta)
+    local delta = (target - current + 180) % 360 - 180 -- shortest angle difference
+    if math.abs(delta) <= maxDelta then
+        return target
+    end
+    return (current + math.sign(delta) * maxDelta + 180) % 360 - 180
+end
+
+function ClientTank:UpdateTurret(dT)
+    local maxAngleChange = self.TankData.BaseAtrributes.TurretAngularVelocity * dT
+
     local baseCFrame = self.TurretBase.CFrame
     local currentYaw = self.RotatorServo.TargetAngle
-    local desiredYawWorld = self.BarrelYaw
+    local desiredYawWorld = self.TargetBarrelYaw
 
     local baseYaw = math.deg(math.atan2(-baseCFrame.LookVector.X, -baseCFrame.LookVector.Z))
     local desiredRelativeYaw = desiredYawWorld - baseYaw
@@ -239,8 +246,10 @@ function ClientTank:UpdateTurret()
     self.CurrentRelativeYaw += delta
 
     self.TargetRotatorAngle = self.CurrentRelativeYaw
-    self.RotatorServo.TargetAngle = lerp(currentYaw, self.TargetRotatorAngle, 0.5)
+    self.RotatorServo.TargetAngle = moveToward(currentYaw, self.TargetRotatorAngle, maxAngleChange)
 
+    self.BarrelWorldYaw = baseYaw + self.RotatorServo.TargetAngle
+    
     -- PITCH
     local rotatorCFrame = self.Rotator.CFrame
     local currentPitch = self.BarrelHinge.CurrentAngle
