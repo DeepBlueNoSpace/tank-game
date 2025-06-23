@@ -25,9 +25,7 @@ function TankController:KnitStart()
     end)
 
     self.TankService.DisableClientTanks:Connect(function() 
-        print'disabling'
         if self.Tank then 
-            print'wassup'
             self.Tank:Disable()
         end
     end)
