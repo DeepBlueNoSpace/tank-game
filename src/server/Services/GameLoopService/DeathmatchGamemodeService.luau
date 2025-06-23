@@ -19,7 +19,7 @@ function DeathmatchGamemode:Start()
         self:PlayerAdded(plyr)
     end
     
-    self.Trove:Add(game:GetService("RunService").Heartbeat:Connect(function(deltaTime)
+    self.Trove:Add(game:GetService("RunService").Heartbeat:Connect(function()
         if self:CheckWinCondition() then
             self:End()
         end
@@ -30,11 +30,7 @@ function DeathmatchGamemode:CheckWinCondition()
     return self.ServerTimeService:GetTime() > self.GameLoopService.Client.StateEndTime:Get() -- no win condition, just end the game after a time
 end
 
-function DeathmatchGamemode:End()
-    local winners: {[string]: boolean} = {}
-    local endgameDataPackage: {Types.EndgamePlayerPackage} = {}
-
-    -- get winners
+function DeathmatchGamemode:GetWinners()
     local leaderboardHash = self.Client.KillLeaderboard:Get()
     local leaderboardArr = {}
 
@@ -59,6 +55,16 @@ function DeathmatchGamemode:End()
         return a.Kills > b.Kills
     end)
 
+    return leaderboardArr
+end
+
+
+function DeathmatchGamemode:End()
+    local winners: {[string]: boolean} = {}
+    local endgameDataPackage: {Types.EndgamePlayerPackage} = {}
+
+    -- get winners
+    local leaderboardArr = self:GetWinners()
     if #leaderboardArr > 0 then -- probably overkill but make sure no edge case server crashes with 0 players
         -- first 1/2 of the leaderboard is winners, rest are losers
         -- doesn't handle case where players are tied
@@ -84,7 +90,7 @@ function DeathmatchGamemode:End()
     self.Ended:Fire(winners, endgameDataPackage)
 end
 
-function DeathmatchGamemode:ReportKill(killer: Player, victim: Player)
+function DeathmatchGamemode:ReportKill(killer: Player, _victim: Player)
     local leaderboard = self.Client.KillLeaderboard:Get()
     if not leaderboard[killer.Name] then
         leaderboard[killer.Name] = 0

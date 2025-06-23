@@ -31,12 +31,12 @@ function GameLoopService:Main()
             -- wait a few seconds...............
 
             -- Select gamemode
-            warn("TODO: players vote on gamemode")
+            --warn("TODO: players vote on gamemode")
             local selectedGamemode = "Deathmatch"
 
             -- Select + load map
-            warn("TODO: players vote on map")
-            warn("TODO: Load map")
+           -- warn("TODO: players vote on map")
+           -- warn("TODO: Load map")
 
             -- Setup teams, just assume all maps have 2 for now
             Knit.GetService("TeamService"):SetupTeams(2)
@@ -58,6 +58,8 @@ function GameLoopService:Main()
             self:_renderHumanoidsAtEndgameScene(endgameDataPackage)
 
             -- TODO give rewards to winners?
+
+            Knit.GetService("TankService"):DeactivateTanks()
 
             task.wait(10) -- give time for victory/defeat popup to show + move on to leaderboard
             Knit.GetService("TankService"):DestroyAllTanks()

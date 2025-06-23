@@ -39,7 +39,9 @@ function TankBillboardController:KnitStart()
 
     CollectionService:GetInstanceRemovedSignal("Tank"):Connect(function(tank:Model)
         local tankData = self.IndexedTanks[tank]
-        tankData.Trove:Destroy()
+        if tankData then 
+            tankData.Trove:Destroy()
+        end
     end)
 
 

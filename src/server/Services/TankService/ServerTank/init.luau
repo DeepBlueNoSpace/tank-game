@@ -14,6 +14,7 @@ local TankPrefabs = Assets.Tanks
 local ServerTank = {}
 ServerTank.__index = ServerTank
 
+local DESTROY_TIME = 20 
 
 function ServerTank.new(driver: Player, tankType: string, tankUpgrades: {}, spawnCFrame: CFrame) 
     local self = setmetatable({}, ServerTank)
@@ -52,20 +53,8 @@ function ServerTank.new(driver: Player, tankType: string, tankUpgrades: {}, spaw
     local primaryPart = self.Model.PrimaryPart :: BasePart
     primaryPart:SetNetworkOwner(driver)
 
-    local hrp = self.Character:WaitForChild("HumanoidRootPart") :: BasePart
-    self.Model.Name = driver.Name
-    
-    --local spawnCFrame = hrp.CFrame + hrp.CFrame.LookVector * 5
+    self.Model.Name = driver.Name    
     self.Model:PivotTo(spawnCFrame)
-    
-    local tankSeat = self.Seat
-    --local humanoid = self.Character:FindFirstChild("Humanoid") :: Humanoid
-    --tankSeat:Sit(humanoid)
-
-    -- self.Trove:Add(humanoid.Died:Connect(function() 
-    --    self:Disable()
-    --end))
-
     driver.ReplicationFocus = self.Model.PrimaryPart
 
     return self
@@ -185,22 +174,26 @@ function ServerTank:PlayDeathAnimation()
     end
 end
 
-function ServerTank:Disable(waitTime: number?)
+function ServerTank:Died()
     --Flow:
     --disabled (so its not alive now) --> wait --> clean
     --Only time disable shouldnt be called first is when the round is over or the player leaves.
-    local actualWaitTime = waitTime or 5 :: number
 
+    self.TankService.Client.DestroyClientTank:Fire(self.Driver)
+
+    task.wait(DESTROY_TIME) -- a long death is cool
     self:PlayDeathAnimation()
 
     self.Alive = false
     self.Model:SetAttribute("Alive", false)
-    self.TankService.Client.DestroyClientTank:Fire(self.Driver)
-
     self:EndClientPhysics()
-    
-    task.wait(actualWaitTime*10) -- a long death is cool
+
+
     self:Destroy()
+end
+
+function ServerTank:Disable()
+    self.TankService.Client.DisableClientTanks:Fire(self.Driver)
 end
 
 function ServerTank:Destroy()
@@ -227,7 +220,7 @@ function ServerTank:TakeDamage(damage: number, sender: Player?, hitbox: string, 
     self.Model:SetAttribute("Health", math.max(newHealth, 0))
 
     if wasKilled then
-        self:Disable()
+        self:Died()
     end
 end
 

@@ -23,6 +23,14 @@ function TankController:KnitStart()
             self.Tank = nil 
         end
     end)
+
+    self.TankService.DisableClientTanks:Connect(function() 
+        print'disabling'
+        if self.Tank then 
+            print'wassup'
+            self.Tank:Disable()
+        end
+    end)
 end
 
 function TankController:GetTankFromPlayer(player) : Model?

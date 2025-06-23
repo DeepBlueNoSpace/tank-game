@@ -5,7 +5,8 @@ local HttpService = game:GetService("HttpService")
 local Knit = require(ReplicatedStorage.Packages.Knit)
 local TankService = Knit.CreateService({ Name = "TankService", 
     Client = {
-        DestroyClientTank = Knit.CreateSignal()}, 
+        DestroyClientTank = Knit.CreateSignal(),
+        DisableClientTanks = Knit.CreateSignal()}, 
         LiveTanks = {} :: {[Player]:{}}
     })
 local ServerTank = require(script.ServerTank)
@@ -51,16 +52,6 @@ function TankService.Client:RequestTank(player: Player)
     local spawns = map:WaitForChild("Spawns"):WaitForChild(tostring(teamIndex))
     local chosenSpawn = spawns:GetChildren()[math.random(1, #spawns:GetChildren())]
 
-    --local humanoid = player.Character:FindFirstChild("Humanoid") :: Humanoid
-    --if not humanoid then 
-    --    return 
-    --end
-
-    --local height = humanoid and humanoid.HipHeight or 0
-    --player.Character:PivotTo(chosenSpawn.CFrame * CFrame.new(Vector3.new(0,height,0)))
- 
-
-
     local tankType = replica.Data.EquippedTank
     local tankUpgrades = replica.Data.OwnedTanks[tankType]
     local tank = ServerTank.new(player, tankType, tankUpgrades, chosenSpawn.CFrame)
@@ -78,7 +69,7 @@ end
 
 function TankService:DestroyAllTanks()
     for _, tank in pairs(self.LiveTanks) do
-        tank:Disable(0)
+        tank:Destroy()
     end
 end
 
@@ -92,6 +83,11 @@ function TankService:GetTankFromModel(model: Model)
     return nil
 end
 
+function TankService:DeactivateTanks()
+for _, tank in pairs(self.LiveTanks) do
+        tank:Disable()
+    end
+end
 
 
 

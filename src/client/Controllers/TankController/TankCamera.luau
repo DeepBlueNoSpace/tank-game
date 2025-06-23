@@ -180,21 +180,24 @@ end
 
 function TankCamera:SetScopedProgress(progress)
     self.Tank.Model.Body.Turret.Transparency = progress
-    self.Tank.TankGui.Scope.ImageTransparency = 1-progress
-    self.Tank.TankGui.Crosshair.ImageTransparency = 1-progress
-    for _, frame in self.Tank.TankGui.ScopeBacking do 
-        if frame:IsA("Frame") then 
-            frame.BackgroundTransparency = 1-progress
+    Camera.FieldOfView = lerp(DEFAULT_FOV, SCOPED_FOV, progress)
+
+    if self.Tank.TankGui then 
+        self.Tank.TankGui.Scope.ImageTransparency = 1-progress
+        self.Tank.TankGui.Crosshair.ImageTransparency = 1-progress
+        self.Tank.TankGui.Reticle.ImageTransparency = progress
+        self.Tank.TankGui.Crosshair.Position = self.Tank.TankGui.Aimer.Position
+
+        for _, frame in self.Tank.TankGui.ScopeBacking do 
+            if frame:IsA("Frame") then 
+                frame.BackgroundTransparency = 1-progress
+            end
+        end
+        
+        for _, frame in self.Tank.TankGui.AimerHairs do 
+            frame.BackgroundTransparency = progress
         end
     end
-
-    for _, frame in self.Tank.TankGui.AimerHairs do 
-        frame.BackgroundTransparency = progress
-    end
-
-    self.Tank.TankGui.Reticle.ImageTransparency = progress
-    Camera.FieldOfView = lerp(DEFAULT_FOV, SCOPED_FOV, progress)
-    self.Tank.TankGui.Crosshair.Position = self.Tank.TankGui.Aimer.Position
 end
 
 function TankCamera:Update(dT: number)

@@ -30,8 +30,6 @@ local function _clearInput()
 	end
 end
 
-
-
 function ClientTank.new(tankModel: Model, type: string)
     local self = setmetatable({}, ClientTank)
     local character = GetSafeCharacter() 
@@ -78,6 +76,7 @@ function ClientTank.new(tankModel: Model, type: string)
     --self.IsOccupied = false :: boolean
     self.IsJoystickControlled = false :: boolean
     self.LastShotTime = 0 :: number 
+    self.Disabled = false :: boolean 
 
     self.JoystickThrottle = {
         Z = 0,
@@ -99,6 +98,11 @@ function ClientTank.new(tankModel: Model, type: string)
     end))
 
     self.Trove:Add(RunService.RenderStepped:Connect(function() 
+        if self.Disabled then 
+            self.Chassis:EnableHandbrake()
+            return
+        end
+
         local throttle, steering, handbreak = self:GetInputValues()
 
         local currentVel = self.Chassis:GetAverageVelocity()
@@ -284,6 +288,13 @@ function ClientTank:Fire()
     self.Seat:ApplyImpulse(directionOfFire*TankUtil.GetAttribute("RecoilForce", self.TankType, self.UpgradeData)*-1)
     self.Camera:ApplyShotImpulse(200)
 end
+
+function ClientTank:Disable()
+    self.Disabled = true
+    self.TankGui:Destroy() 
+    self.TankGui = nil 
+end
+
 function ClientTank:Destroy() 
     self.Trove:Destroy() -- removes all the binds n shit
 end

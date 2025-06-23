@@ -12,6 +12,7 @@ local Types = require(ReplicatedStorage.Shared.Data.Types)
 local HitboxData = require(ReplicatedStorage.Shared.Data.HitboxData)
 local TestConfigs = require(ReplicatedStorage.Shared.TEST_CONFIGS)
 local HitNeedle = require(script.Parent.HitNeedle)
+local Trove = require(ReplicatedStorage.Packages.Trove)
 
 local TankGui = {}
 TankGui.__index = TankGui
@@ -21,7 +22,9 @@ function TankGui.new(tank: {})
     self.Tank = tank :: {}
     self.HitNeedles = {} :: {[string]:{}}
 
-    self.Gui = self.Tank.Trove:Add(TankGuiPrefab:Clone()) :: ScreenGui
+    self.Trove = Trove.new()
+    
+    self.Gui = self.Trove:Add(TankGuiPrefab:Clone()) :: ScreenGui
     self.Aimer = self.Gui:FindFirstChild("Aimer") :: Frame 
     self.AimerHairs = self.Aimer:GetChildren() :: {Frame}
     self.HealthFill = self.Gui:FindFirstChild("Health").Fill :: Frame 
@@ -45,7 +48,7 @@ function TankGui.new(tank: {})
     if touchGui then
         self:SetUpMobile(touchGui)
     else
-        self.Tank.Trove:Add(PlayerGui.ChildAdded:Connect(function(child)
+        self.Trove:Add(PlayerGui.ChildAdded:Connect(function(child)
             if child.Name == "TouchGui" then
                 self:SetUpMobile(touchGui)
             end
@@ -54,7 +57,7 @@ function TankGui.new(tank: {})
 
     self:HandleDoingDamage()
     self:HandleReceivingDamage()
-    self.Tank.Trove:Add(RunService.Heartbeat:Connect(function()
+    self.Trove:Add(RunService.Heartbeat:Connect(function()
         self:Update()
     end))
 
@@ -188,7 +191,7 @@ function TankGui:Update()
 end
 
 function TankGui:HandleDoingDamage()
-    self.Tank.Trove:Add(self.Tank.DamageService.DidDamage:Connect(function(damage: number, hitbox: string, directHit: boolean)
+    self.Trove:Add(self.Tank.DamageService.DidDamage:Connect(function(damage: number, hitbox: string, directHit: boolean)
         local hitMessage = string.format("[%s %s]", directHit and "DIRECT" or "INDIRECT", string.upper(hitbox))
         
         local damageUI = GuiAssets.Damage:Clone() 
@@ -205,7 +208,7 @@ function TankGui:HandleDoingDamage()
 end
 
 function TankGui:HandleReceivingDamage() 
-    self.Tank.Trove:Add(self.Tank.DamageService.TookDamage:Connect(function(playerName: string, damage: number)
+    self.Trove:Add(self.Tank.DamageService.TookDamage:Connect(function(playerName: string, damage: number)
         local existingNeedle = self.HitNeedles[playerName]
         if existingNeedle then 
             existingNeedle:AddDamage(damage)
@@ -225,7 +228,8 @@ function TankGui:HandleReceivingDamage()
 end
 
 function TankGui:Destroy()
-
+    print'yah yeet'
+    self.Trove:Destroy()
 end
 
 return TankGui
