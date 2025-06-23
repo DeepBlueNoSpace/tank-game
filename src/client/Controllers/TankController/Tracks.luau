@@ -4,7 +4,7 @@ local TreadEmitterPrefab =  ReplicatedStorage.Assets.VFX.TreadEmitter
 local Tracks = {}
 Tracks.__index = Tracks
 
-local MAX_DIST = 0.3
+local MAX_DIST = 3
 
 local WIDTH = 1.3
 local THICKNESS = 0.5

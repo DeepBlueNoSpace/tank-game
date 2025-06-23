@@ -180,9 +180,9 @@ function ServerTank:Died()
     --Only time disable shouldnt be called first is when the round is over or the player leaves.
 
     self.TankService.Client.DestroyClientTank:Fire(self.Driver)
+    self:PlayDeathAnimation()
 
     task.wait(DESTROY_TIME) -- a long death is cool
-    self:PlayDeathAnimation()
 
     self.Alive = false
     self.Model:SetAttribute("Alive", false)
