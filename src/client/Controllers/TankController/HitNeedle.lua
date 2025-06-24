@@ -2,13 +2,14 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local GuiAssets = ReplicatedStorage.Assets.Gui 
 local TweenService = game:GetService("TweenService")
 
+local TankUtil = require(ReplicatedStorage.Shared.Modules.TankUtil)
+
 local Camera = workspace.Camera
 
 local NeedlePrefab = GuiAssets.Needle
 
-
 local FADE_COOLDOWN = 0.5
-local FADE_PER_FRAME = 20/60
+local FADE_PER_FRAME = 2 --TODO: make this scale with local tank health
 local OFFSET = 0.35 -- the amount of pixels the tag should be offset from the centre as a % of the Y Axis
 local MIN_TRANSPARENCY = 0.2
 local MAX_TRANSPARENCY = 1
@@ -18,9 +19,14 @@ local MIN_RED = Color3.fromRGB(254, 76, 88)
 local HitNeedle = {}
 HitNeedle.__index = HitNeedle
 
+
 function HitNeedle.new(shooter: Player, initalDamage: number)
 	local self = setmetatable({}, HitNeedle)
-	self.OriginCharacter = shooter.Character
+	self.OriginTank = TankUtil.GetPlayerTank(shooter)
+	if not self.OriginTank then 
+		return 
+	end
+
 	self.ShownDamage = initalDamage
 	self.LastDamaged = tick()
 	self.Needle = NeedlePrefab:Clone()
@@ -53,15 +59,25 @@ function HitNeedle:Update()
 	end
 
 	local needle = self.Needle
-	local target = self.OriginCharacter
+	local target = self.OriginTank
 
-	if not target:FindFirstChild("HumanoidRootPart") then
-		--kill it
+	if not target.Parent then 
 		self:Destroy()
 		return true
 	end
 
-	local targetRootPosition = target.HumanoidRootPart.Position
+	local rootPart = target.PrimaryPart
+	if not rootPart then
+		self:Destroy()
+		return true
+	end
+
+	if not rootPart.Parent then
+		self:Destroy()
+		return true
+	end
+
+	local targetRootPosition = rootPart.Position
 
 	local totalPixelOffset = Camera.ViewportSize.Y * OFFSET
 

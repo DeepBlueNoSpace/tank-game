@@ -228,7 +228,6 @@ function TankGui:HandleReceivingDamage()
 end
 
 function TankGui:Destroy()
-    print'yah yeet'
     self.Trove:Destroy()
 end
 

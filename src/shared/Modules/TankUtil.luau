@@ -2,7 +2,6 @@
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local Types = require(ReplicatedStorage.Shared.Data.Types)
 local TankData = require(ReplicatedStorage.Shared.Data.TankData)
-local UpgradeTypes = require(ReplicatedStorage.Shared.Data.UpgradeTypes)
 
 local Knit = require(ReplicatedStorage.Packages.Knit)
 
@@ -43,6 +42,23 @@ function TankUtil.SpawnTankModelAtPart(tankType: string, part: BasePart)
 
     return tankModel
 end
+
+
+function TankUtil.GetPlayerTank(player: Player): Model?
+    local tankFolder = workspace:FindFirstChild("Tanks")
+    if not tankFolder then 
+        return nil 
+    end
+
+    for _, tank in tankFolder:GetChildren() do 
+        if tank:GetAttribute("Alive") and tank:GetAttribute("OwnerName") == player.Name then 
+            return tank 
+        end
+    end
+
+    return nil 
+end
+
 
 
 
