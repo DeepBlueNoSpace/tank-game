@@ -15,18 +15,19 @@ function KillFeedUI:CloseFrame()
     --self.Frame.Visible = false
 end
 
-local localRewardStack = {}
-function KillFeedUI:PushLocalReward(text: string, reward: number)
-    local tile = self.LocalRewardsPrefab:Clone()
-    tile.TextLabel.Text = text
-    tile.RewardLabel.Text = reward
 
+local KilledString = "Killed %s <b><font color='rgb(127, 245, 105)'>[$%s]</font></b>"
+
+
+local localRewardStack = {}
+function KillFeedUI:PushLocalReward(victimName: string, reward: number)
+    local tile = self.LocalRewardsPrefab:Clone()
+    tile.Value.Text = string.format(KilledString, victimName, reward)
     tile.Parent = self.LocalRewardsContainer
     tile.Visible = true
 
     table.insert(localRewardStack, 1, tile)
 
-    -- delete excess tiles if they're stacking up too fast
     local maxTiles = 2
     if #localRewardStack > maxTiles then
         local oldTile = localRewardStack[#localRewardStack]
@@ -34,7 +35,6 @@ function KillFeedUI:PushLocalReward(text: string, reward: number)
         oldTile:Destroy()
     end
 
-    -- Automatically delete this tile after a delay
     delay(3, function()
         local idx = table.find(localRewardStack, tile)
         if idx then
@@ -53,7 +53,6 @@ function KillFeedUI:PushGlobalKill(killer: Player, victim: Player)
 
     table.insert(localRewardStack, 1, tile)
 
-    -- delete excess tiles if they're stacking up too fast
     local maxTiles = 4
     if #globalKillsStack > maxTiles then
         local oldTile = globalKillsStack[#globalKillsStack]
@@ -61,7 +60,6 @@ function KillFeedUI:PushGlobalKill(killer: Player, victim: Player)
         oldTile:Destroy()
     end
 
-    -- fade out this tile after a delay
     delay(2, function()
         if tile then
             tile.BackgroundTransparency = 0.25
@@ -90,15 +88,13 @@ function KillFeedUI:KnitStart()
 
     self.DamageService.Killed:Connect(function(killer, victim, cashReward)
         if killer == Players.LocalPlayer then
-            self:PushLocalReward("Killed", cashReward)
+            self:PushLocalReward(victim.Name, cashReward)
         end
         self:PushGlobalKill(killer, victim)
-        warn("Killed called:", killer, victim, cashReward)
     end)
 
-    self.DamageService.Assisted:Connect(function(assistingPlayer, victim, cashReward)
+    self.DamageService.Assisted:Connect(function(_assistingPlayer, _victim, cashReward)
         self:PushLocalReward("Assisted", cashReward)
-        warn("Assisted called:", assistingPlayer, victim, cashReward)
     end)
 end
 

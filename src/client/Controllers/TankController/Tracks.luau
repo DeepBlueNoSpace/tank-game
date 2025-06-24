@@ -89,7 +89,7 @@ function Tracks:Emit(emitFromBack)
 end
 
 function Tracks:GenerateTreads()
-    local treads = {} :: {[number]: {Top:BasePart, Bottom:BasePart}}
+    local treads = {} :: {[number]: {Bottom:BasePart}}
 
     local treadSegmentsToGenerate = #self.Wheels-1 
     for i = 1, treadSegmentsToGenerate do 
@@ -134,7 +134,6 @@ function Tracks:Update(dT)
         local wheel2 = wheelPositions[trackNumber+1]
 
         self:SetTread(tracks.Bottom, wheel1.Bottom, wheel2.Bottom, false)
-
         tracks.Texture.OffsetStudsV = tracks.Texture.OffsetStudsV + (currentSpeed * dT)
     end
     self:SetTread(self.TopTread, wheelPositions[1].Top, wheelPositions[8].Top, true)
@@ -197,7 +196,6 @@ end
 
 function Tracks:Destroy()
     for _, x in self.Treads do 
-        x.Top:Destroy()
         x.Bottom:Destroy()
     end
     for _, x in self.Wheels do 
