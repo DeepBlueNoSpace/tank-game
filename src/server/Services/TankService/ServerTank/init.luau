@@ -202,7 +202,7 @@ function ServerTank:Destroy()
 end
 
 
-function ServerTank:TakeDamage(damage: number, sender: Player?, hitbox: string, isDirectHit: boolean)
+function ServerTank:TakeDamage(damage: number, sender: Player?, hitbox: string, isDirectHit: boolean, hitMarkerLocation: Vector3)
     if TestConfigs.Is("TANK_DMG") then
         damage = TestConfigs.TANK_DMG
     end
@@ -216,7 +216,7 @@ function ServerTank:TakeDamage(damage: number, sender: Player?, hitbox: string, 
 
     local wasKilled = (self.Alive and newHealth <= 0) :: boolean
 
-    self.DamageService:ReportDamage(sender, self.Driver, adjustedDamage, wasKilled, hitbox, isDirectHit)
+    self.DamageService:ReportDamage(sender, self.Driver, adjustedDamage, wasKilled, hitbox, isDirectHit, hitMarkerLocation)
     self.Model:SetAttribute("Health", math.max(newHealth, 0))
 
     if wasKilled then

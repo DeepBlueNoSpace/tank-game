@@ -114,5 +114,10 @@ export type EndgamePlayerPackage = {
     Team: Team,
 }
 
+export type SoundData = {
+    Parent: Instance?,
+    Volume: number?, 
+    PlaybackSpeed:number?
+}
 
 return Types 

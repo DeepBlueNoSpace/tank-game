@@ -1,39 +1,44 @@
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
-local TreadEmitterPrefab =  ReplicatedStorage.Assets.VFX.TreadEmitter 
+local Assets = ReplicatedStorage.Assets
+local TreadEmitterPrefab =  Assets.VFX.TreadEmitter 
 
 local Tracks = {}
 Tracks.__index = Tracks
 
-local MAX_DIST = 3
+local MAX_DIST = 0.7
 
 local WIDTH = 1.3
 local THICKNESS = 0.5
 
+local TEXTURE_SIZE = 86
+
 local treadPrefab = Instance.new("Part")
-treadPrefab.BrickColor = BrickColor.Black()
+treadPrefab.Color = Color3.fromRGB(45, 44, 39)
 treadPrefab.CanCollide = false 
 treadPrefab.CanQuery = false 
 treadPrefab.Anchored = true
-treadPrefab.CastShadow = false
 treadPrefab.TopSurface = Enum.SurfaceType.Smooth
 treadPrefab.BottomSurface = Enum.SurfaceType.Smooth
+treadPrefab.Material = Enum.Material.Leather
 
 local roundPrefab = Instance.new("Part")
-roundPrefab.BrickColor = BrickColor.Black()
+roundPrefab.Color = Color3.fromRGB(45, 44, 39)
 roundPrefab.CanCollide = false 
 roundPrefab.CanQuery = false 
 roundPrefab.Anchored = true
 roundPrefab.Size = Vector3.new(WIDTH, THICKNESS, THICKNESS)
 roundPrefab.Shape = Enum.PartType.Cylinder
-roundPrefab.CastShadow = false
 roundPrefab.TopSurface = Enum.SurfaceType.Smooth
 roundPrefab.BottomSurface = Enum.SurfaceType.Smooth
+roundPrefab.Material = Enum.Material.Leather
 
 function Tracks.new(wheels: Model, tank: { [Model]: Model })
     local self = setmetatable({}, Tracks)
     self.Wheels = {} :: {Wheel: BasePart, Motor: Motor6D, DefaultC0: CFrame, FixedWheel: boolean?, BottomRound: BasePart}
     self.TankModel = tank.Model :: Model
     self.Part0 = self.TankModel.Chassis.FloorPanel
+    self.Model = Instance.new("Model")
+    self.Model.Name = "Tracks"
 
     self.EmitterAttachment = Instance.new("Attachment")
     self.EmitterAttachment.Parent = self.Part0 
@@ -54,7 +59,7 @@ function Tracks.new(wheels: Model, tank: { [Model]: Model })
                 BottomRound = roundPrefab:Clone()
             }
 
-            self.Wheels[tonumber(child.Name)].BottomRound.Parent = workspace
+            self.Wheels[tonumber(child.Name)].BottomRound.Parent = self.Model
         end
     end
 
@@ -64,6 +69,7 @@ function Tracks.new(wheels: Model, tank: { [Model]: Model })
     self.TopTread = treadPrefab:Clone()
     self.TopTread.Parent = workspace
 
+    self.Model.Parent = self.TankModel
     return self
 end
 
@@ -87,13 +93,15 @@ function Tracks:GenerateTreads()
 
     local treadSegmentsToGenerate = #self.Wheels-1 
     for i = 1, treadSegmentsToGenerate do 
+        local texture = Assets.TreadTexture:Clone()
         treads[i] = {
-            Top = treadPrefab:Clone(),
-            Bottom = treadPrefab:Clone()
+           -- Top = treadPrefab:Clone(),
+            Bottom = treadPrefab:Clone(),
+            Texture = texture
         }
 
-        treads[i].Top.Parent = workspace
-        treads[i].Bottom.Parent = workspace
+        treads[i].Bottom.Parent = self.Model
+        texture.Parent = treads[i].Bottom
     end
 
     return treads
@@ -117,20 +125,22 @@ function Tracks:SetTread(tread: BasePart, pointA: Vector3, pointB: Vector3, isTo
     tread.Size = Vector3.new(WIDTH, THICKNESS, distance)
 end
 
-function Tracks:Update()
+
+function Tracks:Update(dT)
     local wheelPositions = self:CalculateWheelPositions()
+    local currentSpeed = self.Tank.Speed 
     for trackNumber, tracks in self.Treads do  
         local wheel1 = wheelPositions[trackNumber]
         local wheel2 = wheelPositions[trackNumber+1]
 
         self:SetTread(tracks.Bottom, wheel1.Bottom, wheel2.Bottom, false)
-    end
 
+        tracks.Texture.OffsetStudsV = tracks.Texture.OffsetStudsV + (currentSpeed * dT)
+    end
     self:SetTread(self.TopTread, wheelPositions[1].Top, wheelPositions[8].Top, true)
 end
 
 local LERP_FACTOR = 0.3
-
 function Tracks:UpdateWheel(wheelData)
     local wheelRadius = wheelData.Wheel.Size.Y / 2
 

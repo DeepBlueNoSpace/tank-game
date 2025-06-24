@@ -43,7 +43,6 @@ local function PlaySoundByRemoving(sound: Sound, newParent: Instance)
     newSound:Destroy()
 end
 
-
 function VFXController:SpawnVFX(vfxType: string, info: Types.VFXInfo)
     info = (info or {}) :: Types.VFXInfo
 

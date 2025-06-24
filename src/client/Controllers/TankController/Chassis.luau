@@ -176,6 +176,7 @@ function Chassis:setMotorTorque(torque)
 end
 
 function Chassis:setMotorTorqueDamped(torque, velocityDirection, accelDirection)
+	
 	for _, motor in pairs(self.Motors) do
 		if self.parameters.MaxSpeed == 0 then 
 			motor.MotorMaxTorque = 0
@@ -186,6 +187,7 @@ function Chassis:setMotorTorqueDamped(torque, velocityDirection, accelDirection)
 			end
 			
 			local speed = self.driverSeat.Velocity.Magnitude :: number
+			
 			local r = math.abs( speed / maxSpeed)
 			motor.MotorMaxTorque = math.exp( -3 * r * r ) * torque * torqueDamping
 		end
@@ -297,6 +299,9 @@ local baseVolume = 0.3
 function Chassis:UpdateThrottle(currentSpeed, throttle)
 	local targetVel = 0
 	local fakeRPM = 0
+
+	self.Tank.Speed = self.driverSeat.Velocity.Magnitude
+
 	if math.abs(throttle) < 0.1 then
 		-- Idling
 		self:setMotorMaxAcceleration(self.parameters.AccelerationMax)

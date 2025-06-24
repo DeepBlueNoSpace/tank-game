@@ -78,6 +78,7 @@ function ClientTank.new(tankModel: Model, type: string)
     self.IsJoystickControlled = false :: boolean
     self.LastShotTime = 0 :: number 
     self.Disabled = false :: boolean 
+    self.Speed = 0 :: number -- this is just written to for access. changing it does not set the tank's speed
 
     self.JoystickThrottle = {
         Z = 0,
@@ -204,8 +205,8 @@ function ClientTank:Update(dT: number)
     self.IsOccupied = self.Seat.Occupant == Player.Character.Humanoid
 
 
-    self.LeftTracks:Update()
-    self.RightTracks:Update()
+    self.LeftTracks:Update(dT)
+    self.RightTracks:Update(dT)
 end
 
 function ClientTank:HandleInput(inputObject: InputObject, gameProcessed: boolean)

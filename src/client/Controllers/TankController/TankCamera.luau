@@ -47,7 +47,6 @@ function TankCamera.new(tank: {})
         self:Update(dT)
     end))
 
-
     self.Tank.Trove:Add(UserInputService.InputBegan:Connect(function(inputObject: InputObject, gameProcessedEvent: boolean)
         if gameProcessedEvent then return end
         if inputObject.UserInputType == Enum.UserInputType.MouseButton2 then

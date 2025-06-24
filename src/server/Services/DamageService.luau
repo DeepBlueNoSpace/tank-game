@@ -33,13 +33,13 @@ function DamageService:KnitInit()
     self.XPService = Knit.GetService("XPService")
 end
 
-function DamageService:ReportDamage(sender: Player, receiver: Player, damage: number, wasKill: boolean, hitbox: string, directHit: boolean?)
+function DamageService:ReportDamage(sender: Player, receiver: Player, damage: number, wasKill: boolean, hitbox: string, directHit: boolean?, hitMarkerLocation: Vector3)
     table.insert(DamageService.Log[receiver], {
         Sender = sender,
         Timestamp = os.time(),
     })
 
-    self.Client.DidDamage:Fire(sender, damage, hitbox, directHit)
+    self.Client.DidDamage:Fire(sender, damage, hitbox, directHit, hitMarkerLocation)
     self.Client.TookDamage:Fire(receiver, sender.Name, damage)
     if wasKill then
         -- collect assists

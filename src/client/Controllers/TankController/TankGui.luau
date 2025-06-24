@@ -3,7 +3,8 @@ local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
 
 local Player = Players.LocalPlayer
-local GuiAssets = ReplicatedStorage.Assets.Gui 
+local Assets = ReplicatedStorage.Assets
+local GuiAssets = Assets.Gui 
 local TankGuiPrefab = GuiAssets.Tank
 
 local PlayerGui = Player:WaitForChild("PlayerGui")
@@ -13,17 +14,22 @@ local HitboxData = require(ReplicatedStorage.Shared.Data.HitboxData)
 local TestConfigs = require(ReplicatedStorage.Shared.TEST_CONFIGS)
 local HitNeedle = require(script.Parent.HitNeedle)
 local Trove = require(ReplicatedStorage.Packages.Trove)
+local Knit = require(ReplicatedStorage.Packages.Knit)
+local HitMarker = require(script.Parent.HitMarker)
 
 local TankGui = {}
 TankGui.__index = TankGui
 
 function TankGui.new(tank: {})
     local self = setmetatable({}, TankGui)
+    self.SoundController = Knit.GetController("SoundController")
+
     self.Tank = tank :: {}
+    self.Trove = Trove.new()
+
+    self.HitMarkers = {} :: {[HitMarker.HitMarker]: boolean}
     self.HitNeedles = {} :: {[string]:{}}
 
-    self.Trove = Trove.new()
-    
     self.Gui = self.Trove:Add(TankGuiPrefab:Clone()) :: ScreenGui
     self.Aimer = self.Gui:FindFirstChild("Aimer") :: Frame 
     self.AimerHairs = self.Aimer:GetChildren() :: {Frame}
@@ -188,22 +194,38 @@ function TankGui:Update()
             self.HitNeedles[playerName] = nil
         end
     end
+
+    for hitMarker, _ in self.HitMarkers do 
+        local removeIndex = hitMarker:Update() 
+        if removeIndex then 
+            self.HitMarkers[hitMarker] = nil
+        end
+    end
+end
+
+function TankGui:ShowDamageUI(hitMessage: string, hitbox:string, damage: number)
+    local damageUI = GuiAssets.Damage:Clone() 
+    damageUI.Side.Text = hitMessage
+    damageUI.Side.TextColor3 = HitboxData[hitbox].Color 
+    damageUI.Value.Text = tostring(math.floor(0.5+damage))
+    damageUI.Parent = self.Gui 
+
+    task.delay(2, function() 
+        damageUI:Destroy()
+    end)
 end
 
 function TankGui:HandleDoingDamage()
-    self.Trove:Add(self.Tank.DamageService.DidDamage:Connect(function(damage: number, hitbox: string, directHit: boolean)
-        local hitMessage = string.format("[%s %s]", directHit and "DIRECT" or "INDIRECT", string.upper(hitbox))
-        
-        local damageUI = GuiAssets.Damage:Clone() 
-        damageUI.Side.Text = hitMessage
-        damageUI.Side.TextColor3 = HitboxData[hitbox].Color 
-        damageUI.Value.Text = tostring(math.floor(0.5+damage))
-    
-        damageUI.Parent = self.Gui 
+    self.Trove:Add(self.Tank.DamageService.DidDamage:Connect(function(damage: number, hitbox: string, directHit: boolean, hitMarkerLocation: Vector3)
+        self.SoundController:Play(Assets.Sound.TankHit)
 
-        task.delay(2, function() 
-            damageUI:Destroy()
-        end)
+        local hitMessage = string.format("[%s %s]", directHit and "DIRECT" or "INDIRECT", string.upper(hitbox))
+        self:ShowDamageUI(hitMessage, hitbox, damage)
+
+        local marker = HitMarker.new(hitMarkerLocation, directHit)
+        self.HitMarkers[marker] = true
+
+        marker.Marker.Parent = self.Gui
     end))
 end
 
@@ -228,6 +250,16 @@ function TankGui:HandleReceivingDamage()
 end
 
 function TankGui:Destroy()
+    for hitmarker, _ in self.HitMarkers do 
+        hitmarker:Destroy() 
+    end
+    self.HitMarkers = nil 
+    
+    for _, needle in self.HitNeedles do 
+        needle:Destroy() 
+    end
+    self.HitMarkers = nil 
+
     self.Trove:Destroy()
 end
 

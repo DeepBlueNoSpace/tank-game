@@ -28,14 +28,14 @@ local SIDE_NORMALS = {
 }
 
 
-local function GetHitSide(tank: Model, hitboxParts: {BasePart}, position: Vector3): (string?, number)
+local function GetHitSide(tank: Model, hitboxParts: {BasePart}, position: Vector3): (string?, number, Vector3)
 	local modelCFrame, _ = tank:GetBoundingBox()
 	local toExplosion = (position - modelCFrame.Position).Unit
 
 	local bestPartName = nil
 	local bestDot = -math.huge
 	local bestDistance = math.huge
-
+	local bestPosition = Vector3.new()
 	for _, part in hitboxParts do
 		if part:IsA("BasePart") then
 			local sideName = part.Name
@@ -48,12 +48,13 @@ local function GetHitSide(tank: Model, hitboxParts: {BasePart}, position: Vector
 					bestDot = dot
 					bestPartName = sideName
 					bestDistance = distance
+					bestPosition = part.Position
 				end
 			end
 		end
 	end
 
-	return bestPartName, bestDistance
+	return bestPartName, bestDistance, bestPosition
 end
 
 function ExplosionService:GetHitboxesInLOS(hitboxParts: {BasePart}, tankModel: Model, origin: Vector3): {BasePart}
@@ -94,7 +95,7 @@ function ExplosionService:DamageTanks(sender: Player, position: Vector3, hitInst
 		local hitboxFolder = tank:FindFirstChild("Hitbox")
 		local eligableHitboxParts = self:GetHitboxesInLOS(hitboxFolder:GetChildren(), tankObject.Model, position)
 
-		local bestPartName, distance = GetHitSide(tank, eligableHitboxParts, position)
+		local bestPartName, distance, hitboxPosition = GetHitSide(tank, eligableHitboxParts, position)
 		if distance > radius then 
 			continue 
 		end
@@ -104,12 +105,13 @@ function ExplosionService:DamageTanks(sender: Player, position: Vector3, hitInst
 		end
 
 		if hitInstance and hitInstance.Parent == tank.Hitbox then 
-			tankObject:TakeDamage(damage, sender, hitInstance.Name, true)
+			print('direct hit')
+			tankObject:TakeDamage(damage, sender, hitInstance.Name, true, position)
 			continue
 		end
 		
 		local scaledDamage = damage * (1 - (distance / radius))
-		tankObject:TakeDamage(scaledDamage, sender, bestPartName)
+		tankObject:TakeDamage(scaledDamage, sender, bestPartName, false, hitboxPosition)
 	end
 end
 
