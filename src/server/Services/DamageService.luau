@@ -42,10 +42,7 @@ function DamageService:ReportDamage(sender: Player, receiver: Player, damage: nu
     self.Client.DidDamage:Fire(sender, damage, hitbox, directHit, hitMarkerLocation)
     self.Client.TookDamage:Fire(receiver, sender.Name, damage)
     if wasKill then
-        -- collect assists
-        
         local assists = {}
-
         for i= #DamageService.Log[receiver], 1, -1 do
             local logEntry = DamageService.Log[receiver][i]
             if logEntry.Timestamp < os.time() - ASSIST_WINDOW then
@@ -65,7 +62,6 @@ function DamageService:ReportDamage(sender: Player, receiver: Player, damage: nu
             self.XPService:IncrementXP(sender, ASSIST_XP_REWARD)
         end
 
-        -- send UI updates
         self.Client.Killed:FireAll(sender, receiver, KILL_CASH_REWARD)
         for assistingPlayer, _ in pairs(assists) do
             self.Client.Assisted:Fire(assistingPlayer, assistingPlayer, receiver, ASSIST_REWARD)

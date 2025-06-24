@@ -207,8 +207,8 @@ function TankGui:ShowDamageUI(hitMessage: string, hitbox:string, damage: number)
     local damageUI = GuiAssets.Damage:Clone() 
     damageUI.Side.Text = hitMessage
     damageUI.Side.TextColor3 = HitboxData[hitbox].Color 
-    damageUI.Value.Text = tostring(math.floor(0.5+damage))
-    damageUI.Parent = self.Gui 
+    damageUI.Value.Text = "-"..tostring(math.floor(0.5+damage))
+    damageUI.Parent = self.Gui.DamageTags
 
     task.delay(2, function() 
         damageUI:Destroy()

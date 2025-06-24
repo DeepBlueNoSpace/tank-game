@@ -24,7 +24,7 @@ function HitMarker.new(worldPosition: Vector3, directHit: boolean): HitMarker
 	self.StartTime = tick() 
 
 	if directHit then 
-		self.Marker.ImageColor3 = Color3.fromRGB(145, 0, 0)
+		self.Marker.ImageColor3 = Color3.fromRGB(255, 119, 119)
 	end
 
 	self:Update()
