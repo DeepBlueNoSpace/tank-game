@@ -115,6 +115,14 @@ function ServerTank:SetupHitbox()
     end
 end
 
+function ServerTank:SetupCollisionGroups()
+    for i,v in pairs(self.Model.Chassis:GetDescendants()) do
+        if v:IsA("BasePart") then
+            v.CollisionGroup = "TankChassis"
+        end
+    end
+end
+
 function ServerTank:PullUpgrades(tankUpgrades)
     local attributes = table.clone(self.TankData.BaseAtrributes) :: Types.TankAttributes
 

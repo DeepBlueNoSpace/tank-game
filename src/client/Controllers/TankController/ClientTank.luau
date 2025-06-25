@@ -128,6 +128,8 @@ function ClientTank.new(tankModel: Model, type: string)
         self.RaycastParamsIgnoreSelf:AddToFilter{instance}
     end))
 
+    self:_initDestroyableObjectConnections()
+
     return self 
 end
 
@@ -186,6 +188,17 @@ local function _calculateInput(action)
 	return val
 end
 
+function ClientTank:_initDestroyableObjectConnections()
+    for i,v in pairs(self.Model.Hitbox:GetDescendants()) do
+        if v:IsA("BasePart") then
+            v.Touched:Connect(function(hit: BasePart)
+                if hit:HasTag("DestroyableObjectPart") then
+                    Knit.GetController("DestroyableObjectController"):HandleTankCollision(hit, self.Model.PrimaryPart.Position)
+                end
+            end)
+        end
+    end
+end
 
 function ClientTank:GetInputValues()
     local throttle, steering, handbreak 
