@@ -19,6 +19,12 @@ function TankDisplay:SetTank(tank: string)
             end
         end
     end
+
+    for _, part in pairs(self.CurrentTank:GetDescendants()) do
+            if part:IsA("BasePart") then
+                part.Anchored = true
+            end
+        end
     
     self.CurrentTank:SetPrimaryPartCFrame(self.TankOrigin.CFrame)
     self.CurrentTank.Parent = self.LobbyScene

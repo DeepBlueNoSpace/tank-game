@@ -100,10 +100,16 @@ function Projectile:OnHit(result: RaycastResult)
 
     self.VFXController:SpawnVFX("Explosion", explosionInfo)
 
+
     --Replicate to server
     if self.IsLocal then 
         self.ProjectileService.ProjectileHit:Fire(self.Id, result.Position, result.Instance)
     end
+
+    local tank = self.TankController.Tank 
+    if tank then 
+        tank.Camera:AddRumble(result.Position)
+    end 
 
     --Clean up
     self:Destroy()

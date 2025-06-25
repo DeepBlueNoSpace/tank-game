@@ -47,7 +47,8 @@ function ServerTank.new(driver: Player, tankType: string, tankUpgrades: {}, spaw
 
     self:WeldWheels()
     self:SetupHitbox()
-   
+    self:WeldBodyDetails() 
+
     self.Model.Parent = workspace.Tanks
 
     local primaryPart = self.Model.PrimaryPart :: BasePart
@@ -86,6 +87,15 @@ function ServerTank:WeldWheels()
     self:WeldWheelSet(self.Model.Body.RightWheels, "R")
 end
 
+function ServerTank:WeldBodyDetails()
+    local bodyDetail = self.Model.Body:FindFirstChild("BodyDetail")
+    if bodyDetail then 
+        for _, object in bodyDetail:GetChildren() do 
+            local motor = weldTo(self.FloorPanel , object)
+            motor.Parent = self.FloorPanel
+        end
+    end
+end
 function ServerTank:SetupHitbox()
     --Make it so it cant collide with itself
     local parts = table.clone(self.Hitbox)

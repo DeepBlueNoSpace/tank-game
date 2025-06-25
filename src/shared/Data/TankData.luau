@@ -21,6 +21,292 @@ TurretAngularVelocity: number
 ]]
 
 --TODO: Add maxturn jfc
+TankData["Panzer"] = {
+    Name = "Panzer",
+    Image = "rbxassetid://85716504836651",
+    CurrencyType = "Cash",
+    Cost = 1,
+
+    BaseAtrributes = {
+        Health = 1400,
+        Torque = 150000000, 
+        Acceleration = 10,
+        MaxSpeed = 18,
+        MaxSteer = 1.1, 
+
+        BlastRadius = 20;
+        BlastPressure = 300,
+
+        MuzzleVelocity = 600,
+        RecoilForce = 15000,
+
+        MaxDamage = 220,
+        Cooldown = 4.5,
+
+        TurretAngularVelocity = 35,
+    }
+} :: Types.TankData
+
+TankData["BT-7"] = {
+    Name = "BT-7",
+    Image = "rbxassetid://85716504836651",
+    CurrencyType = "Cash",
+    Cost = 2,
+
+    BaseAtrributes = {
+        Health = 1400,
+        Torque = 150000000, 
+        Acceleration = 10,
+        MaxSpeed = 18,
+        MaxSteer = 1.1, 
+
+        BlastRadius = 20;
+        BlastPressure = 300,
+
+        MuzzleVelocity = 600,
+        RecoilForce = 15000,
+
+        MaxDamage = 220,
+        Cooldown = 4.5,
+
+        TurretAngularVelocity = 35,
+    }
+} :: Types.TankData
+
+TankData["BT-7 L"] = {
+    Name = "BT-7 L",
+    Image = "rbxassetid://85716504836651",
+    CurrencyType = "Cash",
+    Cost = 3,
+
+    BaseAtrributes = {
+        Health = 1400,
+        Torque = 150000000, 
+        Acceleration = 10,
+        MaxSpeed = 18,
+        MaxSteer = 1.1, 
+
+        BlastRadius = 20;
+        BlastPressure = 300,
+
+        MuzzleVelocity = 600,
+        RecoilForce = 15000,
+
+        MaxDamage = 220,
+        Cooldown = 4.5,
+
+        TurretAngularVelocity = 35,
+    }
+} :: Types.TankData
+
+TankData["T 34-76"] = {
+    Name = "T 34-76",
+    Image = "rbxassetid://85716504836651",
+    CurrencyType = "Cash",
+    Cost = 3,
+
+    BaseAtrributes = {
+        Health = 1400,
+        Torque = 150000000, 
+        Acceleration = 10,
+        MaxSpeed = 18,
+        MaxSteer = 1.1, 
+
+        BlastRadius = 20;
+        BlastPressure = 300,
+
+        MuzzleVelocity = 600,
+        RecoilForce = 15000,
+
+        MaxDamage = 220,
+        Cooldown = 4.5,
+
+        TurretAngularVelocity = 35,
+    }
+} :: Types.TankData
+
+TankData["Cromwell"] = {
+    Name = "Cromwell",
+    Image = "rbxassetid://85716504836651",
+    CurrencyType = "Cash",
+    Cost = 4,
+
+    BaseAtrributes = {
+        Health = 1400,
+        Torque = 150000000, 
+        Acceleration = 10,
+        MaxSpeed = 18,
+        MaxSteer = 1.1, 
+
+        BlastRadius = 20;
+        BlastPressure = 300,
+
+        MuzzleVelocity = 600,
+        RecoilForce = 15000,
+
+        MaxDamage = 220,
+        Cooldown = 4.5,
+
+        TurretAngularVelocity = 35,
+    }
+} :: Types.TankData
+
+TankData["KV-1 H"] = {
+    Name = "KV-1 H",
+    Image = "rbxassetid://85716504836651",
+    CurrencyType = "Cash",
+    Cost = 5,
+
+    BaseAtrributes = {
+        Health = 1400,
+        Torque = 150000000, 
+        Acceleration = 10,
+        MaxSpeed = 18,
+        MaxSteer = 1.1, 
+
+        BlastRadius = 20;
+        BlastPressure = 300,
+
+        MuzzleVelocity = 600,
+        RecoilForce = 15000,
+
+        MaxDamage = 220,
+        Cooldown = 4.5,
+
+        TurretAngularVelocity = 35,
+    }
+} :: Types.TankData
+
+TankData["KV-1"] = {
+    Name = "KV-1",
+    Image = "rbxassetid://85716504836651",
+    CurrencyType = "Cash",
+    Cost = 5,
+
+    BaseAtrributes = {
+        Health = 1400,
+        Torque = 150000000, 
+        Acceleration = 10,
+        MaxSpeed = 18,
+        MaxSteer = 1.1, 
+
+        BlastRadius = 20;
+        BlastPressure = 300,
+
+        MuzzleVelocity = 600,
+        RecoilForce = 15000,
+
+        MaxDamage = 220,
+        Cooldown = 4.5,
+
+        TurretAngularVelocity = 35,
+    }
+} :: Types.TankData
+
+TankData["Type 87"] = {
+    Name = "Type 87",
+    Image = "rbxassetid://85716504836651",
+    CurrencyType = "Cash",
+    Cost = 6,
+
+    BaseAtrributes = {
+        Health = 1400,
+        Torque = 150000000, 
+        Acceleration = 10,
+        MaxSpeed = 18,
+        MaxSteer = 1.1, 
+
+        BlastRadius = 20;
+        BlastPressure = 300,
+
+        MuzzleVelocity = 600,
+        RecoilForce = 15000,
+
+        MaxDamage = 220,
+        Cooldown = 4.5,
+
+        TurretAngularVelocity = 35,
+    }
+} :: Types.TankData
+
+TankData["Firefly"] = {
+    Name = "Firefly",
+    Image = "rbxassetid://85716504836651",
+    CurrencyType = "Cash",
+    Cost = 6,
+
+    BaseAtrributes = {
+        Health = 1400,
+        Torque = 150000000, 
+        Acceleration = 10,
+        MaxSpeed = 18,
+        MaxSteer = 1.1, 
+
+        BlastRadius = 20;
+        BlastPressure = 300,
+
+        MuzzleVelocity = 600,
+        RecoilForce = 15000,
+
+        MaxDamage = 220,
+        Cooldown = 4.5,
+
+        TurretAngularVelocity = 35,
+    }
+} :: Types.TankData
+
+TankData["T-34 85"] = {
+    Name = "T-34 85",
+    Image = "rbxassetid://85716504836651",
+    CurrencyType = "Cash",
+    Cost = 7,
+
+    BaseAtrributes = {
+        Health = 1400,
+        Torque = 150000000, 
+        Acceleration = 10,
+        MaxSpeed = 18,
+        MaxSteer = 1.1, 
+
+        BlastRadius = 20;
+        BlastPressure = 300,
+
+        MuzzleVelocity = 600,
+        RecoilForce = 15000,
+
+        MaxDamage = 220,
+        Cooldown = 4.5,
+
+        TurretAngularVelocity = 35,
+    }
+} :: Types.TankData
+
+TankData["Sdk. Fz. 251"] = {
+    Name = "Sdk. Fz. 251",
+    Image = "rbxassetid://85716504836651",
+    CurrencyType = "Cash",
+    Cost = 8,
+
+    BaseAtrributes = {
+        Health = 1400,
+        Torque = 150000000, 
+        Acceleration = 10,
+        MaxSpeed = 18,
+        MaxSteer = 1.1, 
+
+        BlastRadius = 20;
+        BlastPressure = 300,
+
+        MuzzleVelocity = 600,
+        RecoilForce = 15000,
+
+        MaxDamage = 220,
+        Cooldown = 4.5,
+
+        TurretAngularVelocity = 35,
+    }
+} :: Types.TankData
+
 TankData["Sherman 1"] = {
     Name = "Sherman 1",
     Image = "rbxassetid://85716504836651",

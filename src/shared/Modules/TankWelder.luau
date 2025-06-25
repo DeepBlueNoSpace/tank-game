@@ -5,7 +5,7 @@ local armour = tank.Armour
 local function weldTo(x, y)
 
 	local motor = Instance.new("Motor6D")
-	motor.Name = x.Name .. "_Motor"
+	motor.Name = x.Name .. "_Motor_" .. y.Name
 	motor.Part0 = x
 	motor.Part1 = y
 
@@ -13,7 +13,7 @@ local function weldTo(x, y)
 	motor.C0 = x.CFrame:ToObjectSpace(y.CFrame)
 	motor.C1 = CFrame.new() -- Assume Part1 is at its origin relative to itself
 
-	motor.Parent = x
+	motor.Parent = y
 end
 
 local selection = game:GetService("Selection"):Get()

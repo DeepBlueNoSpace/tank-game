@@ -357,8 +357,10 @@ function Chassis:UpdateWheelMotors()
 
 	if math.abs(self.DistanceTravelledSinceLastTread) > DISTANCE_PER_TREAD then 
 		local emitFromBack = self.DistanceTravelledSinceLastTread<0
-		self.Tank.LeftTracks:Emit(emitFromBack)
-		self.Tank.RightTracks:Emit(emitFromBack)
+		if self.Tank.LeftTracks then 
+			self.Tank.LeftTracks:Emit(emitFromBack)
+			self.Tank.RightTracks:Emit(emitFromBack)
+		end
 		self.DistanceTravelledSinceLastTread = 0 
 	end	
 

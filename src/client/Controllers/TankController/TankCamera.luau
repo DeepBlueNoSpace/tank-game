@@ -22,7 +22,8 @@ local SCOPED_FOV = 50
 local MIN_ZOOM = 0.5
 local MAX_ZOOM = 2
 
-
+local RUMBLE_SPEED = 10
+local RUMBLE_DAMPEN = 0.35
 function TankCamera.new(tank: {})
     local self = setmetatable({}, TankCamera)
     self.Tank = tank 
@@ -35,6 +36,12 @@ function TankCamera.new(tank: {})
     self.zSpring = Spring.new(0, 0, 30,0.5)
     self.ySpring = Spring.new(0, 0, 30,0.5)
     
+    self.RumbleSprings = {
+        X = Spring.new(0, 0, RUMBLE_SPEED, RUMBLE_DAMPEN),
+        Y = Spring.new(0, 0, RUMBLE_SPEED, RUMBLE_DAMPEN),
+        Z = Spring.new(0, 0, RUMBLE_SPEED, RUMBLE_DAMPEN),
+    }
+
     self.ScopeSpring = Spring.new(0, 0, 30,1)
 
     self.LastInputDelta = Vector2.new() 
@@ -105,6 +112,30 @@ function TankCamera:ApplyShotImpulse(force: number)
     self.zSpring:Accelerate(force*0.8)
     self.ySpring:Accelerate(force*0.2)
 end
+
+local MAX_RUMBLE = 200
+local MAX_RUMBLE_DISTANCE = 100
+
+function TankCamera:AddRumble(worldPosition: Vector3)
+    local camCF = workspace.CurrentCamera.CFrame
+    local delta = worldPosition - camCF.Position
+    local distance = (worldPosition-self.Tank.Seat.Position).Magnitude
+
+    -- Avoid NaNs if distance is zero
+    local strength = 1
+    if distance ~= 0 then 
+        strength = math.clamp(1 - (distance / MAX_RUMBLE_DISTANCE), 0, 1)
+    end
+
+    local localDir = camCF:VectorToObjectSpace(delta.Unit)
+
+    local impulse = -localDir * (MAX_RUMBLE * strength)
+
+    self.RumbleSprings.X:Accelerate(impulse.X)
+    self.RumbleSprings.Y:Accelerate(impulse.Y)
+    self.RumbleSprings.Z:Accelerate(impulse.Z)
+end
+
 
 function TankCamera:UpdateBarrel(dT: number)
     local maxAngleChange = self.Tank.TankData.BaseAtrributes.TurretAngularVelocity * dT
@@ -210,6 +241,7 @@ function TankCamera:Update(dT: number)
     local ySpringOffset = self.ySpring:Solve(dT)
     local xSpringOffset = self.zSpring:Solve(dT)
 
+    local xRumble, yRumble, zRumble = self.RumbleSprings.X:Solve(dT),self.RumbleSprings.Y:Solve(dT),self.RumbleSprings.Z:Solve(dT)
     self.LastInputDelta = Vector2.new()
     local _barrelYaw, _barrelPitch = self:UpdateBarrel(dT)
 
@@ -217,7 +249,7 @@ function TankCamera:Update(dT: number)
     local freecamPosition = self:GetFreeCamUpdate(basePosition, ySpringOffset, xSpringOffset)
 
     local scopeProgress = self.ScopeSpring:Solve(dT)
-    Camera.CFrame = freecamPosition:Lerp(scopedPosition, scopeProgress)
+    Camera.CFrame = freecamPosition:Lerp(scopedPosition, scopeProgress) * CFrame.new(Vector3.new(xRumble, yRumble,zRumble))
     self:SetScopedProgress(scopeProgress)
 end
 
