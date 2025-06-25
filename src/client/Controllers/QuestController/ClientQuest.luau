@@ -57,7 +57,7 @@ function ClientQuest:HookUIComponent(frame:Frame)
 end
 
 function ClientQuest:Update()
-    warn("ClientQuest - Update", self.QuestName, self)
+    --warn("ClientQuest - Update", self.QuestName, self)
 
     if not self.Replica then
         repeat task.wait() until self.Replica
@@ -65,7 +65,7 @@ function ClientQuest:Update()
 
     local hasCompleted, previouslyCompleted = QuestUtil.IsQuestCompleted(self.Replica, self.QuestName)
     if hasCompleted and not previouslyCompleted then
-        warn("ClientQuest - Completing quest:", self.QuestName)
+        --warn("ClientQuest - Completing quest:", self.QuestName)
         Knit.GetService("QuestService"):RequestCompleteQuest(self.QuestName) -- asks for rewards to be distributed
     end
 
