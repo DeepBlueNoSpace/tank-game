@@ -5,6 +5,8 @@ local CollectionService = game:GetService("CollectionService")
 local Types = require(ReplicatedStorage.Shared.Data.Types)
 local Knit = require(ReplicatedStorage.Packages.Knit)
 
+local SoundUtil = require(Knit.Modules.SoundUtil)
+
 local DestroyableObjectController = Knit.CreateController { Name = "DestroyableObjectController" }
 DestroyableObjectController.ServerAssetsInitialized = {} -- [Model] = true
 DestroyableObjectController.ClientAssetsInitialized = {} -- [Model] = true
@@ -77,22 +79,25 @@ function DestroyableObjectController:KnockOverModel(model: Model, tankOrigin: Ve
         return
     end
 
-    DestroyableObjectController:ResetModelWithDelay(model, RESET_DELAY)
-
+    DestroyableObjectController:ResetModelWithDelay(model, RESET_DELAY) -- need to copy BEFORE setting IsKnockedOver
     model:SetAttribute("IsKnockedOver", true)
-
+    SoundUtil.PlaySoundAtLocation(ReplicatedStorage.Assets.Sound.TreeFalling, model.PrimaryPart.Position)
+    
     for i,v in pairs(model:GetDescendants()) do
         if v:IsA("BasePart") then
             v.CollisionGroup = "NoTankCollision" -- touch ground but not tanks
             v.Anchored = false
             v.CustomPhysicalProperties = PhysicalProperties.new(100, 2, 0.5) -- (Density, Friction, Elasticity)
+            if not v == model.PrimaryPart then
+                v.CanCollide = false 
+            end
         end
     end
 
     -- Apply some force to help the knockover
     if model.PrimaryPart then
         local direction = (model.PrimaryPart.Position - Vector3.new(tankOrigin.X, model.PrimaryPart.Position.Y, tankOrigin.Z)).Unit
-        local impulse = direction * model.PrimaryPart.AssemblyMass * 25
+        local impulse = direction * model.PrimaryPart.AssemblyMass * 30
         model.PrimaryPart:ApplyImpulseAtPosition(impulse, tankOrigin + Vector3.new(0,20,0))
     end
 

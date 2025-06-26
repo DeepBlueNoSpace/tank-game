@@ -1,3 +1,5 @@
+-- Trees and other objects that can be knocked over by tanks
+
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local TweenService = game:GetService("TweenService")
 local Types = require(ReplicatedStorage.Shared.Data.Types)
@@ -46,7 +48,6 @@ function DestroyableObjectService.Client:RequestReplicateKnockOver(player, model
 
     model:SetAttribute("LastKnocked", tick())
 
-    warn("AGHHHHHHHHHHHHHHHHHHHHH")
     DestroyableObjectService.Client.ReplicateKnockOver:FireExcept(player, model, tankOrigin)
 end
 
