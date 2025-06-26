@@ -53,9 +53,7 @@ function DataController:GetReplicaPromise(player)
 					return
 				end
 
-				print(player, type(player), "----", replica.Tags.Player, type(replica.Tags.Player))
 				if player == replica.Tags.Player then
-					print("resolving :)")
 					resolve(replica)
 					trove:Destroy()
 				else
