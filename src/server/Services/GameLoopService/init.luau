@@ -26,6 +26,10 @@ function GameLoopService:Main()
         local succ, err = pcall(function()
             self.Client.State:Set("Intermission")
             self.Client.Gamemode:Set(nil)
+
+            for _, folder in pairs(workspace.RuntimeContent:GetChildren()) do
+                folder:ClearAllChildren()
+            end
             
 
             -- wait a few seconds...............

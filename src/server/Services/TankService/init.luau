@@ -18,6 +18,10 @@ function TankService:KnitInit()
 
 end
 
+function TankService:GetServerTank(player: Player)
+    return self.LiveTanks[player]
+end
+
 function TankService:RemovePlayersTankIndex(player: Player, tankObject: {})
     --Only unindexed once the tank object has done deleting itself.
     if self.LiveTanks[player] == tankObject then 

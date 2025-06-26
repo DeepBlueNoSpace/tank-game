@@ -100,7 +100,7 @@ function ClientTank.new(tankModel: Model, type: string)
     end))
 
     self.Trove:Add(RunService.RenderStepped:Connect(function() 
-        if self.Disabled then 
+        if self.Disabled or not self.Model:GetAttribute("Alive") then 
             self.Chassis:EnableHandbrake()
             return
         end
@@ -129,7 +129,7 @@ function ClientTank.new(tankModel: Model, type: string)
         self.RaycastParamsIgnoreSelf:AddToFilter{instance}
     end))
 
-    self:_initDestroyableObjectConnections()
+    self:_initCollisionDetection()
 
     return self 
 end
@@ -189,12 +189,14 @@ local function _calculateInput(action)
 	return val
 end
 
-function ClientTank:_initDestroyableObjectConnections()
+function ClientTank:_initCollisionDetection()
     for i,v in pairs(self.Model.Hitbox:GetDescendants()) do
         if v:IsA("BasePart") then
             v.Touched:Connect(function(hit: BasePart)
                 if hit:HasTag("DestroyableObjectPart") then
                     Knit.GetController("DestroyableObjectController"):HandleTankCollision(hit, self.Model.PrimaryPart.Position)
+                elseif hit:HasTag("HealthDropHitbox") then
+                    Knit.GetController("HealthDropController"):Pickup(hit.Parent)
                 end
             end)
         end

@@ -14,7 +14,7 @@ local TankPrefabs = Assets.Tanks
 local ServerTank = {}
 ServerTank.__index = ServerTank
 
-local DESTROY_TIME = 20 
+local DESTROY_TIME = 7 
 
 function ServerTank.new(driver: Player, tankType: string, tankUpgrades: {}, spawnCFrame: CFrame) 
     local self = setmetatable({}, ServerTank)
@@ -206,6 +206,7 @@ function ServerTank:Died()
     self.Model:SetAttribute("Alive", false)
     self:EndClientPhysics()
 
+    Knit.GetService("HealthDropService"):SpawnHealthDrop(self.Model.PrimaryPart.Position + Vector3.new(0,3,0))
 
     self:Destroy()
 end
