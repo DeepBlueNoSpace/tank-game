@@ -80,7 +80,7 @@ function DestroyableObjectController:KnockOverModel(model: Model, tankOrigin: Ve
     model:SetAttribute("IsKnockedOver", true)
     self.SoundController:Play("TreeFalling", {Parent = model.PrimaryPart})
     
-    for i,v in pairs(model:GetDescendants()) do
+    for _,v in pairs(model:GetDescendants()) do
         if v:IsA("BasePart") then
             v.CollisionGroup = "NoTankCollision" -- touch ground but not tanks
             v.Anchored = false
