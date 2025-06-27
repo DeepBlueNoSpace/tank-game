@@ -209,7 +209,11 @@ local function lerp(v0:number,v1:number,t:number): number
 end
 
 function TankCamera:SetScopedProgress(progress)
-    self.Tank.Model.Body.Turret.Transparency = progress
+    for _, object in self.Tank.Model.Body:GetDescendants() do 
+        if object:IsA("BasePart") and object:GetAttribute("HideForLocal")== nil then 
+            object.Transparency = progress
+        end
+    end
     Camera.FieldOfView = lerp(DEFAULT_FOV, SCOPED_FOV, progress)
 
     if self.Tank.TankGui then 
