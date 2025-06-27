@@ -130,10 +130,20 @@ function ClientTank.new(tankModel: Model, type: string)
     end))
 
     self:_initCollisionDetection()
+    self:HideLocalParts()
 
     return self 
 end
 
+function ClientTank:HideLocalParts() 
+    for _, object in self.Model:GetDescendants() do 
+        if object:IsA("BasePart") then 
+            if object:GetAttribute("HideForLocal") then 
+                object.Transparency = 1 
+            end
+        end
+    end
+end
 
 local function _updateRawInput(inputState, inputObj)
 	local key = inputObj.KeyCode
