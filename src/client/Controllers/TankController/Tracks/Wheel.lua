@@ -32,7 +32,7 @@ function Wheel.new(wheel: Part, chassis: Part, tank: {})
     self.DefaultCosmeticC0 = self.CosmeticMotor.C0 :: CFrame
     self.DefaultC0 = self.Motor.C0 :: CFrame
     self.r = math.max(self.WheelModel.Size.X, self.WheelModel.Size.Y)/2
-    self.DownGive = 1:: number 
+    self.DownGive = .5:: number 
     self.UpGive = .2:: number 
     self.TouchingGround = false :: boolean
     self.YOffset = 0 :: number

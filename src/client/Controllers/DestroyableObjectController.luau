@@ -2,10 +2,7 @@ warn("TODO: delete server DestroyableObjects on map wipe or gonna have memory le
 
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local CollectionService = game:GetService("CollectionService")
-local Types = require(ReplicatedStorage.Shared.Data.Types)
 local Knit = require(ReplicatedStorage.Packages.Knit)
-
-local SoundUtil = require(Knit.Modules.SoundUtil)
 
 local DestroyableObjectController = Knit.CreateController { Name = "DestroyableObjectController" }
 DestroyableObjectController.ServerAssetsInitialized = {} -- [Model] = true
@@ -81,7 +78,7 @@ function DestroyableObjectController:KnockOverModel(model: Model, tankOrigin: Ve
 
     DestroyableObjectController:ResetModelWithDelay(model, RESET_DELAY) -- need to copy BEFORE setting IsKnockedOver
     model:SetAttribute("IsKnockedOver", true)
-    SoundUtil.PlaySoundAtLocation(ReplicatedStorage.Assets.Sound.TreeFalling, model.PrimaryPart.Position)
+    self.SoundController:Play("TreeFalling", {Parent = model.PrimaryPart})
     
     for i,v in pairs(model:GetDescendants()) do
         if v:IsA("BasePart") then
@@ -145,6 +142,7 @@ end
 
 function DestroyableObjectController:KnitInit() 
     self.DestroyableObjectService = Knit.GetService("DestroyableObjectService")
+    self.SoundController = Knit.GetController("SoundController")
 end
 
 function DestroyableObjectController:KnitStart()
@@ -158,7 +156,6 @@ function DestroyableObjectController:KnitStart()
 
     -- TODO optimize by checking if this is in viewport or not
     self.DestroyableObjectService.ReplicateKnockOver:Connect(function(serverModel: Model, tankOrigin: Vector3)
-        warn("AHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHH")
         local clientModel = DestroyableObjectController.ServerClientMap[serverModel]
         if not clientModel then
             warn("DestroyableObjectController:ReplicateKnockOver - No client model found for server model", serverModel)
