@@ -54,6 +54,8 @@ TankData["BT-7"] = {
     Cost = 2,
 
     BaseAtrributes = {
+        SequentialTrackAttachments = true, 
+
         Health = 1400,
         Torque = 150000000, 
         Acceleration = 10,
@@ -80,6 +82,8 @@ TankData["BT-7 L"] = {
     Cost = 3,
 
     BaseAtrributes = {
+        SequentialTrackAttachments = true, 
+        
         Health = 1400,
         Torque = 150000000, 
         Acceleration = 10,
@@ -106,6 +110,8 @@ TankData["T 34-76"] = {
     Cost = 3,
 
     BaseAtrributes = {
+        SequentialTrackAttachments = true, 
+
         Health = 1400,
         Torque = 150000000, 
         Acceleration = 10,
@@ -132,6 +138,8 @@ TankData["Cromwell"] = {
     Cost = 4,
 
     BaseAtrributes = {
+        SequentialTrackAttachments = true, 
+
         Health = 1400,
         Torque = 150000000, 
         Acceleration = 10,
@@ -235,7 +243,9 @@ TankData["Firefly"] = {
     CurrencyType = "Cash",
     Cost = 6,
 
-    BaseAtrributes = {
+    BaseAtrributes = {        
+        SequentialTrackAttachments = true, 
+
         Health = 1400,
         Torque = 150000000, 
         Acceleration = 10,
@@ -255,13 +265,15 @@ TankData["Firefly"] = {
     }
 } :: Types.TankData
 
-TankData["T-34 85"] = {
-    Name = "T-34 85",
+TankData["T 34-85"] = {
+    Name = "T 34-85",
     Image = "rbxassetid://85716504836651",
     CurrencyType = "Cash",
     Cost = 7,
 
     BaseAtrributes = {
+        SequentialTrackAttachments = true, 
+
         Health = 1400,
         Torque = 150000000, 
         Acceleration = 10,
@@ -288,6 +300,8 @@ TankData["Sdk. Fz. 251"] = {
     Cost = 8,
 
     BaseAtrributes = {
+        SequentialTrackAttachments = true, 
+
         Health = 1400,
         Torque = 150000000, 
         Acceleration = 10,

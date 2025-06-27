@@ -88,8 +88,8 @@ function ClientTank.new(tankModel: Model, type: string)
 
 
     --Functions
-   -- self.LeftTracks = self.Trove:Add(Tracks.new(self.Model.Body.LeftWheels, self))
-   -- self.RightTracks = self.Trove:Add(Tracks.new(self.Model.Body.RightWheels, self))
+    self.LeftTracks = self.Trove:Add(Tracks.new(self.Model.Body.LeftWheels, self))
+    self.RightTracks = self.Trove:Add(Tracks.new(self.Model.Body.RightWheels, self))
 
     self.Trove:Add(RunService.Heartbeat:Connect(function(dT)
         self:Update(dT)
@@ -216,10 +216,9 @@ end
 function ClientTank:Update(dT: number)
     self:UpdateTurret(dT)
     self.IsOccupied = self.Seat.Occupant == Player.Character.Humanoid
-
-
-    --self.LeftTracks:Update(dT)
-    --self.RightTracks:Update(dT)
+    
+    self.LeftTracks:Update(dT)
+    self.RightTracks:Update(dT)
 end
 
 function ClientTank:HandleInput(inputObject: InputObject, gameProcessed: boolean)

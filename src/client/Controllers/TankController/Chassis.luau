@@ -162,7 +162,7 @@ function Chassis:getSprings(springType)
 end
 
 function getMotorVelocity(motor)
-	return motor.Attachment1.WorldAxis:Dot( motor.Attachment1.Parent.RotVelocity )
+	return motor.Attachment1.WorldAxis:Dot(motor.Attachment1.Parent.RotVelocity )
 end
 
 local function adjustSpring( spring, stiffness, damping )
@@ -357,25 +357,12 @@ function Chassis:UpdateWheelMotors()
 
 	if math.abs(self.DistanceTravelledSinceLastTread) > DISTANCE_PER_TREAD then 
 		local emitFromBack = self.DistanceTravelledSinceLastTread<0
-		if self.Tank.LeftTracks then 
-			self.Tank.LeftTracks:Emit(emitFromBack)
-			self.Tank.RightTracks:Emit(emitFromBack)
-		end
+		self.Tank.LeftTracks:Emit(emitFromBack)
+		self.Tank.RightTracks:Emit(emitFromBack)
 		self.DistanceTravelledSinceLastTread = 0 
 	end	
 
 	self.LastPosition = newPosition
-
-	for _, motor: Motor6D in self.CosmeticWheelMotors do
-		local wheel = motor.Part1 :: BasePart
-		local wheelRadius = wheel.Size.Y/2 
-		local baseC0 = motor.C0
-		local _, y, z = baseC0:ToEulerAnglesXYZ()
-		local pos = baseC0.Position
-
-			local totalAngle = self.TotalDistanceTravelled / wheelRadius
-		motor.C0 = CFrame.new(pos) * CFrame.Angles(totalAngle, y, z)
-	end
 end
 
 function Chassis:Destroy() 
