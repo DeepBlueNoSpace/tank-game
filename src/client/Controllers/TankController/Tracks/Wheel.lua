@@ -55,8 +55,6 @@ function Wheel:CalculateAttachmentOffsets() : {CFrame}
     end
 
     table.sort(attachments, function(a, b)
-            print(a.Name, b.Name)
-
         return tonumber(a.Name) < tonumber(b.Name)
     end)
 

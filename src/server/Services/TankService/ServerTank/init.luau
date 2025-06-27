@@ -50,9 +50,6 @@ function ServerTank.new(driver: Player, tankType: string, tankUpgrades: {}, spaw
     self:WeldBodyDetails() 
 
     self.Model.Parent = workspace.Tanks
-
-   
-    print'go go go'
     self.Model.Name = driver.Name    
     self.Model:PivotTo(spawnCFrame+Vector3.new(0,50,0))
     driver.ReplicationFocus = self.Model.PrimaryPart
