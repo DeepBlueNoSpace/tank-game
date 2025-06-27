@@ -51,12 +51,14 @@ function ServerTank.new(driver: Player, tankType: string, tankUpgrades: {}, spaw
 
     self.Model.Parent = workspace.Tanks
 
-    local primaryPart = self.Model.PrimaryPart :: BasePart
-    primaryPart:SetNetworkOwner(driver)
-
+   
+    print'go go go'
     self.Model.Name = driver.Name    
-    self.Model:PivotTo(spawnCFrame)
+    self.Model:PivotTo(spawnCFrame+Vector3.new(0,50,0))
     driver.ReplicationFocus = self.Model.PrimaryPart
+
+     local primaryPart = self.Model.PrimaryPart :: BasePart
+    primaryPart:SetNetworkOwner(driver)
 
     return self
 end
@@ -73,13 +75,34 @@ local function weldTo(x: BasePart, y: BasePart): Motor6D
 	motor.Parent = x
     return motor
 end
+local function weldToWheel(chassis: BasePart, wheel: BasePart): Motor6D
+    local part = Instance.new("Part")
+    part.Size = Vector3.new(0.1,0.1,0.1)
+    part.Position = wheel.Position
+    part.Orientation = chassis.Orientation
+    part.CanCollide = false 
+    part.Transparency = 1 
+    part.Name = wheel.Name 
+    part.Parent = wheel.Parent 
+
+	local motorToWheel = weldTo(part,wheel)
+    motorToWheel.Name = "CosmeticMotor"
+    local motorToPart = weldTo(chassis,part)
+    motorToPart.Parent = part 
+    motorToPart.Name = "Motor"
+    wheel.Parent = part
+    return motorToPart
+end
 
 function ServerTank:WeldWheelSet(wheelSet: Model, namePrefix: string)
-    for _, wheel in wheelSet:GetChildren() do 
-        local motor = weldTo(self.FloorPanel , wheel)
-        motor.Name = string.format("%s%s", namePrefix, tostring(wheel.Name))
-        motor.Parent = self.FloorPanel.WheelMotors
-    end
+	for _, wheel in wheelSet:GetChildren() do
+		if wheel:IsA("BasePart") then
+			local motor = weldToWheel(self.FloorPanel, wheel)
+            wheel.Name = "Wheel"
+			motor.Name = "Motor"
+			wheel.Anchored = false
+		end
+	end
 end
 
 function ServerTank:WeldWheels()
@@ -90,9 +113,11 @@ end
 function ServerTank:WeldBodyDetails()
     local bodyDetail = self.Model.Body:FindFirstChild("BodyDetail")
     if bodyDetail then 
-        for _, object in bodyDetail:GetChildren() do 
-            local motor = weldTo(self.FloorPanel , object)
-            motor.Parent = self.FloorPanel
+        for _, object in bodyDetail:GetDescendants() do 
+            if object:IsA("BasePart") then 
+                local motor = weldTo(self.FloorPanel , object)
+                motor.Parent = self.FloorPanel
+            end
         end
     end
 end
