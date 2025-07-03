@@ -32,6 +32,9 @@ export type TankData = {
     Cost: number?,
     BaseAtrributes: TankAttributes,
 
+    TankType: string, 
+    TankCopy: string, 
+
     RequiredLevel: number, 
 }
 

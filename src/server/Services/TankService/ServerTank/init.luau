@@ -205,12 +205,12 @@ function ServerTank:PlayDeathAnimation()
     end
 
     self.VFXService:DoEffect("TankExplosion", {
-        Parent = self.Body.Body,
+        Parent = self.Model.PrimaryPart,
         SoundSource = ReplicatedStorage.Assets.Sound.TankDestroyed
     })
 
     for _, object in Assets.VFX.DestroyedTank:GetChildren() do 
-        object:Clone().Parent = self.Body.Body
+        object:Clone().Parent = self.Model.PrimaryPart
     end
 end
 

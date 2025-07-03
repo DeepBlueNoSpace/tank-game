@@ -20,32 +20,68 @@ Cooldown: number,
 TurretAngularVelocity: number
 ]]
 
---TODO: Add maxturn jfc
-TankData["Panzer"] = {
-    Name = "Panzer",
+
+TankData["Sdk. Fz. 251"] = {
+    Name = "Sdk. Fz. 251",
     Image = "rbxassetid://85716504836651",
     CurrencyType = "Cash",
-    Cost = 1,
+    Cost = 4000,
+
+    TankType = "Light", 
+    TankCopy = "German half-track carrier.",
 
     BaseAtrributes = {
-        Health = 1400,
-        Torque = 150000000, 
-        Acceleration = 10,
-        MaxSpeed = 18,
-        MaxSteer = 1.1, 
+        SequentialTrackAttachments = true,
 
-        BlastRadius = 20;
+        Health = 300,
+        Torque = 150000000, 
+        Acceleration = 25,
+        MaxSpeed = 55,
+        MaxSteer = 2.5, 
+
+        BlastRadius = 0;
+        BlastPressure = 0,
+
+        MuzzleVelocity = 600,
+        RecoilForce = 15000,
+
+        MaxDamage = 100,
+        Cooldown = 0.2,
+
+        TurretAngularVelocity = 100,
+    }
+} :: Types.TankData
+
+
+TankData["Type 87"] = {
+    Name = "Type 87",
+    Image = "rbxassetid://85716504836651",
+    CurrencyType = "Cash",
+    Cost = 7500,
+
+    TankType = "Light", 
+    TankCopy = "Japanese post-war scout.",
+
+    BaseAtrributes = {
+        Health = 1000,
+        Torque = 150000000, 
+        Acceleration = 15,
+        MaxSpeed = 18,
+        MaxSteer = 1.5, 
+
+        BlastRadius = 15;
         BlastPressure = 300,
 
         MuzzleVelocity = 600,
         RecoilForce = 15000,
 
         MaxDamage = 220,
-        Cooldown = 4.5,
+        Cooldown = 3,
 
-        TurretAngularVelocity = 35,
+        TurretAngularVelocity = 40,
     }
 } :: Types.TankData
+
 
 TankData["BT-7"] = {
     Name = "BT-7",
@@ -53,22 +89,25 @@ TankData["BT-7"] = {
     CurrencyType = "Cash",
     Cost = 2,
 
-    BaseAtrributes = {
-        SequentialTrackAttachments = true, 
+    TankType = "Light", 
+    TankCopy = "Soviet speed demon.",
 
-        Health = 1400,
+    BaseAtrributes = {
+        SequentialTrackAttachments = true,
+
+        Health = 700,
         Torque = 150000000, 
         Acceleration = 10,
-        MaxSpeed = 18,
-        MaxSteer = 1.1, 
+        MaxSpeed = 25,
+        MaxSteer = 1.5, 
 
-        BlastRadius = 20;
+        BlastRadius = 15;
         BlastPressure = 300,
 
         MuzzleVelocity = 600,
         RecoilForce = 15000,
 
-        MaxDamage = 220,
+        MaxDamage = 200,
         Cooldown = 4.5,
 
         TurretAngularVelocity = 35,
@@ -81,23 +120,26 @@ TankData["BT-7 L"] = {
     CurrencyType = "Cash",
     Cost = 3,
 
+    TankType = "Medium", 
+    TankCopy = "Upgunned BT with a bigger bite.",
+
     BaseAtrributes = {
-        SequentialTrackAttachments = true, 
-        
+        SequentialTrackAttachments = true,
+
         Health = 1400,
         Torque = 150000000, 
-        Acceleration = 10,
+        Acceleration = 8,
         MaxSpeed = 18,
         MaxSteer = 1.1, 
 
-        BlastRadius = 20;
+        BlastRadius = 19;
         BlastPressure = 300,
 
         MuzzleVelocity = 600,
         RecoilForce = 15000,
 
-        MaxDamage = 220,
-        Cooldown = 4.5,
+        MaxDamage = 350,
+        Cooldown = 6,
 
         TurretAngularVelocity = 35,
     }
@@ -109,27 +151,60 @@ TankData["T 34-76"] = {
     CurrencyType = "Cash",
     Cost = 3,
 
-    BaseAtrributes = {
-        SequentialTrackAttachments = true, 
+    TankType = "Medium", 
+    TankCopy = "The Soviet icon begins.",
 
-        Health = 1400,
+    BaseAtrributes = {
+        SequentialTrackAttachments = true,
+
+        Health = 2000,
         Torque = 150000000, 
-        Acceleration = 10,
+        Acceleration = 7,
         MaxSpeed = 18,
         MaxSteer = 1.1, 
 
-        BlastRadius = 20;
+        BlastRadius = 19;
         BlastPressure = 300,
 
         MuzzleVelocity = 600,
         RecoilForce = 15000,
 
-        MaxDamage = 220,
-        Cooldown = 4.5,
+        MaxDamage = 350,
+        Cooldown = 7,
 
         TurretAngularVelocity = 35,
     }
 } :: Types.TankData
+
+TankData["Panzer"] = {
+    Name = "Panzer",
+    Image = "rbxassetid://85716504836651",
+    CurrencyType = "Cash",
+    Cost = 1,
+ 
+    TankType = "Medium", 
+    TankCopy = "Classic German workhorse.",
+
+    BaseAtrributes = {
+        Health = 1200,
+        Torque = 150000000, 
+        Acceleration = 8,
+        MaxSpeed = 25,
+        MaxSteer = 1.5, 
+
+        BlastRadius = 19;
+        BlastPressure = 300,
+
+        MuzzleVelocity = 600,
+        RecoilForce = 15000,
+
+        MaxDamage = 400,
+        Cooldown = 6.5,
+
+        TurretAngularVelocity = 35,
+    }
+} :: Types.TankData
+
 
 TankData["Cromwell"] = {
     Name = "Cromwell",
@@ -137,16 +212,115 @@ TankData["Cromwell"] = {
     CurrencyType = "Cash",
     Cost = 4,
 
-    BaseAtrributes = {
-        SequentialTrackAttachments = true, 
+    TankType = "Medium", 
+    TankCopy = "Fast British cruiser.",
 
-        Health = 1400,
+    BaseAtrributes = {
+        SequentialTrackAttachments = true,
+
+        Health = 1300,
         Torque = 150000000, 
-        Acceleration = 10,
+        Acceleration = 15,
+        MaxSpeed = 30,
+        MaxSteer = 0.8, 
+
+        BlastRadius = 19;
+        BlastPressure = 300,
+
+        MuzzleVelocity = 600,
+        RecoilForce = 15000,
+
+        MaxDamage = 240,
+        Cooldown = 6,
+
+        TurretAngularVelocity = 45,
+    }
+} :: Types.TankData
+
+
+TankData["Firefly"] = {
+    Name = "Firefly",
+    Image = "rbxassetid://85716504836651",
+    CurrencyType = "Cash",
+    Cost = 6,
+
+    TankType = "Medium", 
+    TankCopy = "British Sherman with punch.",
+
+    BaseAtrributes = {
+        SequentialTrackAttachments = true,
+
+        Health = 2500,
+        Torque = 150000000, 
+        Acceleration = 6,
+        MaxSpeed = 18,
+        MaxSteer = 1.5, 
+
+        BlastRadius = 19;
+        BlastPressure = 300,
+
+        MuzzleVelocity = 600,
+        RecoilForce = 15000,
+
+        MaxDamage = 350,
+        Cooldown = 4.5,
+
+        TurretAngularVelocity = 35,
+    }
+} :: Types.TankData
+
+
+TankData["T 34-85"] = {
+    Name = "T 34-85",
+    Image = "rbxassetid://85716504836651",
+    CurrencyType = "Cash",
+    Cost = 7,
+
+    TankType = "Medium", 
+    TankCopy = "Refined Soviet classic.",
+
+    BaseAtrributes = {
+        SequentialTrackAttachments = true,
+
+        Health = 1900,
+        Torque = 150000000, 
+        Acceleration = 12,
+        MaxSpeed = 22,
+        MaxSteer = 1.1, 
+
+        BlastRadius = 19;
+        BlastPressure = 300,
+
+        MuzzleVelocity = 600,
+        RecoilForce = 15000,
+
+        MaxDamage = 280,
+        Cooldown = 4.5,
+
+        TurretAngularVelocity = 34,
+    }
+} :: Types.TankData
+
+
+
+
+TankData["KV-1"] = {
+    Name = "KV-1",
+    Image = "rbxassetid://85716504836651",
+    CurrencyType = "Cash",
+    Cost = 5,
+
+    TankType = "Heavy", 
+    TankCopy = "Soviet fortress on tracks.",
+
+    BaseAtrributes = {
+        Health = 2000,
+        Torque = 150000000, 
+        Acceleration = 5,
         MaxSpeed = 18,
         MaxSteer = 1.1, 
 
-        BlastRadius = 20;
+        BlastRadius = 25;
         BlastPressure = 300,
 
         MuzzleVelocity = 600,
@@ -165,159 +339,26 @@ TankData["KV-1 H"] = {
     CurrencyType = "Cash",
     Cost = 5,
 
-    BaseAtrributes = {
-        Health = 1400,
-        Torque = 150000000, 
-        Acceleration = 10,
-        MaxSpeed = 18,
-        MaxSteer = 1.1, 
-
-        BlastRadius = 20;
-        BlastPressure = 300,
-
-        MuzzleVelocity = 600,
-        RecoilForce = 15000,
-
-        MaxDamage = 220,
-        Cooldown = 4.5,
-
-        TurretAngularVelocity = 35,
-    }
-} :: Types.TankData
-
-TankData["KV-1"] = {
-    Name = "KV-1",
-    Image = "rbxassetid://85716504836651",
-    CurrencyType = "Cash",
-    Cost = 5,
+    TankType = "Heavy", 
+    TankCopy = "Ultra heavy variant of KV-1.",
 
     BaseAtrributes = {
-        Health = 1400,
+        Health = 2000,
         Torque = 150000000, 
-        Acceleration = 10,
-        MaxSpeed = 18,
-        MaxSteer = 1.1, 
+        Acceleration = 3,
+        MaxSpeed = 12,
+        MaxSteer = 0.8, 
 
-        BlastRadius = 20;
+        BlastRadius = 30;
         BlastPressure = 300,
 
         MuzzleVelocity = 600,
         RecoilForce = 15000,
 
-        MaxDamage = 220,
+        MaxDamage = 700,
         Cooldown = 4.5,
 
-        TurretAngularVelocity = 35,
-    }
-} :: Types.TankData
-
-TankData["Type 87"] = {
-    Name = "Type 87",
-    Image = "rbxassetid://85716504836651",
-    CurrencyType = "Cash",
-    Cost = 6,
-
-    BaseAtrributes = {
-        Health = 1400,
-        Torque = 150000000, 
-        Acceleration = 10,
-        MaxSpeed = 18,
-        MaxSteer = 1.1, 
-
-        BlastRadius = 20;
-        BlastPressure = 300,
-
-        MuzzleVelocity = 600,
-        RecoilForce = 15000,
-
-        MaxDamage = 220,
-        Cooldown = 4.5,
-
-        TurretAngularVelocity = 35,
-    }
-} :: Types.TankData
-
-TankData["Firefly"] = {
-    Name = "Firefly",
-    Image = "rbxassetid://85716504836651",
-    CurrencyType = "Cash",
-    Cost = 6,
-
-    BaseAtrributes = {        
-        SequentialTrackAttachments = true, 
-
-        Health = 1400,
-        Torque = 150000000, 
-        Acceleration = 10,
-        MaxSpeed = 18,
-        MaxSteer = 1.1, 
-
-        BlastRadius = 20;
-        BlastPressure = 300,
-
-        MuzzleVelocity = 600,
-        RecoilForce = 15000,
-
-        MaxDamage = 220,
-        Cooldown = 4.5,
-
-        TurretAngularVelocity = 35,
-    }
-} :: Types.TankData
-
-TankData["T 34-85"] = {
-    Name = "T 34-85",
-    Image = "rbxassetid://85716504836651",
-    CurrencyType = "Cash",
-    Cost = 7,
-
-    BaseAtrributes = {
-        SequentialTrackAttachments = true, 
-
-        Health = 1400,
-        Torque = 150000000, 
-        Acceleration = 10,
-        MaxSpeed = 18,
-        MaxSteer = 1.1, 
-
-        BlastRadius = 20;
-        BlastPressure = 300,
-
-        MuzzleVelocity = 600,
-        RecoilForce = 15000,
-
-        MaxDamage = 220,
-        Cooldown = 4.5,
-
-        TurretAngularVelocity = 35,
-    }
-} :: Types.TankData
-
-TankData["Sdk. Fz. 251"] = {
-    Name = "Sdk. Fz. 251",
-    Image = "rbxassetid://85716504836651",
-    CurrencyType = "Cash",
-    Cost = 8,
-
-    BaseAtrributes = {
-        SequentialTrackAttachments = true, 
-
-        Health = 1400,
-        Torque = 150000000, 
-        Acceleration = 10,
-        MaxSpeed = 18,
-        MaxSteer = 1.1, 
-
-        BlastRadius = 20;
-        BlastPressure = 300,
-
-        MuzzleVelocity = 600,
-        RecoilForce = 15000,
-
-        MaxDamage = 220,
-        Cooldown = 4.5,
-
-        TurretAngularVelocity = 35,
+        TurretAngularVelocity = 15,
     }
 } :: Types.TankData
 
@@ -326,6 +367,9 @@ TankData["Sherman 1"] = {
     Image = "rbxassetid://85716504836651",
     CurrencyType = "Cash",
     Cost = 1000,
+
+    TankType = "Heavy", 
+    TankCopy = "this is a panzer",
 
     BaseAtrributes = {
         Health = 1400,
@@ -353,6 +397,9 @@ TankData["Sherman 2"] = {
     CurrencyType = "Cash",
     Cost = 2000,
 
+    TankType = "Heavy", 
+    TankCopy = "this is a panzer",
+
     BaseAtrributes = {
         Health = 1600,
         Torque = 150000000, 
@@ -378,6 +425,9 @@ TankData["Sherman 3"] = {
     Image = "rbxassetid://85716504836651",
     CurrencyType = "Cash",
     Cost = 3000,
+
+    TankType = "Heavy", 
+    TankCopy = "this is a panzer",
 
     BaseAtrributes = {
         Health = 1800,
@@ -405,6 +455,9 @@ TankData["Sherman 4"] = {
     CurrencyType = "Cash",
     Cost = 4000,
 
+    TankType = "Heavy", 
+    TankCopy = "this is a panzer",
+
     BaseAtrributes = {
         Health = 2000,
         Torque = 150000000, 
@@ -430,6 +483,9 @@ TankData["Sherman 5"] = {
     Image = "rbxassetid://85716504836651",
     CurrencyType = "Cash",
     Cost = 5000,
+
+    TankType = "Heavy", 
+    TankCopy = "this is a panzer",
 
     BaseAtrributes = {
         Health = 2200,
@@ -457,6 +513,9 @@ TankData["Sherman 6"] = {
     CurrencyType = "Cash",
     Cost = 6000,
 
+    TankType = "Heavy", 
+    TankCopy = "this is a panzer",
+
     BaseAtrributes = {
         Health = 2400,
         Torque = 150000000, 
@@ -482,6 +541,9 @@ TankData["Sherman 7"] = {
     Image = "rbxassetid://85716504836651",
     CurrencyType = "Cash",
     Cost = 7000,
+
+    TankType = "Heavy", 
+    TankCopy = "this is a panzer",
 
     BaseAtrributes = {
         Health = 2600,
