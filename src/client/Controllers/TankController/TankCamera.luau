@@ -259,7 +259,7 @@ end
 
 function TankCamera:Destroy()
     self.Heartbeat:Disconnect()
-    Camera.CameraType = Enum.CameraType.Custom
+    --Camera.CameraType = Enum.CameraType.Custom -- this can overrid other stuff thats controlling camera
     UserInputService.MouseIconEnabled = true
     UserInputService.MouseBehavior = Enum.MouseBehavior.Default
 end

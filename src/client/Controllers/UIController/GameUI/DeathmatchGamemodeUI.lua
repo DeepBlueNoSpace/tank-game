@@ -36,7 +36,7 @@ local MAX_TILES = 10
 
 function DeathmatchGamemodeUI:UpdateLeaderboard()
 	local leaderboardData = self.DeathmatchGamemodeService.KillLeaderboard:Get()
-
+	
 	-- process and sort players
 	local transformedData = {}
 	for playerName, killCount in pairs(leaderboardData) do

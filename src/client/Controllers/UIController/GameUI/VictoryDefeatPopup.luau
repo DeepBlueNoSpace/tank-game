@@ -7,6 +7,10 @@ local CameraPart = LobbyScene:WaitForChild("CameraPart")
 local VictoryDefeatPopup= Knit.CreateController({ Name = "VictoryDefeatPopup", Open = false })
 
 function VictoryDefeatPopup:OpenFrame()
+	if self.LobbyMainUI.Open then
+		self.LobbyMainUI:CloseFrame()
+	end
+	
 	self.Open = true
 	self.Frame.Visible = true
 end
@@ -23,6 +27,7 @@ end
 
 function VictoryDefeatPopup:KnitInit()
 	self.UIController = Knit.GetController("UIController")
+	self.LobbyMainUI = Knit.GetController("LobbyMainUI")
 end
 
 function VictoryDefeatPopup:KnitStart()

@@ -46,12 +46,18 @@ function TankController:GetTankFromPlayer(player) : Model?
 end
 
 function TankController:InitTank()
-    self.TankService:RequestTank():andThen(function(tankId: string, type: string)
+    return self.TankService:RequestTank():andThen(function(tankId: string, type: string)
+        if not tankId then
+            warn("Failed to get tankId from TankService")
+            return
+        end
+
         local tankModel = workspace:WaitForChild("Tanks"):WaitForChild(tankId, 3) :: Model
         assert(tankModel, "no tankey wankey")
 
         self.Tank = ClientTank.new(tankModel, type) 
         Knit.GetController("GameUI"):OpenFrame()
+        return true
     end)
 end
 
@@ -61,15 +67,25 @@ function TankController:AttemptDeploy()
 		return
 	end
 
-    Knit.GetController("LobbyMainUI"):CloseFrame()
+    local function callInitTank()
+        self:InitTank():andThen(function(success)
+            if success then
+                Knit.GetController("LobbyMainUI"):CloseFrame()
+            else
+                warn("Failed to initialize tank")
+            end
+        end):catch(function(err)
+            warn("Error initializing tank:", err)
+        end)
+    end
 
     if Player.Team then
-        self:InitTank()
+        callInitTank()
     else
         -- TODO: kick over to the team selector ui
         -- Will call attempt deploy again after selecting team
         Knit.GetService("TeamService"):RequestAssignTeam():andThen(function(_team)
-            self:InitTank()
+            callInitTank()
         end):catch(function(err)
             warn("Failed to request team:", err)
         end)

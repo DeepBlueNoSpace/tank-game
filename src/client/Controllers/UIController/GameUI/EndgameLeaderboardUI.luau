@@ -33,7 +33,7 @@ end
 
 function LeaderboardUI:_loadLeaderboard(endgameDataPackage: {Types.EndgamePlayerPackage})
 	for i,v in pairs(self.Container:GetChildren()) do
-		if v:IsA("GuiObject") and v.Name ~= "Prefab" then
+		if v:IsA("GuiObject") and v ~= self.Prefab then
 			v:Destroy()
 		end
 	end
@@ -68,6 +68,7 @@ end
 function LeaderboardUI:_loadModels(endgameDataPackage: {Types.EndgamePlayerPackage})
 	warn("LoadModels", endgameDataPackage)
 	for i,v in pairs(EndgameScene.Prefabs:GetChildren()) do
+		local tankPart = v:WaitForChild("TankPart")
 		v.TankPart.Transparency = 1
 		if v:FindFirstChild("Tank") then
 			v.Tank:Destroy()
