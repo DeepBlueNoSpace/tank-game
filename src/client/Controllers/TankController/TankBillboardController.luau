@@ -70,6 +70,9 @@ function TankBillboardController:UpdateTankBillboard(tank: Model, data: TankBill
     local ownerObject = Players:FindFirstChild(tank:GetAttribute("OwnerName"))
     if ownerObject then 
         local teamColorImage = data.Billboard:FindFirstChild("TeamColor") :: Frame
+        if not teamColorImage then
+            return
+        end
 
         if ownerObject.Team == Player.Team then 
            teamColorImage.BackgroundColor3 = Color3.fromRGB(255,255,255)
