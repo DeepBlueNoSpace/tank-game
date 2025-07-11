@@ -116,6 +116,11 @@ function ClientTank.new(tankModel: Model, type: string)
         end
     end))
 
+    self.Trove:Add(self.Model.Destroying:Connect(function()
+        --warn("CLIENT TANK MODEL DESTROYING!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
+        self:Destroy()
+    end))
+
 
     self.Camera = self.Trove:Add(TankCamera.new(self))
     self.TankGui = self.Trove:Add(TankGui.new(self))
