@@ -278,6 +278,11 @@ function Chassis:EnableHandbrake()
 end
 
 --Set target steering position based on current velocity
+
+local function lerp(v0: number,v1:number,t:number): number
+	return v0+(v1-v0)*t 
+end
+
 function Chassis:UpdateSteering(steer:number, currentVel:number)
 	local maxSteer = self.parameters.MaxSteer	
 	if LimitSteerAtHighVel then
@@ -285,14 +290,11 @@ function Chassis:UpdateSteering(steer:number, currentVel:number)
 		--decrease steer value as speed increases to prevent tipping (handbrake cancels this)
 		steer = steer/c
 	end
-	self.SteeringPrismatic.TargetPosition = steer * steer * steer * maxSteer
+	self.SteeringPrismatic.TargetPosition = lerp(self.SteeringPrismatic.TargetPosition, steer * steer * steer * maxSteer, maxSteer/30)
 end
 
-local function lerp(v0: number,v1:number,t:number): number
-	return v0+(v1-v0)*t 
-end
 
-local idlePitch = 0.7
+local idlePitch = 0.4
 local maxPitch = 1.6
 local baseVolume = 0.3
 

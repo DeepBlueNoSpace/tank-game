@@ -33,8 +33,8 @@ function TankCamera.new(tank: {})
 
     self.Zoom = 1 
 
-    self.zSpring = Spring.new(0, 0, 30,0.5)
-    self.ySpring = Spring.new(0, 0, 30,0.5)
+    self.zSpring = Spring.new(0, 0, 20, 0.5)
+    self.ySpring = Spring.new(0, 0, 20, 0.5)
     
     self.RumbleSprings = {
         X = Spring.new(0, 0, RUMBLE_SPEED, RUMBLE_DAMPEN),
@@ -109,11 +109,11 @@ local function moveToward(current, target, maxDelta)
 end
 
 function TankCamera:ApplyShotImpulse(force: number)
-    self.zSpring:Accelerate(force*0.8)
-    self.ySpring:Accelerate(force*0.2)
+    self.zSpring:Accelerate(force*1.3)
+    self.ySpring:Accelerate(force*0.3)
 end
 
-local MAX_RUMBLE = 200
+local MAX_RUMBLE = 150
 local MAX_RUMBLE_DISTANCE = 100
 
 function TankCamera:AddRumble(worldPosition: Vector3)

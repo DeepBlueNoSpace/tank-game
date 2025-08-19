@@ -188,8 +188,8 @@ TankData["Panzer"] = {
     BaseAtrributes = {
         Health = 1200,
         Torque = 150000000, 
-        Acceleration = 8,
-        MaxSpeed = 25,
+        Acceleration = 2,
+        MaxSpeed = 17,
         MaxSteer = 1.5, 
 
         BlastRadius = 19;
@@ -201,7 +201,7 @@ TankData["Panzer"] = {
         MaxDamage = 400,
         Cooldown = 6.5,
 
-        TurretAngularVelocity = 35,
+        TurretAngularVelocity = 25,
     }
 } :: Types.TankData
 
