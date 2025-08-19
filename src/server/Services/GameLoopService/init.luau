@@ -65,7 +65,7 @@ function GameLoopService:Main()
 
             Knit.GetService("TankService"):DeactivateTanks()
 
-            task.wait(10) -- give time for victory/defeat popup to show + move on to leaderboard
+            task.wait(6.1) -- give time for victory/defeat popup to show + move on to leaderboard
             Knit.GetService("TankService"):DestroyAllTanks()
         end)
 
@@ -149,6 +149,13 @@ function GameLoopService:PlayerAdded(player)
 		if ff then
 			ff:Destroy()
 		end
+
+        humanoid.Died:Connect(function()
+            local tank = self.TankService.LiveTanks[player]
+            if tank then
+                tank:TakeDamage(math.huge, player)
+            end
+        end)
     end)
 end
 
@@ -171,6 +178,7 @@ end
 
 
 function GameLoopService:KnitStart()
+    game.Players.RespawnTime = 0
     self:Main()
 end
 

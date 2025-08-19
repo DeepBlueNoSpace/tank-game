@@ -48,6 +48,11 @@ function TankService.Client:RequestTank(player: Player)
         return
     end
 
+    if TankService.LiveTanks[player] then
+        warn("Player already has a tank assigned when requesting a new one:", player)
+        return
+    end
+
 
     local playerTeam = tostring(player.Team)
     local teamIndex = TeamUtil.GetTeamIndex(playerTeam)
@@ -88,11 +93,17 @@ function TankService:GetTankFromModel(model: Model)
 end
 
 function TankService:DeactivateTanks()
-for _, tank in pairs(self.LiveTanks) do
+    for _, tank in pairs(self.LiveTanks) do
         tank:Disable()
     end
 end
 
+function TankService:PlayerRemoving(player)
+    local tank = self.LiveTanks[player]
+    if tank then
+        tank:TakeDamage(math.huge)
+    end
+end
 
 
 return TankService

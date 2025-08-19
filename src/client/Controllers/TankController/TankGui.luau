@@ -250,15 +250,20 @@ function TankGui:HandleReceivingDamage()
 end
 
 function TankGui:Destroy()
-    for hitmarker, _ in self.HitMarkers do 
-        hitmarker:Destroy() 
+    -- for some reason it was throwing and error and bricking game because hitmarkers doesnt exist?
+    if self.HitMarkers then
+        for hitmarker, _ in self.HitMarkers do 
+            hitmarker:Destroy() 
+        end
+        self.HitMarkers = nil 
     end
-    self.HitMarkers = nil 
     
-    for _, needle in self.HitNeedles do 
-        needle:Destroy() 
+    if self.HitNeedles then
+        for _, needle in self.HitNeedles do 
+            needle:Destroy() 
+        end
+        self.HitMarkers = nil 
     end
-    self.HitMarkers = nil 
 
     self.Trove:Destroy()
 end

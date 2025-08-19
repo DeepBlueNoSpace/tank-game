@@ -6,8 +6,6 @@ local LocalSaveReplica = nil
 
 local GameLoopController = Knit.CreateController { Name = "GameLoopController" }
 
-
-
 function GameLoopController:KnitInit()
     self.GameLoopService = Knit.GetService("GameLoopService")
 
@@ -19,7 +17,6 @@ function GameLoopController:KnitInit()
     self.LobbyMainUI = Knit.GetController("LobbyMainUI")
 
 end
-
 
 function GameLoopController:KnitStart()
     self.GameLoopService.GameEnding:Connect(function(winners: {Player: boolean}, endgameDataPackage: {Types.EndgamePlayerPackage})
@@ -38,9 +35,12 @@ function GameLoopController:KnitStart()
 
     self.GameLoopService.PlayerKilled:Connect(function(killer, victim)
         if victim == game.Players.LocalPlayer then
-            self.KillcamUI:OpenFrame(killer)
-            task.wait(6)
-            self.KillcamUI:CloseFrame()
+            if killer ~= victim then
+                self.KillcamUI:OpenFrame(killer)
+                task.wait(6)
+                self.KillcamUI:CloseFrame()
+            end
+
             self.LobbyMainUI:OpenFrame()
         end
     end)

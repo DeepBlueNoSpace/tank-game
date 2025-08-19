@@ -34,6 +34,10 @@ function DamageService:KnitInit()
 end
 
 function DamageService:ReportDamage(sender: Player, receiver: Player, damage: number, wasKill: boolean, hitbox: string, directHit: boolean?, hitMarkerLocation: Vector3)
+    if sender == receiver then -- dont allow self damage..... for now!
+        return
+    end
+
     table.insert(DamageService.Log[receiver], {
         Sender = sender,
         Timestamp = os.time(),

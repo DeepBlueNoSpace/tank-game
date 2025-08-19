@@ -240,24 +240,34 @@ end
 function ServerTank:Destroy()
     self.TankService:RemovePlayersTankIndex(self.Driver, self)
     self.Trove:Destroy()
+    if self.Model then
+        self.Model:Destroy()
+    end
 end
 
 
-function ServerTank:TakeDamage(damage: number, sender: Player?, hitbox: string, isDirectHit: boolean, hitMarkerLocation: Vector3)
+function ServerTank:TakeDamage(damage: number, sender: Player?, hitbox: string?, isDirectHit: boolean, hitMarkerLocation: Vector3)
     if TestConfigs.Is("TANK_DMG") then
         damage = TestConfigs.TANK_DMG
     end
 
-    local hitboxData = HitboxData[hitbox]
-    assert(hitboxData, "No hitbox data found for " .. hitbox)
+    local hitboxDmgMultiplier = 1
+    if hitbox then
+        local hitboxData = HitboxData[hitbox]
+        assert(hitboxData, "No hitbox data found for " .. hitbox)
+        hitboxDmgMultiplier = hitboxData.DamageMultiplier
+    end
 
-    local adjustedDamage = hitboxData.DamageMultiplier*damage :: number
+    local adjustedDamage = hitboxDmgMultiplier * damage :: number
     local currentHealth = self.Model:GetAttribute("Health") :: number
     local newHealth =  currentHealth - adjustedDamage
 
     local wasKilled = (self.Alive and newHealth <= 0) :: boolean
 
-    self.DamageService:ReportDamage(sender, self.Driver, adjustedDamage, wasKilled, hitbox, isDirectHit, hitMarkerLocation)
+    if sender ~= nil then -- can be nil e.g on player leaving
+        self.DamageService:ReportDamage(sender, self.Driver, adjustedDamage, wasKilled, hitbox, isDirectHit, hitMarkerLocation)
+    end
+    
     self.Model:SetAttribute("Health", math.max(newHealth, 0))
 
     if wasKilled then
